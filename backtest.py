@@ -63,7 +63,8 @@ def fetch_candles_chunked(symbol, resolution_minutes, start_ts, end_ts, chunk_da
 
 def run_backtest(candles, capital_thb=1000.0, stop_loss_pct=4.0, take_profit_pct=6.0,
                   rsi_overbought=70, ma_gap_threshold=0.3, warmup=24,
-                  require_uptrend=False, trend_ma_period=50):
+                  require_uptrend=False, trend_ma_period=50,
+                  use_rsi_filter=True, use_volume_filter=True):
     closes, volumes, times = candles["c"], candles["v"], candles["t"]
 
     if require_uptrend:
@@ -83,7 +84,10 @@ def run_backtest(candles, capital_thb=1000.0, stop_loss_pct=4.0, take_profit_pct
         )
 
         if position is None:
-            if is_entry_signal(indicators, ma_gap_threshold, rsi_overbought, require_uptrend=require_uptrend):
+            if is_entry_signal(
+                indicators, ma_gap_threshold, rsi_overbought, require_uptrend=require_uptrend,
+                use_rsi_filter=use_rsi_filter, use_volume_filter=use_volume_filter,
+            ):
                 position = {
                     "entry_price": indicators["price"],
                     "entry_time": times[i],
@@ -225,6 +229,53 @@ def validate_sweep(candles, capital_thb, stop_loss_grid, take_profit_grid, rsi_g
     return validated
 
 
+def filter_ablation(candles, capital_thb, stop_loss_pct, take_profit_pct, rsi_overbought,
+                     trend_ma_period=50, ma_gap=0.3):
+    """
+    ไล่ทดสอบทุกชุดค่าผสมของตัวกรอง 3 ตัว (RSI, Volume, Trend) เปิด/ปิด = 8 แบบ
+    (สัญญาณ Golden Cross จากเส้น MA ยังเป็นเงื่อนไขหลักเสมอ) ด้วยวิธี train/test เดียวกับ validate_sweep
+    เพื่อดูว่าตัวกรองไหนช่วยจริง ตัวไหนแค่ทำให้ตัวเลขดูดีบนข้อมูลเก่าเฉยๆ
+    """
+    older, recent = split_candles(candles, 0.5)
+    combos = []
+    for use_rsi in (True, False):
+        for use_vol in (True, False):
+            for use_trend in (True, False):
+                combos.append((use_rsi, use_vol, use_trend))
+
+    rows = []
+    for use_rsi, use_vol, use_trend in combos:
+        train_result = run_backtest(
+            recent, capital_thb=capital_thb, stop_loss_pct=stop_loss_pct, take_profit_pct=take_profit_pct,
+            rsi_overbought=rsi_overbought, ma_gap_threshold=ma_gap,
+            require_uptrend=use_trend, trend_ma_period=trend_ma_period,
+            use_rsi_filter=use_rsi, use_volume_filter=use_vol,
+        )
+        train_summary = summarize(train_result, capital_thb)
+        test_result = run_backtest(
+            older, capital_thb=capital_thb, stop_loss_pct=stop_loss_pct, take_profit_pct=take_profit_pct,
+            rsi_overbought=rsi_overbought, ma_gap_threshold=ma_gap,
+            require_uptrend=use_trend, trend_ma_period=trend_ma_period,
+            use_rsi_filter=use_rsi, use_volume_filter=use_vol,
+        )
+        test_summary = summarize(test_result, capital_thb)
+        label = "+".join(filter(None, [
+            "RSI" if use_rsi else None, "Vol" if use_vol else None, "Trend" if use_trend else None,
+        ])) or "MA-cross-only"
+        rows.append({
+            "filters": label,
+            "train_trades": train_summary["total_trades"],
+            "train_return_pct": train_summary["total_return_pct"],
+            "test_oos_trades": test_summary["total_trades"],
+            "test_oos_return_pct": test_summary["total_return_pct"],
+            "test_oos_win_rate_pct": test_summary["win_rate_pct"],
+            "test_oos_profit_factor": test_summary["profit_factor"],
+        })
+
+    rows.sort(key=lambda r: min(r["train_return_pct"], r["test_oos_return_pct"]), reverse=True)
+    return rows
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--coin", default="BTC,ETH", help="BTC, ETH, หรือ BTC,ETH")
@@ -239,6 +290,8 @@ def main():
     parser.add_argument("--sweep", action="store_true", help="ลองหลายชุดพารามิเตอร์แล้วจัดอันดับ แทนการรันค่าเดียว")
     parser.add_argument("--validate", action="store_true",
                          help="เหมือน --sweep แต่แบ่งข้อมูลครึ่งใหม่/ครึ่งเก่า หาค่าดีสุดจากครึ่งใหม่แล้วเช็คซ้ำกับครึ่งเก่า (กัน overfit)")
+    parser.add_argument("--ablation", action="store_true",
+                         help="ไล่ทดสอบทุกชุดเปิด/ปิดของตัวกรอง RSI/Volume/Trend (8 แบบ) ด้วยวิธี train/test เดียวกับ --validate")
     parser.add_argument("--resolution", default="60", help="ความละเอียดแท่งเทียนเป็นนาที เช่น 60 (1ชม.), 240 (4ชม.)")
     parser.add_argument("--require-uptrend", action="store_true", help="เปิด trend filter (เข้าซื้อเฉพาะตอนราคาอยู่เหนือ trend MA)")
     parser.add_argument("--trend-ma", type=int, default=50, help="คาบของ trend MA (ใช้ตอน --require-uptrend)")
@@ -263,7 +316,20 @@ def main():
             print(f"  ข้อมูลไม่พอสำหรับทดสอบ ({coin})")
             continue
 
-        if args.validate:
+        if args.ablation:
+            rows = filter_ablation(
+                candles, args.capital,
+                stop_loss_pct=args.stop_loss,
+                take_profit_pct=args.take_profit,
+                rsi_overbought=args.rsi_overbought,
+                trend_ma_period=args.trend_ma,
+                ma_gap=args.ma_gap,
+            )
+            all_results[coin] = {"ablation": rows}
+            print(f"\n=== {coin}: ablation ตัวกรอง RSI/Volume/Trend (train/test เดียวกับ validate) ===")
+            for r in rows:
+                print(json.dumps(r, ensure_ascii=False))
+        elif args.validate:
             rows = validate_sweep(
                 candles, args.capital,
                 stop_loss_grid=[3, 4, 5],
@@ -307,7 +373,7 @@ def main():
             print(json.dumps(summary, indent=2, ensure_ascii=False))
 
     output = {
-        "mode": "sweep" if args.sweep else "single",
+        "mode": "ablation" if args.ablation else ("validate" if args.validate else ("sweep" if args.sweep else "single")),
         "params": {
             "days": args.days,
             "capital_thb": args.capital,

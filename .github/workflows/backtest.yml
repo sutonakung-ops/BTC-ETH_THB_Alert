@@ -35,6 +35,10 @@ on:
         description: "แบ่งข้อมูลครึ่งใหม่/เก่า หา params จากครึ่งใหม่แล้วเช็คกับครึ่งเก่า (true/false)"
         default: "false"
         required: false
+      ablation:
+        description: "ไล่ทดสอบเปิด/ปิดตัวกรอง RSI/Volume/Trend ทุกชุด (8 แบบ) ด้วย train/test (true/false)"
+        default: "false"
+        required: false
       resolution:
         description: "ความละเอียดแท่งเทียน (นาที) เช่น 60=1ชม., 240=4ชม."
         default: "60"
@@ -65,7 +69,9 @@ jobs:
       - name: Run backtest
         run: |
           SWEEP_FLAG=""
-          if [ "${{ github.event.inputs.validate }}" = "true" ]; then
+          if [ "${{ github.event.inputs.ablation }}" = "true" ]; then
+            SWEEP_FLAG="--ablation"
+          elif [ "${{ github.event.inputs.validate }}" = "true" ]; then
             SWEEP_FLAG="--validate"
           elif [ "${{ github.event.inputs.sweep }}" = "true" ]; then
             SWEEP_FLAG="--sweep"
@@ -86,6 +92,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add backtest_result.json
-          git diff --staged --quiet || git commit -m "Backtest result: coin=${{ github.event.inputs.coin }} days=${{ github.event.inputs.days }} sl=${{ github.event.inputs.stop_loss }} tp=${{ github.event.inputs.take_profit }} rsi=${{ github.event.inputs.rsi_overbought }} [skip ci]"
+          git diff --staged --quiet || git commit -m "Backtest result: coin=${{ github.event.inputs.coin }} days=${{ github.event.inputs.days }} sl=${{ github.event.inputs.stop_loss }} tp=${{ github.event.inputs.take_profit }} rsi=${{ github.event.inputs.rsi_overbought }} ablation=${{ github.event.inputs.ablation }} validate=${{ github.event.inputs.validate }} sweep=${{ github.event.inputs.sweep }} [skip ci]"
           git pull --rebase
           git push
