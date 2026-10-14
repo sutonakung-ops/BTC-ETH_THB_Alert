@@ -1,19 +1,31 @@
 {
-  "updated_at": "2026-10-14T09:20:52.104041+00:00",
+  "updated_at": "2026-10-14T10:13:15.561009+00:00",
   "BTC": {
-    "change_24h": -0.24,
-    "price": 2797994.11,
-    "ma12": 2801465.15,
-    "ma24": 2799627.07,
-    "gap_percent": 0.0657,
+    "change_24h": -0.51,
+    "price": 2792136.77,
+    "ma12": 2799997.9,
+    "ma24": 2799101.02,
+    "gap_percent": 0.032,
     "signal": "ยังสรุปแนวโน้มไม่ได้"
   },
   "ETH": {
-    "change_24h": -0.39,
-    "price": 84005.29,
-    "ma12": 84151.21,
-    "ma24": 84177.75,
-    "gap_percent": -0.0315,
+    "change_24h": -0.79,
+    "price": 83657.78,
+    "ma12": 84081.59,
+    "ma24": 84158.6,
+    "gap_percent": -0.0915,
     "signal": "ยังสรุปแนวโน้มไม่ได้"
+  },
+  "trading_bot": {
+    "enabled": false,
+    "position": null,
+    "pending_signal": null,
+    "daily_risk": {
+      "date": "2026-10-14",
+      "realized_pnl_thb": 0.0,
+      "halted": false
+    },
+    "trade_count_today": 0,
+    "checked_at": "2026-10-14T10:13:17.527437+00:00"
   }
 }
