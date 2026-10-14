@@ -1,0 +1,60 @@
+name: Strategy Backtest
+
+on:
+  workflow_dispatch:
+    inputs:
+      coin:
+        description: "เหรียญที่จะทดสอบ (BTC, ETH, หรือ BTC,ETH)"
+        default: "BTC,ETH"
+        required: false
+      days:
+        description: "จำนวนวันย้อนหลัง"
+        default: "180"
+        required: false
+      stop_loss:
+        description: "stop-loss %"
+        default: "4"
+        required: false
+      take_profit:
+        description: "take-profit %"
+        default: "6"
+        required: false
+      rsi_overbought:
+        description: "RSI overbought threshold"
+        default: "70"
+        required: false
+      capital:
+        description: "ทุนต่อไม้ (บาท)"
+        default: "1000"
+        required: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run backtest
+        run: |
+          python backtest.py \
+            --coin "${{ github.event.inputs.coin }}" \
+            --days "${{ github.event.inputs.days }}" \
+            --capital "${{ github.event.inputs.capital }}" \
+            --stop-loss "${{ github.event.inputs.stop_loss }}" \
+            --take-profit "${{ github.event.inputs.take_profit }}" \
+            --rsi-overbought "${{ github.event.inputs.rsi_overbought }}"
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: backtest-result
+          path: backtest_result.json

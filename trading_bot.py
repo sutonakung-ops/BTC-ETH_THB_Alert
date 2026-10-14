@@ -18,6 +18,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 from bitkub_trade import BitkubAPIError, place_ask, place_bid
+from strategy import check_exit, compute_indicators, is_entry_signal
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
@@ -86,37 +87,6 @@ def get_candles(symbol, resolution, hours_back):
     params = {"symbol": symbol, "resolution": resolution, "from": start, "to": now}
     response = requests.get(url, params=params, timeout=20)
     return response.json()
-
-
-def moving_average(prices, period):
-    return sum(prices[-period:]) / period
-
-
-def calc_rsi(closes, period=14):
-    window = closes[-(period + 1):]
-    if len(window) < period + 1:
-        return None
-    gains, losses = [], []
-    for i in range(1, len(window)):
-        diff = window[i] - window[i - 1]
-        if diff > 0:
-            gains.append(diff)
-        else:
-            losses.append(-diff)
-    avg_gain = sum(gains) / period
-    avg_loss = sum(losses) / period
-    if avg_loss == 0:
-        return 100.0
-    rs = avg_gain / avg_loss
-    return round(100 - (100 / (1 + rs)), 2)
-
-
-def volume_confirmed(volumes, lookback=24):
-    recent = volumes[-lookback:]
-    if len(recent) < 2:
-        return False
-    avg_vol = sum(recent[:-1]) / len(recent[:-1])
-    return recent[-1] > avg_vol
 
 
 def get_telegram_replies(offset):
@@ -236,23 +206,15 @@ def main():
     if not trading_enabled:
         print("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET — ข้ามการเทรดจริง (วิเคราะห์อย่างเดียว)")
 
-    # ----- 1. ดึงราคา + คำนวณ indicator ของทุกเหรียญ -----
+    # ----- 1. ดึงราคา + คำนวณ indicator ของทุกเหรียญ (ใช้สูตรเดียวกับ backtest.py จาก strategy.py) -----
     market = {}
     for coin in COINS:
         data = get_candles(coin["candle_symbol"], "60", 48)
         closes = data["c"]
         volumes = data.get("v", [])
-        ma12 = moving_average(closes, 12)
-        ma24 = moving_average(closes, 24)
-        market[coin["name"]] = {
-            "price": closes[-1],
-            "ma12": ma12,
-            "ma24": ma24,
-            "gap_percent": round((ma12 - ma24) / ma24 * 100, 4),
-            "rsi": calc_rsi(closes, RSI_PERIOD),
-            "vol_confirmed": volume_confirmed(volumes),
-            "trade_symbol": coin["trade_symbol"],
-        }
+        indicators = compute_indicators(closes, volumes, rsi_period=RSI_PERIOD)
+        indicators["trade_symbol"] = coin["trade_symbol"]
+        market[coin["name"]] = indicators
 
     # ----- 2. อ่านข้อความตอบกลับจาก Telegram -----
     confirm_seen, cancel_seen = False, False
@@ -304,13 +266,15 @@ def main():
     if position:
         name = position["name"]
         cur_price = market[name]["price"]
-        change_pct = (cur_price - position["entry_price"]) / position["entry_price"] * 100
+        reason_code, change_pct = check_exit(
+            market[name], position["entry_price"], STOP_LOSS_PCT, TAKE_PROFIT_PCT, MA_GAP_THRESHOLD
+        )
         exit_reason = None
-        if change_pct <= -STOP_LOSS_PCT:
-            exit_reason = f"ตัดขาดทุนอัตโนมัติ (stop-loss {STOP_LOSS_PCT}%)"
-        elif change_pct >= TAKE_PROFIT_PCT:
-            exit_reason = f"ปิดทำกำไรอัตโนมัติ (take-profit {TAKE_PROFIT_PCT}%)"
-        elif market[name]["gap_percent"] < -MA_GAP_THRESHOLD:
+        if reason_code and reason_code.startswith("stop-loss"):
+            exit_reason = f"ตัดขาดทุนอัตโนมัติ ({reason_code})"
+        elif reason_code and reason_code.startswith("take-profit"):
+            exit_reason = f"ปิดทำกำไรอัตโนมัติ ({reason_code})"
+        elif reason_code == "death-cross":
             exit_reason = "สัญญาณกลับตัว (Death Cross)"
 
         if exit_reason:
@@ -358,9 +322,7 @@ def main():
         for coin in COINS:
             name = coin["name"]
             info = market[name]
-            is_golden_cross = info["gap_percent"] > MA_GAP_THRESHOLD
-            rsi_ok = info["rsi"] is not None and info["rsi"] < RSI_OVERBOUGHT
-            if is_golden_cross and rsi_ok and info["vol_confirmed"]:
+            if is_entry_signal(info, MA_GAP_THRESHOLD, RSI_OVERBOUGHT):
                 pending = {
                     "name": name,
                     "trade_symbol": info["trade_symbol"],
