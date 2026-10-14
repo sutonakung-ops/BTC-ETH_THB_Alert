@@ -35,6 +35,10 @@ on:
         description: "ความละเอียดแท่งเทียน (นาที) เช่น 60=1ชม., 240=4ชม."
         default: "60"
         required: false
+      offset_days:
+        description: "เลื่อนช่วงเวลาย้อนหลังออกไปอีกกี่วัน (ทดสอบ out-of-sample)"
+        default: "0"
+        required: false
 
 permissions:
   contents: write
@@ -68,6 +72,7 @@ jobs:
             --take-profit "${{ github.event.inputs.take_profit }}" \
             --rsi-overbought "${{ github.event.inputs.rsi_overbought }}" \
             --resolution "${{ github.event.inputs.resolution }}" \
+            --offset-days "${{ github.event.inputs.offset_days }}" \
             $SWEEP_FLAG
 
       - name: Commit backtest result

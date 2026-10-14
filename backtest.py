@@ -176,6 +176,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--coin", default="BTC,ETH", help="BTC, ETH, หรือ BTC,ETH")
     parser.add_argument("--days", type=int, default=180)
+    parser.add_argument("--offset-days", type=int, default=0,
+                         help="เลื่อนช่วงเวลาย้อนหลังออกไปอีกกี่วัน (ใช้ทดสอบ out-of-sample บนช่วงเก่ากว่า)")
     parser.add_argument("--capital", type=float, default=1000.0)
     parser.add_argument("--stop-loss", type=float, default=4.0)
     parser.add_argument("--take-profit", type=float, default=6.0)
@@ -188,7 +190,7 @@ def main():
     args = parser.parse_args()
 
     coins = [c.strip().upper() for c in args.coin.split(",") if c.strip()]
-    now = int(time.time())
+    now = int(time.time()) - args.offset_days * 86400
     start = now - args.days * 86400
 
     all_results = {}
