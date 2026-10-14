@@ -84,12 +84,50 @@
     color: var(--red);
     margin-top: 40px;
   }
+  .section-title {
+    max-width: 800px;
+    margin: 32px auto 12px;
+    font-size: 1rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .bot-card {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .bot-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .status-on { background: rgba(46,204,113,0.15); color: var(--green); }
+  .status-off { background: rgba(154,160,172,0.15); color: var(--muted); }
+  .status-halted { background: rgba(231,76,60,0.15); color: var(--red); }
+  .pending-box {
+    background: rgba(241,196,15,0.08);
+    border: 1px solid rgba(241,196,15,0.3);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
 </style>
 </head>
 <body>
   <h1>📊 Crypto Price Alert Dashboard</h1>
   <div class="updated" id="updated">กำลังโหลดข้อมูล...</div>
   <div class="grid" id="grid"></div>
+
+  <div class="section-title">สถานะบอทเทรดอัตโนมัติ</div>
+  <div class="bot-card" id="botCard">กำลังโหลด...</div>
 
   <script>
     function fmtNum(n) {
@@ -132,6 +170,59 @@
       `;
     }
 
+    function renderBotCard(bot) {
+      if (!bot) {
+        return `<span class="bot-status status-off">ยังไม่มีข้อมูล</span><div>บอทเทรดยังไม่เคยรัน</div>`;
+      }
+
+      let statusHtml;
+      if (!bot.enabled) {
+        statusHtml = `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — วิเคราะห์อย่างเดียว ไม่เทรดจริง</span>`;
+      } else if (bot.daily_risk && bot.daily_risk.halted) {
+        statusHtml = `<span class="bot-status status-halted">หยุดเปิดไม้ใหม่วันนี้ (ชนเพดานขาดทุนรายวัน)</span>`;
+      } else {
+        statusHtml = `<span class="bot-status status-on">ทำงานปกติ</span>`;
+      }
+
+      let bodyHtml = "";
+
+      if (bot.position) {
+        const p = bot.position;
+        bodyHtml += `
+          <div class="row"><span class="label">ไม้ที่ถืออยู่</span><span>${p.name}</span></div>
+          <div class="row"><span class="label">ราคาเข้า</span><span>${fmtNum(p.entry_price)} บาท</span></div>
+          <div class="row"><span class="label">ทุนที่ใช้</span><span>${fmtNum(p.capital_thb)} บาท</span></div>
+        `;
+      } else {
+        bodyHtml += `<div class="row"><span class="label">ไม้ที่ถืออยู่</span><span>ไม่มี (ว่าง)</span></div>`;
+      }
+
+      if (bot.pending_signal) {
+        const s = bot.pending_signal;
+        bodyHtml += `
+          <div class="pending-box">
+            ⏳ รอยืนยันคำสั่งซื้อ <strong>${s.name}</strong> ที่ราคาสัญญาณ ${fmtNum(s.signal_price)} บาท<br>
+            ตอบกลับในแชท Telegram ของบอทว่า "ยืนยัน" หรือ "ยกเลิก"
+          </div>
+        `;
+      }
+
+      if (bot.daily_risk) {
+        const pnl = bot.daily_risk.realized_pnl_thb || 0;
+        const pnlCls = changeClass(pnl);
+        bodyHtml += `
+          <div class="row"><span class="label">กำไร/ขาดทุนสะสมวันนี้ (${bot.daily_risk.date || "-"})</span>
+          <span class="${pnlCls}">${pnl > 0 ? "+" : ""}${fmtNum(pnl)} บาท</span></div>
+        `;
+      }
+
+      bodyHtml += `<div class="row"><span class="label">เช็คล่าสุด</span><span>${
+        bot.checked_at ? new Date(bot.checked_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }) : "-"
+      }</span></div>`;
+
+      return statusHtml + bodyHtml;
+    }
+
     fetch("latest.json?t=" + Date.now())
       .then((res) => {
         if (!res.ok) throw new Error("ไม่พบไฟล์ latest.json");
@@ -143,6 +234,7 @@
           "อัปเดตล่าสุด: " + updatedDate.toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
         document.getElementById("grid").innerHTML =
           renderCoin("BTC", data.BTC) + renderCoin("ETH", data.ETH);
+        document.getElementById("botCard").innerHTML = renderBotCard(data.trading_bot);
       })
       .catch((err) => {
         document.getElementById("updated").textContent = "";
