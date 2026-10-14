@@ -138,6 +138,22 @@ def summarize(result, capital_thb):
     }
 
 
+def sweep(candles, capital_thb, stop_loss_grid, take_profit_grid, rsi_grid, ma_gap=0.3):
+    """ลองหลายชุดพารามิเตอร์กับข้อมูลเดียวกัน (ดึงราคาแค่ครั้งเดียว) แล้วจัดอันดับผลลัพธ์"""
+    rows = []
+    for sl in stop_loss_grid:
+        for tp in take_profit_grid:
+            for rsi in rsi_grid:
+                result = run_backtest(
+                    candles, capital_thb=capital_thb, stop_loss_pct=sl,
+                    take_profit_pct=tp, rsi_overbought=rsi, ma_gap_threshold=ma_gap,
+                )
+                summary = summarize(result, capital_thb)
+                rows.append({"stop_loss_pct": sl, "take_profit_pct": tp, "rsi_overbought": rsi, **summary})
+    rows.sort(key=lambda r: r["total_return_pct"], reverse=True)
+    return rows
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--coin", default="BTC,ETH", help="BTC, ETH, หรือ BTC,ETH")
@@ -147,6 +163,7 @@ def main():
     parser.add_argument("--take-profit", type=float, default=6.0)
     parser.add_argument("--rsi-overbought", type=float, default=70.0)
     parser.add_argument("--ma-gap", type=float, default=0.3)
+    parser.add_argument("--sweep", action="store_true", help="ลองหลายชุดพารามิเตอร์แล้วจัดอันดับ แทนการรันค่าเดียว")
     args = parser.parse_args()
 
     coins = [c.strip().upper() for c in args.coin.split(",") if c.strip()]
@@ -168,21 +185,34 @@ def main():
             print(f"  ข้อมูลไม่พอสำหรับทดสอบ ({coin})")
             continue
 
-        result = run_backtest(
-            candles,
-            capital_thb=args.capital,
-            stop_loss_pct=args.stop_loss,
-            take_profit_pct=args.take_profit,
-            rsi_overbought=args.rsi_overbought,
-            ma_gap_threshold=args.ma_gap,
-        )
-        summary = summarize(result, args.capital)
-        all_results[coin] = {"summary": summary, "trades": result["trades"]}
-
-        print(f"\n=== ผลทดสอบย้อนหลัง {coin} ({args.days} วัน) ===")
-        print(json.dumps(summary, indent=2, ensure_ascii=False))
+        if args.sweep:
+            rows = sweep(
+                candles, args.capital,
+                stop_loss_grid=[2, 3, 4, 5],
+                take_profit_grid=[3, 4, 6, 8, 10],
+                rsi_grid=[60, 65, 70, 75],
+                ma_gap=args.ma_gap,
+            )
+            all_results[coin] = {"sweep_top10": rows[:10], "sweep_all": rows}
+            print(f"\n=== TOP 5 พารามิเตอร์ {coin} ({args.days} วัน, จัดอันดับตาม total_return_pct) ===")
+            for r in rows[:5]:
+                print(json.dumps(r, ensure_ascii=False))
+        else:
+            result = run_backtest(
+                candles,
+                capital_thb=args.capital,
+                stop_loss_pct=args.stop_loss,
+                take_profit_pct=args.take_profit,
+                rsi_overbought=args.rsi_overbought,
+                ma_gap_threshold=args.ma_gap,
+            )
+            summary = summarize(result, args.capital)
+            all_results[coin] = {"summary": summary, "trades": result["trades"]}
+            print(f"\n=== ผลทดสอบย้อนหลัง {coin} ({args.days} วัน) ===")
+            print(json.dumps(summary, indent=2, ensure_ascii=False))
 
     output = {
+        "mode": "sweep" if args.sweep else "single",
         "params": {
             "days": args.days,
             "capital_thb": args.capital,

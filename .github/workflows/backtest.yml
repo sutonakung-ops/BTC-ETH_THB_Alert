@@ -27,6 +27,10 @@ on:
         description: "ทุนต่อไม้ (บาท)"
         default: "1000"
         required: false
+      sweep:
+        description: "ลองหลายชุดพารามิเตอร์แล้วจัดอันดับ (true/false)"
+        default: "false"
+        required: false
 
 permissions:
   contents: write
@@ -48,13 +52,18 @@ jobs:
 
       - name: Run backtest
         run: |
+          SWEEP_FLAG=""
+          if [ "${{ github.event.inputs.sweep }}" = "true" ]; then
+            SWEEP_FLAG="--sweep"
+          fi
           python backtest.py \
             --coin "${{ github.event.inputs.coin }}" \
             --days "${{ github.event.inputs.days }}" \
             --capital "${{ github.event.inputs.capital }}" \
             --stop-loss "${{ github.event.inputs.stop_loss }}" \
             --take-profit "${{ github.event.inputs.take_profit }}" \
-            --rsi-overbought "${{ github.event.inputs.rsi_overbought }}"
+            --rsi-overbought "${{ github.event.inputs.rsi_overbought }}" \
+            $SWEEP_FLAG
 
       - name: Commit backtest result
         run: |
