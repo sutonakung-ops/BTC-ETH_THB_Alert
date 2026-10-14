@@ -1,19 +1,19 @@
 {
-  "updated_at": "2026-10-14T16:22:08.551074+00:00",
+  "updated_at": "2026-10-14T17:18:38.024975+00:00",
   "BTC": {
-    "change_24h": -2.08,
-    "price": 2746537.11,
-    "ma12": 2783759.09,
-    "ma24": 2791440.37,
-    "gap_percent": -0.2752,
-    "signal": "ยังสรุปแนวโน้มไม่ได้"
+    "change_24h": -1.27,
+    "price": 2759509.59,
+    "ma12": 2781472.8,
+    "ma24": 2790760.23,
+    "gap_percent": -0.3328,
+    "signal": "Death Cross (ขาลง)"
   },
   "ETH": {
-    "change_24h": -3.47,
-    "price": 81705.78,
-    "ma12": 83268.66,
-    "ma24": 83736.55,
-    "gap_percent": -0.5588,
+    "change_24h": -2.2,
+    "price": 82363.65,
+    "ma12": 83190.37,
+    "ma24": 83699.21,
+    "gap_percent": -0.6079,
     "signal": "Death Cross (ขาลง)"
   },
   "trading_bot": {
@@ -21,11 +21,11 @@
     "position": null,
     "pending_signal": null,
     "daily_risk": {
-      "date": "2026-10-14",
+      "date": "2026-10-15",
       "realized_pnl_thb": 0.0,
       "halted": false
     },
     "trade_count_today": 0,
-    "checked_at": "2026-10-14T16:22:10.876299+00:00"
+    "checked_at": "2026-10-14T17:18:39.797603+00:00"
   }
 }
