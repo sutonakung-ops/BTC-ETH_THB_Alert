@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Alert Dashboard</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --text: #e8e8e8;
+    --muted: #9aa0ac;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --yellow: #f1c40f;
+    --border: #2a2d38;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+  }
+  .updated {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card h2 {
+    margin: 0 0 12px;
+    font-size: 1.2rem;
+  }
+  .price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 4px 0 12px;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  .row:last-child { border-bottom: none; }
+  .label { color: var(--muted); }
+  .up { color: var(--green); font-weight: 600; }
+  .down { color: var(--red); font-weight: 600; }
+  .neutral { color: var(--yellow); font-weight: 600; }
+  .signal-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .badge-up { background: rgba(46,204,113,0.15); color: var(--green); }
+  .badge-down { background: rgba(231,76,60,0.15); color: var(--red); }
+  .badge-neutral { background: rgba(241,196,15,0.15); color: var(--yellow); }
+  .error {
+    text-align: center;
+    color: var(--red);
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+  <h1>📊 Crypto Price Alert Dashboard</h1>
+  <div class="updated" id="updated">กำลังโหลดข้อมูล...</div>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    function fmtNum(n) {
+      return Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    }
+
+    function changeClass(val) {
+      if (val > 0) return "up";
+      if (val < 0) return "down";
+      return "neutral";
+    }
+
+    function signalClass(signal) {
+      if (signal.includes("Golden") || signal.includes("ขาขึ้น")) return "badge-up";
+      if (signal.includes("Death") || signal.includes("ขาลง")) return "badge-down";
+      return "badge-neutral";
+    }
+
+    function renderCoin(name, d) {
+      const changeCls = changeClass(d.change_24h);
+      const gapCls = changeClass(d.gap_percent);
+      return `
+        <div class="card">
+          <h2>${name}</h2>
+          <div class="price">${fmtNum(d.price)} THB</div>
+          <div class="row">
+            <span class="label">เปลี่ยนแปลง 24 ชม.</span>
+            <span class="${changeCls}">${d.change_24h > 0 ? "+" : ""}${d.change_24h}%</span>
+          </div>
+          <div class="row">
+            <span class="label">MA12 / MA24</span>
+            <span>${fmtNum(d.ma12)} / ${fmtNum(d.ma24)}</span>
+          </div>
+          <div class="row">
+            <span class="label">ส่วนต่าง MA</span>
+            <span class="${gapCls}">${d.gap_percent > 0 ? "+" : ""}${d.gap_percent}%</span>
+          </div>
+          <div class="signal-badge ${signalClass(d.signal)}">${d.signal}</div>
+        </div>
+      `;
+    }
+
+    fetch("latest.json?t=" + Date.now())
+      .then((res) => {
+        if (!res.ok) throw new Error("ไม่พบไฟล์ latest.json");
+        return res.json();
+      })
+      .then((data) => {
+        const updatedDate = new Date(data.updated_at);
+        document.getElementById("updated").textContent =
+          "อัปเดตล่าสุด: " + updatedDate.toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
+        document.getElementById("grid").innerHTML =
+          renderCoin("BTC", data.BTC) + renderCoin("ETH", data.ETH);
+      })
+      .catch((err) => {
+        document.getElementById("updated").textContent = "";
+        document.getElementById("grid").innerHTML =
+          `<div class="error">⚠️ โหลดข้อมูลไม่สำเร็จ: ${err.message}</div>`;
+      });
+  </script>
+</body>
+</html>
