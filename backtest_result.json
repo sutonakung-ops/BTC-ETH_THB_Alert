@@ -1,5 +1,5 @@
 {
-  "mode": "single",
+  "mode": "ablation",
   "params": {
     "days": 360,
     "capital_thb": 1000.0,
@@ -10,323 +10,535 @@
     "fee_pct_per_side": 0.25
   },
   "results": {
-    "XRP": {
-      "validated": [
+    "BTC": {
+      "ablation": [
         {
-          "stop_loss_pct": 5,
-          "take_profit_pct": 10,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": 9.05,
-          "train_trades": 49,
-          "test_oos_return_pct": -28.04,
-          "test_oos_trades": 47,
-          "test_oos_win_rate_pct": 25.5,
+          "filters": "RSI+Vol+Trend",
+          "train_trades": 36,
+          "train_return_pct": -6.22,
+          "test_oos_trades": 39,
+          "test_oos_return_pct": -13.22,
+          "test_oos_win_rate_pct": 30.8,
           "test_oos_profit_factor": 0.7
         },
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 10,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": 8.88,
-          "train_trades": 49,
-          "test_oos_return_pct": -29.23,
-          "test_oos_trades": 48,
-          "test_oos_win_rate_pct": 25.0,
-          "test_oos_profit_factor": 0.69
+          "filters": "Vol+Trend",
+          "train_trades": 41,
+          "train_return_pct": 0.89,
+          "test_oos_trades": 42,
+          "test_oos_return_pct": -18.86,
+          "test_oos_win_rate_pct": 26.2,
+          "test_oos_profit_factor": 0.64
         },
         {
-          "stop_loss_pct": 3,
-          "take_profit_pct": 10,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": 7.95,
-          "train_trades": 49,
-          "test_oos_return_pct": -34.81,
+          "filters": "RSI+Vol",
+          "train_trades": 39,
+          "train_return_pct": -2.53,
+          "test_oos_trades": 51,
+          "test_oos_return_pct": -20.62,
+          "test_oos_win_rate_pct": 27.5,
+          "test_oos_profit_factor": 0.65
+        },
+        {
+          "filters": "RSI+Trend",
+          "train_trades": 41,
+          "train_return_pct": -5.8,
           "test_oos_trades": 50,
-          "test_oos_win_rate_pct": 24.0,
-          "test_oos_profit_factor": 0.66
+          "test_oos_return_pct": -24.75,
+          "test_oos_win_rate_pct": 28.0,
+          "test_oos_profit_factor": 0.6
         },
         {
-          "stop_loss_pct": 5,
-          "take_profit_pct": 10,
-          "rsi_overbought": 75,
-          "trend_filter": "off",
-          "train_return_pct": 6.62,
-          "train_trades": 56,
-          "test_oos_return_pct": -46.65,
-          "test_oos_trades": 65,
-          "test_oos_win_rate_pct": 23.1,
-          "test_oos_profit_factor": 0.63
+          "filters": "Vol",
+          "train_trades": 44,
+          "train_return_pct": 1.66,
+          "test_oos_trades": 55,
+          "test_oos_return_pct": -30.59,
+          "test_oos_win_rate_pct": 21.8,
+          "test_oos_profit_factor": 0.55
         },
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 10,
-          "rsi_overbought": 75,
-          "trend_filter": "off",
-          "train_return_pct": 6.46,
-          "train_trades": 56,
-          "test_oos_return_pct": -47.84,
+          "filters": "Trend",
+          "train_trades": 43,
+          "train_return_pct": -0.83,
+          "test_oos_trades": 51,
+          "test_oos_return_pct": -37.13,
+          "test_oos_win_rate_pct": 23.5,
+          "test_oos_profit_factor": 0.49
+        },
+        {
+          "filters": "RSI",
+          "train_trades": 43,
+          "train_return_pct": -3.61,
+          "test_oos_trades": 60,
+          "test_oos_return_pct": -38.67,
+          "test_oos_win_rate_pct": 26.7,
+          "test_oos_profit_factor": 0.54
+        },
+        {
+          "filters": "MA-cross-only",
+          "train_trades": 45,
+          "train_return_pct": -0.46,
+          "test_oos_trades": 61,
+          "test_oos_return_pct": -51.83,
+          "test_oos_win_rate_pct": 21.3,
+          "test_oos_profit_factor": 0.46
+        }
+      ]
+    },
+    "ETH": {
+      "ablation": [
+        {
+          "filters": "RSI+Vol+Trend",
+          "train_trades": 46,
+          "train_return_pct": -7.63,
+          "test_oos_trades": 47,
+          "test_oos_return_pct": -20.81,
+          "test_oos_win_rate_pct": 40.4,
+          "test_oos_profit_factor": 0.71
+        },
+        {
+          "filters": "Vol+Trend",
+          "train_trades": 52,
+          "train_return_pct": -6.09,
+          "test_oos_trades": 55,
+          "test_oos_return_pct": -34.84,
+          "test_oos_win_rate_pct": 38.2,
+          "test_oos_profit_factor": 0.65
+        },
+        {
+          "filters": "RSI+Trend",
+          "train_trades": 51,
+          "train_return_pct": -3.51,
+          "test_oos_trades": 60,
+          "test_oos_return_pct": -40.55,
+          "test_oos_win_rate_pct": 35.0,
+          "test_oos_profit_factor": 0.61
+        },
+        {
+          "filters": "RSI+Vol",
+          "train_trades": 54,
+          "train_return_pct": -20.84,
           "test_oos_trades": 66,
-          "test_oos_win_rate_pct": 22.7,
-          "test_oos_profit_factor": 0.63
+          "test_oos_return_pct": -48.47,
+          "test_oos_win_rate_pct": 37.9,
+          "test_oos_profit_factor": 0.56
+        },
+        {
+          "filters": "RSI",
+          "train_trades": 61,
+          "train_return_pct": -17.02,
+          "test_oos_trades": 71,
+          "test_oos_return_pct": -54.34,
+          "test_oos_win_rate_pct": 35.2,
+          "test_oos_profit_factor": 0.58
+        },
+        {
+          "filters": "Vol",
+          "train_trades": 58,
+          "train_return_pct": -19.59,
+          "test_oos_trades": 71,
+          "test_oos_return_pct": -55.16,
+          "test_oos_win_rate_pct": 38.0,
+          "test_oos_profit_factor": 0.58
+        },
+        {
+          "filters": "Trend",
+          "train_trades": 57,
+          "train_return_pct": -0.19,
+          "test_oos_trades": 65,
+          "test_oos_return_pct": -62.3,
+          "test_oos_win_rate_pct": 33.8,
+          "test_oos_profit_factor": 0.52
+        },
+        {
+          "filters": "MA-cross-only",
+          "train_trades": 66,
+          "train_return_pct": -13.85,
+          "test_oos_trades": 74,
+          "test_oos_return_pct": -63.83,
+          "test_oos_win_rate_pct": 35.1,
+          "test_oos_profit_factor": 0.55
+        }
+      ]
+    },
+    "XRP": {
+      "ablation": [
+        {
+          "filters": "Vol+Trend",
+          "train_trades": 59,
+          "train_return_pct": 10.62,
+          "test_oos_trades": 57,
+          "test_oos_return_pct": -23.07,
+          "test_oos_win_rate_pct": 31.6,
+          "test_oos_profit_factor": 0.78
+        },
+        {
+          "filters": "RSI+Vol+Trend",
+          "train_trades": 50,
+          "train_return_pct": -17.66,
+          "test_oos_trades": 50,
+          "test_oos_return_pct": -23.71,
+          "test_oos_win_rate_pct": 32.0,
+          "test_oos_profit_factor": 0.72
+        },
+        {
+          "filters": "Trend",
+          "train_trades": 69,
+          "train_return_pct": 8.02,
+          "test_oos_trades": 64,
+          "test_oos_return_pct": -35.72,
+          "test_oos_win_rate_pct": 31.2,
+          "test_oos_profit_factor": 0.71
+        },
+        {
+          "filters": "RSI+Vol",
+          "train_trades": 58,
+          "train_return_pct": -19.16,
+          "test_oos_trades": 66,
+          "test_oos_return_pct": -50.54,
+          "test_oos_win_rate_pct": 28.8,
+          "test_oos_profit_factor": 0.57
+        },
+        {
+          "filters": "RSI+Trend",
+          "train_trades": 60,
+          "train_return_pct": -8.01,
+          "test_oos_trades": 62,
+          "test_oos_return_pct": -51.18,
+          "test_oos_win_rate_pct": 29.0,
+          "test_oos_profit_factor": 0.57
+        },
+        {
+          "filters": "Vol",
+          "train_trades": 65,
+          "train_return_pct": 6.63,
+          "test_oos_trades": 74,
+          "test_oos_return_pct": -51.97,
+          "test_oos_win_rate_pct": 27.0,
+          "test_oos_profit_factor": 0.64
+        },
+        {
+          "filters": "MA-cross-only",
+          "train_trades": 75,
+          "train_return_pct": 4.69,
+          "test_oos_trades": 83,
+          "test_oos_return_pct": -79.27,
+          "test_oos_win_rate_pct": 26.5,
+          "test_oos_profit_factor": 0.55
+        },
+        {
+          "filters": "RSI",
+          "train_trades": 69,
+          "train_return_pct": -12.45,
+          "test_oos_trades": 77,
+          "test_oos_return_pct": -83.9,
+          "test_oos_win_rate_pct": 24.7,
+          "test_oos_profit_factor": 0.46
         }
       ]
     },
     "ADA": {
-      "validated": [
+      "ablation": [
         {
-          "stop_loss_pct": 5,
-          "take_profit_pct": 8,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": 15.56,
-          "train_trades": 57,
-          "test_oos_return_pct": -55.96,
+          "filters": "Vol+Trend",
+          "train_trades": 64,
+          "train_return_pct": -14.99,
+          "test_oos_trades": 63,
+          "test_oos_return_pct": -43.23,
+          "test_oos_win_rate_pct": 28.6,
+          "test_oos_profit_factor": 0.67
+        },
+        {
+          "filters": "RSI+Vol+Trend",
+          "train_trades": 58,
+          "train_return_pct": -12.72,
           "test_oos_trades": 53,
-          "test_oos_win_rate_pct": 24.5,
-          "test_oos_profit_factor": 0.49
+          "test_oos_return_pct": -55.82,
+          "test_oos_win_rate_pct": 22.6,
+          "test_oos_profit_factor": 0.51
         },
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 8,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": 9.72,
-          "train_trades": 57,
-          "test_oos_return_pct": -56.88,
-          "test_oos_trades": 54,
-          "test_oos_win_rate_pct": 25.9,
-          "test_oos_profit_factor": 0.49
+          "filters": "Trend",
+          "train_trades": 77,
+          "train_return_pct": -38.9,
+          "test_oos_trades": 72,
+          "test_oos_return_pct": -62.49,
+          "test_oos_win_rate_pct": 27.8,
+          "test_oos_profit_factor": 0.6
         },
         {
-          "stop_loss_pct": 5,
-          "take_profit_pct": 8,
-          "rsi_overbought": 75,
-          "trend_filter": "MA100",
-          "train_return_pct": 12.71,
-          "train_trades": 51,
-          "test_oos_return_pct": -57.0,
-          "test_oos_trades": 43,
+          "filters": "RSI+Trend",
+          "train_trades": 74,
+          "train_return_pct": -27.6,
+          "test_oos_trades": 66,
+          "test_oos_return_pct": -63.33,
+          "test_oos_win_rate_pct": 27.3,
+          "test_oos_profit_factor": 0.54
+        },
+        {
+          "filters": "Vol",
+          "train_trades": 78,
+          "train_return_pct": -43.52,
+          "test_oos_trades": 82,
+          "test_oos_return_pct": -67.27,
+          "test_oos_win_rate_pct": 28.0,
+          "test_oos_profit_factor": 0.6
+        },
+        {
+          "filters": "RSI+Vol",
+          "train_trades": 72,
+          "train_return_pct": -40.62,
+          "test_oos_trades": 75,
+          "test_oos_return_pct": -76.03,
+          "test_oos_win_rate_pct": 24.0,
+          "test_oos_profit_factor": 0.51
+        },
+        {
+          "filters": "RSI",
+          "train_trades": 83,
+          "train_return_pct": -32.77,
+          "test_oos_trades": 86,
+          "test_oos_return_pct": -101.32,
           "test_oos_win_rate_pct": 23.3,
-          "test_oos_profit_factor": 0.39
+          "test_oos_profit_factor": 0.45
         },
         {
-          "stop_loss_pct": 3,
-          "take_profit_pct": 8,
-          "rsi_overbought": 75,
-          "trend_filter": "MA100",
-          "train_return_pct": 11.26,
-          "train_trades": 52,
-          "test_oos_return_pct": -58.6,
-          "test_oos_trades": 46,
-          "test_oos_win_rate_pct": 21.7,
-          "test_oos_profit_factor": 0.42
-        },
-        {
-          "stop_loss_pct": 3,
-          "take_profit_pct": 8,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": 12.57,
-          "train_trades": 60,
-          "test_oos_return_pct": -58.83,
-          "test_oos_trades": 55,
-          "test_oos_win_rate_pct": 25.5,
-          "test_oos_profit_factor": 0.48
+          "filters": "MA-cross-only",
+          "train_trades": 86,
+          "train_return_pct": -39.18,
+          "test_oos_trades": 92,
+          "test_oos_return_pct": -107.92,
+          "test_oos_win_rate_pct": 22.8,
+          "test_oos_profit_factor": 0.47
         }
       ]
     },
     "DOGE": {
-      "validated": [
+      "ablation": [
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 6,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": -7.22,
+          "filters": "RSI+Vol+Trend",
           "train_trades": 54,
-          "test_oos_return_pct": -19.75,
+          "train_return_pct": -7.04,
           "test_oos_trades": 56,
+          "test_oos_return_pct": -19.75,
           "test_oos_win_rate_pct": 23.2,
           "test_oos_profit_factor": 0.8
         },
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 6,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": -6.15,
-          "train_trades": 57,
-          "test_oos_return_pct": -30.96,
-          "test_oos_trades": 60,
-          "test_oos_win_rate_pct": 21.7,
-          "test_oos_profit_factor": 0.72
+          "filters": "Vol+Trend",
+          "train_trades": 62,
+          "train_return_pct": -23.75,
+          "test_oos_trades": 66,
+          "test_oos_return_pct": -20.72,
+          "test_oos_win_rate_pct": 27.3,
+          "test_oos_profit_factor": 0.84
         },
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 10,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": -7.93,
-          "train_trades": 51,
-          "test_oos_return_pct": -35.03,
-          "test_oos_trades": 50,
-          "test_oos_win_rate_pct": 22.0,
+          "filters": "RSI+Vol",
+          "train_trades": 66,
+          "train_return_pct": -9.9,
+          "test_oos_trades": 70,
+          "test_oos_return_pct": -33.62,
+          "test_oos_win_rate_pct": 22.9,
+          "test_oos_profit_factor": 0.73
+        },
+        {
+          "filters": "Trend",
+          "train_trades": 66,
+          "train_return_pct": -21.79,
+          "test_oos_trades": 71,
+          "test_oos_return_pct": -35.17,
+          "test_oos_win_rate_pct": 29.6,
+          "test_oos_profit_factor": 0.75
+        },
+        {
+          "filters": "Vol",
+          "train_trades": 71,
+          "train_return_pct": -25.51,
+          "test_oos_trades": 78,
+          "test_oos_return_pct": -39.41,
+          "test_oos_win_rate_pct": 25.6,
+          "test_oos_profit_factor": 0.74
+        },
+        {
+          "filters": "RSI+Trend",
+          "train_trades": 62,
+          "train_return_pct": -15.2,
+          "test_oos_trades": 66,
+          "test_oos_return_pct": -49.6,
+          "test_oos_win_rate_pct": 24.2,
           "test_oos_profit_factor": 0.62
         },
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 6,
-          "rsi_overbought": 75,
-          "trend_filter": "off",
-          "train_return_pct": -2.79,
-          "train_trades": 67,
-          "test_oos_return_pct": -46.5,
-          "test_oos_trades": 73,
-          "test_oos_win_rate_pct": 20.5,
-          "test_oos_profit_factor": 0.66
+          "filters": "MA-cross-only",
+          "train_trades": 75,
+          "train_return_pct": -34.63,
+          "test_oos_trades": 82,
+          "test_oos_return_pct": -54.17,
+          "test_oos_win_rate_pct": 29.3,
+          "test_oos_profit_factor": 0.68
         },
         {
-          "stop_loss_pct": 5,
-          "take_profit_pct": 6,
-          "rsi_overbought": 75,
-          "trend_filter": "off",
-          "train_return_pct": -5.02,
-          "train_trades": 67,
-          "test_oos_return_pct": -48.29,
-          "test_oos_trades": 72,
-          "test_oos_win_rate_pct": 20.8,
-          "test_oos_profit_factor": 0.65
+          "filters": "RSI",
+          "train_trades": 71,
+          "train_return_pct": -23.63,
+          "test_oos_trades": 78,
+          "test_oos_return_pct": -61.96,
+          "test_oos_win_rate_pct": 24.4,
+          "test_oos_profit_factor": 0.6
         }
       ]
     },
     "SOL": {
-      "validated": [
+      "ablation": [
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 10,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": 28.98,
-          "train_trades": 48,
-          "test_oos_return_pct": -54.58,
-          "test_oos_trades": 52,
-          "test_oos_win_rate_pct": 30.8,
+          "filters": "Vol+Trend",
+          "train_trades": 54,
+          "train_return_pct": 17.07,
+          "test_oos_trades": 58,
+          "test_oos_return_pct": -62.79,
+          "test_oos_win_rate_pct": 31.0,
+          "test_oos_profit_factor": 0.48
+        },
+        {
+          "filters": "Trend",
+          "train_trades": 62,
+          "train_return_pct": 3.75,
+          "test_oos_trades": 64,
+          "test_oos_return_pct": -66.55,
+          "test_oos_win_rate_pct": 31.2,
+          "test_oos_profit_factor": 0.51
+        },
+        {
+          "filters": "RSI+Trend",
+          "train_trades": 59,
+          "train_return_pct": 14.82,
+          "test_oos_trades": 61,
+          "test_oos_return_pct": -67.04,
+          "test_oos_win_rate_pct": 27.9,
+          "test_oos_profit_factor": 0.47
+        },
+        {
+          "filters": "RSI+Vol+Trend",
+          "train_trades": 51,
+          "train_return_pct": 21.25,
+          "test_oos_trades": 53,
+          "test_oos_return_pct": -70.95,
+          "test_oos_win_rate_pct": 24.5,
+          "test_oos_profit_factor": 0.36
+        },
+        {
+          "filters": "RSI",
+          "train_trades": 64,
+          "train_return_pct": 6.04,
+          "test_oos_trades": 76,
+          "test_oos_return_pct": -75.63,
+          "test_oos_win_rate_pct": 28.9,
           "test_oos_profit_factor": 0.49
         },
         {
-          "stop_loss_pct": 3,
-          "take_profit_pct": 10,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": 26.07,
-          "train_trades": 47,
-          "test_oos_return_pct": -61.15,
-          "test_oos_trades": 49,
-          "test_oos_win_rate_pct": 26.5,
-          "test_oos_profit_factor": 0.35
+          "filters": "MA-cross-only",
+          "train_trades": 66,
+          "train_return_pct": -0.05,
+          "test_oos_trades": 77,
+          "test_oos_return_pct": -78.48,
+          "test_oos_win_rate_pct": 31.2,
+          "test_oos_profit_factor": 0.5
         },
         {
-          "stop_loss_pct": 5,
-          "take_profit_pct": 10,
-          "rsi_overbought": 75,
-          "trend_filter": "MA50",
-          "train_return_pct": 28.98,
-          "train_trades": 48,
-          "test_oos_return_pct": -63.27,
-          "test_oos_trades": 52,
-          "test_oos_win_rate_pct": 30.8,
-          "test_oos_profit_factor": 0.46
+          "filters": "Vol",
+          "train_trades": 62,
+          "train_return_pct": 7.29,
+          "test_oos_trades": 74,
+          "test_oos_return_pct": -89.17,
+          "test_oos_win_rate_pct": 29.7,
+          "test_oos_profit_factor": 0.41
         },
         {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 10,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": 27.37,
-          "train_trades": 47,
-          "test_oos_return_pct": -73.22,
-          "test_oos_trades": 49,
-          "test_oos_win_rate_pct": 26.5,
-          "test_oos_profit_factor": 0.31
-        },
-        {
-          "stop_loss_pct": 5,
-          "take_profit_pct": 10,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": 27.37,
-          "train_trades": 47,
-          "test_oos_return_pct": -77.91,
-          "test_oos_trades": 49,
-          "test_oos_win_rate_pct": 26.5,
-          "test_oos_profit_factor": 0.29
+          "filters": "RSI+Vol",
+          "train_trades": 59,
+          "train_return_pct": 11.7,
+          "test_oos_trades": 68,
+          "test_oos_return_pct": -94.81,
+          "test_oos_win_rate_pct": 25.0,
+          "test_oos_profit_factor": 0.3
         }
       ]
     },
     "KUB": {
-      "validated": [
+      "ablation": [
         {
-          "stop_loss_pct": 3,
-          "take_profit_pct": 10,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": -12.83,
-          "train_trades": 35,
-          "test_oos_return_pct": -30.11,
-          "test_oos_trades": 35,
-          "test_oos_win_rate_pct": 20.0,
-          "test_oos_profit_factor": 0.36
-        },
-        {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 10,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": -12.83,
-          "train_trades": 35,
-          "test_oos_return_pct": -30.11,
-          "test_oos_trades": 35,
-          "test_oos_win_rate_pct": 20.0,
-          "test_oos_profit_factor": 0.36
-        },
-        {
-          "stop_loss_pct": 5,
-          "take_profit_pct": 8,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": -6.7,
-          "train_trades": 38,
-          "test_oos_return_pct": -32.18,
-          "test_oos_trades": 35,
-          "test_oos_win_rate_pct": 20.0,
-          "test_oos_profit_factor": 0.32
-        },
-        {
-          "stop_loss_pct": 4,
-          "take_profit_pct": 8,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": -7.42,
-          "train_trades": 38,
-          "test_oos_return_pct": -32.18,
-          "test_oos_trades": 35,
-          "test_oos_win_rate_pct": 20.0,
-          "test_oos_profit_factor": 0.32
-        },
-        {
-          "stop_loss_pct": 3,
-          "take_profit_pct": 8,
-          "rsi_overbought": 70,
-          "trend_filter": "MA50",
-          "train_return_pct": -8.16,
+          "filters": "RSI+Vol+Trend",
           "train_trades": 39,
-          "test_oos_return_pct": -32.18,
-          "test_oos_trades": 35,
-          "test_oos_win_rate_pct": 20.0,
-          "test_oos_profit_factor": 0.32
+          "train_return_pct": -16.21,
+          "test_oos_trades": 36,
+          "test_oos_return_pct": -34.73,
+          "test_oos_win_rate_pct": 19.4,
+          "test_oos_profit_factor": 0.3
+        },
+        {
+          "filters": "RSI+Vol",
+          "train_trades": 46,
+          "train_return_pct": -23.14,
+          "test_oos_trades": 43,
+          "test_oos_return_pct": -35.65,
+          "test_oos_win_rate_pct": 23.3,
+          "test_oos_profit_factor": 0.36
+        },
+        {
+          "filters": "RSI+Trend",
+          "train_trades": 48,
+          "train_return_pct": -16.67,
+          "test_oos_trades": 43,
+          "test_oos_return_pct": -37.99,
+          "test_oos_win_rate_pct": 18.6,
+          "test_oos_profit_factor": 0.38
+        },
+        {
+          "filters": "RSI",
+          "train_trades": 56,
+          "train_return_pct": -26.51,
+          "test_oos_trades": 50,
+          "test_oos_return_pct": -40.79,
+          "test_oos_win_rate_pct": 22.0,
+          "test_oos_profit_factor": 0.41
+        },
+        {
+          "filters": "Trend",
+          "train_trades": 51,
+          "train_return_pct": -39.21,
+          "test_oos_trades": 44,
+          "test_oos_return_pct": -40.99,
+          "test_oos_win_rate_pct": 18.2,
+          "test_oos_profit_factor": 0.41
+        },
+        {
+          "filters": "Vol+Trend",
+          "train_trades": 42,
+          "train_return_pct": -29.92,
+          "test_oos_trades": 37,
+          "test_oos_return_pct": -42.56,
+          "test_oos_win_rate_pct": 18.9,
+          "test_oos_profit_factor": 0.27
+        },
+        {
+          "filters": "Vol",
+          "train_trades": 48,
+          "train_return_pct": -34.68,
+          "test_oos_trades": 44,
+          "test_oos_return_pct": -46.13,
+          "test_oos_win_rate_pct": 22.7,
+          "test_oos_profit_factor": 0.28
+        },
+        {
+          "filters": "MA-cross-only",
+          "train_trades": 58,
+          "train_return_pct": -48.07,
+          "test_oos_trades": 51,
+          "test_oos_return_pct": -45.55,
+          "test_oos_win_rate_pct": 19.6,
+          "test_oos_profit_factor": 0.42
         }
       ]
     }
