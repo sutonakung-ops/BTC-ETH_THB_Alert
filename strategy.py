@@ -38,10 +38,13 @@ def volume_confirmed(volumes, lookback=24):
     return recent[-1] > avg_vol
 
 
-def compute_indicators(closes, volumes, rsi_period=14, vol_lookback=24):
+def compute_indicators(closes, volumes, rsi_period=14, vol_lookback=24, trend_ma_period=None):
     ma12 = moving_average(closes, 12)
     ma24 = moving_average(closes, 24)
     gap_percent = (ma12 - ma24) / ma24 * 100
+    trend_ma = None
+    if trend_ma_period and len(closes) >= trend_ma_period:
+        trend_ma = moving_average(closes, trend_ma_period)
     return {
         "price": closes[-1],
         "ma12": ma12,
@@ -49,17 +52,25 @@ def compute_indicators(closes, volumes, rsi_period=14, vol_lookback=24):
         "gap_percent": round(gap_percent, 4),
         "rsi": calc_rsi(closes, rsi_period),
         "vol_confirmed": volume_confirmed(volumes, vol_lookback),
+        "trend_ma": trend_ma,
     }
 
 
-def is_entry_signal(indicators, ma_gap_threshold=0.3, rsi_overbought=70):
-    """เงื่อนไขเข้าซื้อ: Golden Cross ชัดเจน + RSI ยังไม่ overbought + ปริมาณซื้อขายยืนยัน"""
-    return (
+def is_entry_signal(indicators, ma_gap_threshold=0.3, rsi_overbought=70, require_uptrend=False):
+    """
+    เงื่อนไขเข้าซื้อ: Golden Cross ชัดเจน + RSI ยังไม่ overbought + ปริมาณซื้อขายยืนยัน
+    require_uptrend=True เพิ่มเงื่อนไข "เทรนด์ใหญ่ต้องเป็นขาขึ้น" (ราคาต้องอยู่เหนือ trend_ma
+    ที่เป็นเส้นค่าเฉลี่ยระยะยาว) เพื่อกรองสัญญาณ Golden Cross ที่เกิดตอนตลาดเป็นขาลงใหญ่ออกไป
+    """
+    base_ok = (
         indicators["gap_percent"] > ma_gap_threshold
         and indicators["rsi"] is not None
         and indicators["rsi"] < rsi_overbought
         and indicators["vol_confirmed"]
     )
+    if not require_uptrend:
+        return base_ok
+    return base_ok and indicators["trend_ma"] is not None and indicators["price"] > indicators["trend_ma"]
 
 
 def check_exit(indicators, entry_price, stop_loss_pct=4.0, take_profit_pct=6.0, ma_gap_threshold=0.3):

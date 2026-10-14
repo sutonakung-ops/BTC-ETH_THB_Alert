@@ -55,8 +55,12 @@ def fetch_candles_chunked(symbol, resolution_minutes, start_ts, end_ts, chunk_da
 
 
 def run_backtest(candles, capital_thb=1000.0, stop_loss_pct=4.0, take_profit_pct=6.0,
-                  rsi_overbought=70, ma_gap_threshold=0.3, warmup=24):
+                  rsi_overbought=70, ma_gap_threshold=0.3, warmup=24,
+                  require_uptrend=False, trend_ma_period=50):
     closes, volumes, times = candles["c"], candles["v"], candles["t"]
+
+    if require_uptrend:
+        warmup = max(warmup, trend_ma_period)
 
     position = None
     trades = []
@@ -66,10 +70,13 @@ def run_backtest(candles, capital_thb=1000.0, stop_loss_pct=4.0, take_profit_pct
     for i in range(warmup, len(closes)):
         window_closes = closes[: i + 1]
         window_volumes = volumes[: i + 1]
-        indicators = compute_indicators(window_closes, window_volumes)
+        indicators = compute_indicators(
+            window_closes, window_volumes,
+            trend_ma_period=trend_ma_period if require_uptrend else None,
+        )
 
         if position is None:
-            if is_entry_signal(indicators, ma_gap_threshold, rsi_overbought):
+            if is_entry_signal(indicators, ma_gap_threshold, rsi_overbought, require_uptrend=require_uptrend):
                 position = {
                     "entry_price": indicators["price"],
                     "entry_time": times[i],
@@ -138,18 +145,29 @@ def summarize(result, capital_thb):
     }
 
 
-def sweep(candles, capital_thb, stop_loss_grid, take_profit_grid, rsi_grid, ma_gap=0.3):
-    """ลองหลายชุดพารามิเตอร์กับข้อมูลเดียวกัน (ดึงราคาแค่ครั้งเดียว) แล้วจัดอันดับผลลัพธ์"""
+def sweep(candles, capital_thb, stop_loss_grid, take_profit_grid, rsi_grid, ma_gap=0.3,
+          trend_filter_grid=((False, None),)):
+    """
+    ลองหลายชุดพารามิเตอร์กับข้อมูลเดียวกัน (ดึงราคาแค่ครั้งเดียว) แล้วจัดอันดับผลลัพธ์
+    trend_filter_grid: list ของ (require_uptrend, trend_ma_period) ที่จะลอง เช่น
+      [(False, None), (True, 50), (True, 100)]
+    """
     rows = []
     for sl in stop_loss_grid:
         for tp in take_profit_grid:
             for rsi in rsi_grid:
-                result = run_backtest(
-                    candles, capital_thb=capital_thb, stop_loss_pct=sl,
-                    take_profit_pct=tp, rsi_overbought=rsi, ma_gap_threshold=ma_gap,
-                )
-                summary = summarize(result, capital_thb)
-                rows.append({"stop_loss_pct": sl, "take_profit_pct": tp, "rsi_overbought": rsi, **summary})
+                for require_uptrend, trend_ma_period in trend_filter_grid:
+                    result = run_backtest(
+                        candles, capital_thb=capital_thb, stop_loss_pct=sl,
+                        take_profit_pct=tp, rsi_overbought=rsi, ma_gap_threshold=ma_gap,
+                        require_uptrend=require_uptrend, trend_ma_period=trend_ma_period or 50,
+                    )
+                    summary = summarize(result, capital_thb)
+                    rows.append({
+                        "stop_loss_pct": sl, "take_profit_pct": tp, "rsi_overbought": rsi,
+                        "trend_filter": f"MA{trend_ma_period}" if require_uptrend else "off",
+                        **summary,
+                    })
     rows.sort(key=lambda r: r["total_return_pct"], reverse=True)
     return rows
 
@@ -165,6 +183,8 @@ def main():
     parser.add_argument("--ma-gap", type=float, default=0.3)
     parser.add_argument("--sweep", action="store_true", help="ลองหลายชุดพารามิเตอร์แล้วจัดอันดับ แทนการรันค่าเดียว")
     parser.add_argument("--resolution", default="60", help="ความละเอียดแท่งเทียนเป็นนาที เช่น 60 (1ชม.), 240 (4ชม.)")
+    parser.add_argument("--require-uptrend", action="store_true", help="เปิด trend filter (เข้าซื้อเฉพาะตอนราคาอยู่เหนือ trend MA)")
+    parser.add_argument("--trend-ma", type=int, default=50, help="คาบของ trend MA (ใช้ตอน --require-uptrend)")
     args = parser.parse_args()
 
     coins = [c.strip().upper() for c in args.coin.split(",") if c.strip()]
@@ -189,10 +209,11 @@ def main():
         if args.sweep:
             rows = sweep(
                 candles, args.capital,
-                stop_loss_grid=[2, 3, 4, 5],
-                take_profit_grid=[3, 4, 6, 8, 10],
-                rsi_grid=[60, 65, 70, 75],
+                stop_loss_grid=[3, 4, 5],
+                take_profit_grid=[6, 8, 10],
+                rsi_grid=[70, 75],
                 ma_gap=args.ma_gap,
+                trend_filter_grid=[(False, None), (True, 50), (True, 100)],
             )
             all_results[coin] = {"sweep_top10": rows[:10], "sweep_all": rows}
             print(f"\n=== TOP 5 พารามิเตอร์ {coin} ({args.days} วัน, จัดอันดับตาม total_return_pct) ===")
@@ -206,6 +227,8 @@ def main():
                 take_profit_pct=args.take_profit,
                 rsi_overbought=args.rsi_overbought,
                 ma_gap_threshold=args.ma_gap,
+                require_uptrend=args.require_uptrend,
+                trend_ma_period=args.trend_ma,
             )
             summary = summarize(result, args.capital)
             all_results[coin] = {"summary": summary, "trades": result["trades"]}
