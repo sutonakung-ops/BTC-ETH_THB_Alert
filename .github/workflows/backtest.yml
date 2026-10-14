@@ -28,6 +28,9 @@ on:
         default: "1000"
         required: false
 
+permissions:
+  contents: write
+
 jobs:
   backtest:
     runs-on: ubuntu-latest
@@ -53,8 +56,11 @@ jobs:
             --take-profit "${{ github.event.inputs.take_profit }}" \
             --rsi-overbought "${{ github.event.inputs.rsi_overbought }}"
 
-      - name: Upload result
-        uses: actions/upload-artifact@v4
-        with:
-          name: backtest-result
-          path: backtest_result.json
+      - name: Commit backtest result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add backtest_result.json
+          git diff --staged --quiet || git commit -m "Backtest result: coin=${{ github.event.inputs.coin }} days=${{ github.event.inputs.days }} sl=${{ github.event.inputs.stop_loss }} tp=${{ github.event.inputs.take_profit }} rsi=${{ github.event.inputs.rsi_overbought }} [skip ci]"
+          git pull --rebase
+          git push
