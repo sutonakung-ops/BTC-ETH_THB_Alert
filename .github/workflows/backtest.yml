@@ -31,6 +31,10 @@ on:
         description: "ลองหลายชุดพารามิเตอร์แล้วจัดอันดับ (true/false)"
         default: "false"
         required: false
+      resolution:
+        description: "ความละเอียดแท่งเทียน (นาที) เช่น 60=1ชม., 240=4ชม."
+        default: "60"
+        required: false
 
 permissions:
   contents: write
@@ -63,6 +67,7 @@ jobs:
             --stop-loss "${{ github.event.inputs.stop_loss }}" \
             --take-profit "${{ github.event.inputs.take_profit }}" \
             --rsi-overbought "${{ github.event.inputs.rsi_overbought }}" \
+            --resolution "${{ github.event.inputs.resolution }}" \
             $SWEEP_FLAG
 
       - name: Commit backtest result

@@ -164,6 +164,7 @@ def main():
     parser.add_argument("--rsi-overbought", type=float, default=70.0)
     parser.add_argument("--ma-gap", type=float, default=0.3)
     parser.add_argument("--sweep", action="store_true", help="ลองหลายชุดพารามิเตอร์แล้วจัดอันดับ แทนการรันค่าเดียว")
+    parser.add_argument("--resolution", default="60", help="ความละเอียดแท่งเทียนเป็นนาที เช่น 60 (1ชม.), 240 (4ชม.)")
     args = parser.parse_args()
 
     coins = [c.strip().upper() for c in args.coin.split(",") if c.strip()]
@@ -177,8 +178,8 @@ def main():
             print(f"ข้ามเหรียญที่ไม่รู้จัก: {coin}")
             continue
 
-        print(f"กำลังดึงข้อมูลย้อนหลัง {args.days} วันของ {coin} ...")
-        candles = fetch_candles_chunked(symbol, 60, start, now)
+        print(f"กำลังดึงข้อมูลย้อนหลัง {args.days} วันของ {coin} (แท่ง {args.resolution} นาที) ...")
+        candles = fetch_candles_chunked(symbol, args.resolution, start, now)
         print(f"  ได้ {len(candles['t'])} แท่งเทียน (รายชั่วโมง)")
 
         if len(candles["t"]) < 48:
