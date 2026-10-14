@@ -31,6 +31,10 @@ on:
         description: "ลองหลายชุดพารามิเตอร์แล้วจัดอันดับ (true/false)"
         default: "false"
         required: false
+      validate:
+        description: "แบ่งข้อมูลครึ่งใหม่/เก่า หา params จากครึ่งใหม่แล้วเช็คกับครึ่งเก่า (true/false)"
+        default: "false"
+        required: false
       resolution:
         description: "ความละเอียดแท่งเทียน (นาที) เช่น 60=1ชม., 240=4ชม."
         default: "60"
@@ -61,7 +65,9 @@ jobs:
       - name: Run backtest
         run: |
           SWEEP_FLAG=""
-          if [ "${{ github.event.inputs.sweep }}" = "true" ]; then
+          if [ "${{ github.event.inputs.validate }}" = "true" ]; then
+            SWEEP_FLAG="--validate"
+          elif [ "${{ github.event.inputs.sweep }}" = "true" ]; then
             SWEEP_FLAG="--sweep"
           fi
           python backtest.py \

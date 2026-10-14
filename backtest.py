@@ -24,6 +24,13 @@ FEE_PCT = 0.25  # ค่าธรรมเนียม Bitkub ต่อฝั่
 COIN_SYMBOLS = {
     "BTC": "BTC_THB",
     "ETH": "ETH_THB",
+    "XRP": "XRP_THB",
+    "ADA": "ADA_THB",
+    "DOGE": "DOGE_THB",
+    "SOL": "SOL_THB",
+    "MATIC": "MATIC_THB",
+    "POL": "POL_THB",   # MATIC ถูกรีแบรนด์เป็น POL ในบาง exchange — ลองทั้งคู่เผื่อ symbol เปลี่ยน
+    "KUB": "KUB_THB",   # Bitkub Coin (เหรียญของตลาดเอง)
 }
 
 
@@ -172,6 +179,52 @@ def sweep(candles, capital_thb, stop_loss_grid, take_profit_grid, rsi_grid, ma_g
     return rows
 
 
+def split_candles(candles, split_ratio=0.5):
+    """แบ่งข้อมูลเป็น 2 ช่วง: ช่วงเก่า (test/out-of-sample) และช่วงใหม่ (train)"""
+    n = len(candles["t"])
+    split_idx = int(n * split_ratio)
+    older = {k: v[:split_idx] for k, v in candles.items()}
+    recent = {k: v[split_idx:] for k, v in candles.items()}
+    return older, recent
+
+
+def validate_sweep(candles, capital_thb, stop_loss_grid, take_profit_grid, rsi_grid,
+                    ma_gap=0.3, trend_filter_grid=((False, None),), top_n=5):
+    """
+    หาพารามิเตอร์ที่ดีที่สุดจากครึ่งข้อมูลใหม่ (train) แล้วเช็คซ้ำกับครึ่งข้อมูลเก่า (test/out-of-sample)
+    จัดอันดับสุดท้ายด้วยผลที่ "แย่กว่า" ระหว่าง train กับ test เพื่อลดความเสี่ยง overfit
+    (ชุดที่ดีแต่ใน train อย่างเดียวแต่พังใน test จะถูกจัดอันดับท้ายๆ ไม่ใช่ต้นๆ)
+    """
+    older, recent = split_candles(candles, 0.5)
+    train_rows = sweep(recent, capital_thb, stop_loss_grid, take_profit_grid, rsi_grid, ma_gap, trend_filter_grid)
+
+    validated = []
+    for c in train_rows[:top_n]:
+        require_uptrend = c["trend_filter"] != "off"
+        trend_ma_period = int(c["trend_filter"].replace("MA", "")) if require_uptrend else 50
+        test_result = run_backtest(
+            older, capital_thb=capital_thb, stop_loss_pct=c["stop_loss_pct"],
+            take_profit_pct=c["take_profit_pct"], rsi_overbought=c["rsi_overbought"],
+            ma_gap_threshold=ma_gap, require_uptrend=require_uptrend, trend_ma_period=trend_ma_period,
+        )
+        test_summary = summarize(test_result, capital_thb)
+        validated.append({
+            "stop_loss_pct": c["stop_loss_pct"],
+            "take_profit_pct": c["take_profit_pct"],
+            "rsi_overbought": c["rsi_overbought"],
+            "trend_filter": c["trend_filter"],
+            "train_return_pct": c["total_return_pct"],
+            "train_trades": c["total_trades"],
+            "test_oos_return_pct": test_summary["total_return_pct"],
+            "test_oos_trades": test_summary["total_trades"],
+            "test_oos_win_rate_pct": test_summary["win_rate_pct"],
+            "test_oos_profit_factor": test_summary["profit_factor"],
+        })
+
+    validated.sort(key=lambda v: min(v["train_return_pct"], v["test_oos_return_pct"]), reverse=True)
+    return validated
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--coin", default="BTC,ETH", help="BTC, ETH, หรือ BTC,ETH")
@@ -184,6 +237,8 @@ def main():
     parser.add_argument("--rsi-overbought", type=float, default=70.0)
     parser.add_argument("--ma-gap", type=float, default=0.3)
     parser.add_argument("--sweep", action="store_true", help="ลองหลายชุดพารามิเตอร์แล้วจัดอันดับ แทนการรันค่าเดียว")
+    parser.add_argument("--validate", action="store_true",
+                         help="เหมือน --sweep แต่แบ่งข้อมูลครึ่งใหม่/ครึ่งเก่า หาค่าดีสุดจากครึ่งใหม่แล้วเช็คซ้ำกับครึ่งเก่า (กัน overfit)")
     parser.add_argument("--resolution", default="60", help="ความละเอียดแท่งเทียนเป็นนาที เช่น 60 (1ชม.), 240 (4ชม.)")
     parser.add_argument("--require-uptrend", action="store_true", help="เปิด trend filter (เข้าซื้อเฉพาะตอนราคาอยู่เหนือ trend MA)")
     parser.add_argument("--trend-ma", type=int, default=50, help="คาบของ trend MA (ใช้ตอน --require-uptrend)")
@@ -208,7 +263,21 @@ def main():
             print(f"  ข้อมูลไม่พอสำหรับทดสอบ ({coin})")
             continue
 
-        if args.sweep:
+        if args.validate:
+            rows = validate_sweep(
+                candles, args.capital,
+                stop_loss_grid=[3, 4, 5],
+                take_profit_grid=[6, 8, 10],
+                rsi_grid=[70, 75],
+                ma_gap=args.ma_gap,
+                trend_filter_grid=[(False, None), (True, 50), (True, 100)],
+                top_n=5,
+            )
+            all_results[coin] = {"validated": rows}
+            print(f"\n=== {coin}: หา params จากครึ่งใหม่ (train) แล้วเช็คกับครึ่งเก่า (test_oos) ===")
+            for r in rows:
+                print(json.dumps(r, ensure_ascii=False))
+        elif args.sweep:
             rows = sweep(
                 candles, args.capital,
                 stop_loss_grid=[3, 4, 5],
