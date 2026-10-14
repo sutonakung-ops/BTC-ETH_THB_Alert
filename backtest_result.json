@@ -3,492 +3,195 @@
   "params": {
     "days": 180,
     "capital_thb": 1000.0,
-    "stop_loss_pct": 3.0,
-    "take_profit_pct": 6.0,
+    "stop_loss_pct": 5.0,
+    "take_profit_pct": 8.0,
     "rsi_overbought": 75.0,
     "ma_gap_threshold": 0.3,
     "fee_pct_per_side": 0.25
   },
   "results": {
-    "BTC": {
+    "ETH": {
       "summary": {
-        "total_trades": 52,
-        "win_rate_pct": 25.0,
-        "total_pnl_thb": -271.85,
-        "total_return_pct": -27.19,
-        "avg_win_thb": 29.14,
-        "avg_loss_thb": -16.68,
-        "profit_factor": 0.58,
-        "max_drawdown_thb": 346.71
+        "total_trades": 19,
+        "win_rate_pct": 21.1,
+        "total_pnl_thb": -311.94,
+        "total_return_pct": -31.19,
+        "avg_win_thb": 75.47,
+        "avg_loss_thb": -40.92,
+        "profit_factor": 0.49,
+        "max_drawdown_thb": 409.91
       },
       "trades": [
         {
-          "entry_time": 1761087600,
-          "exit_time": 1761112800,
-          "entry_price": 3558340.86,
-          "exit_price": 3545014.43,
-          "pnl_thb": -8.75,
-          "pnl_pct": -0.87,
+          "entry_time": 1761469200,
+          "exit_time": 1761742800,
+          "entry_price": 132799.68,
+          "exit_price": 128200.08,
+          "pnl_thb": -39.64,
+          "pnl_pct": -3.96,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1761217200,
-          "exit_time": 1761620400,
-          "entry_price": 3584043.79,
-          "exit_price": 3717174.66,
-          "pnl_thb": 32.15,
-          "pnl_pct": 3.21,
+          "entry_time": 1762131600,
+          "exit_time": 1762174800,
+          "entry_price": 121508.04,
+          "exit_price": 118200.59,
+          "pnl_thb": -32.22,
+          "pnl_pct": -3.22,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1761933600,
-          "exit_time": 1762142400,
-          "entry_price": 3545170.94,
-          "exit_price": 3501986.86,
-          "pnl_thb": -17.18,
-          "pnl_pct": -1.72,
+          "entry_time": 1762693200,
+          "exit_time": 1762966800,
+          "entry_price": 114666.99,
+          "exit_price": 110564.58,
+          "pnl_thb": -40.78,
+          "pnl_pct": -4.08,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1762390800,
-          "exit_time": 1762430400,
-          "entry_price": 3361274,
-          "exit_price": 3321101.78,
-          "pnl_thb": -16.95,
-          "pnl_pct": -1.7,
+          "entry_time": 1764003600,
+          "exit_time": 1764536400,
+          "entry_price": 96081.22,
+          "exit_price": 91360,
+          "pnl_thb": -54.14,
+          "pnl_pct": -5.41,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1762743600,
-          "exit_time": 1762873200,
-          "entry_price": 3434799.95,
-          "exit_price": 3353271.26,
-          "pnl_thb": -28.74,
-          "pnl_pct": -2.87,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1762959600,
-          "exit_time": 1762981200,
-          "entry_price": 3300740.88,
-          "exit_price": 3297495,
-          "pnl_thb": -5.98,
-          "pnl_pct": -0.6,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1763384400,
-          "exit_time": 1763409600,
-          "entry_price": 3045673.6,
-          "exit_price": 2996342.73,
-          "pnl_thb": -21.2,
-          "pnl_pct": -2.12,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1763514000,
-          "exit_time": 1763546400,
-          "entry_price": 2988613.67,
-          "exit_price": 2960271.83,
-          "pnl_thb": -14.48,
-          "pnl_pct": -1.45,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1763650800,
-          "exit_time": 1763661600,
-          "entry_price": 2911707.59,
-          "exit_price": 2817539.75,
-          "pnl_thb": -37.34,
-          "pnl_pct": -3.73,
-          "reason": "stop-loss (3.0%)"
-        },
-        {
-          "entry_time": 1763859600,
-          "exit_time": 1763985600,
-          "entry_price": 2793163.62,
-          "exit_price": 2791199,
-          "pnl_thb": -5.7,
-          "pnl_pct": -0.57,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1764025200,
-          "exit_time": 1764079200,
-          "entry_price": 2856979.52,
-          "exit_price": 2802950.47,
-          "pnl_thb": -23.91,
-          "pnl_pct": -2.39,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1764244800,
-          "exit_time": 1764385200,
-          "entry_price": 2933795.01,
-          "exit_price": 2921000.01,
-          "pnl_thb": -9.36,
-          "pnl_pct": -0.94,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1764662400,
-          "exit_time": 1764698400,
-          "entry_price": 2767541.47,
-          "exit_price": 2942794.71,
-          "pnl_thb": 58.32,
-          "pnl_pct": 5.83,
-          "reason": "take-profit (6.0%)"
-        },
-        {
-          "entry_time": 1764738000,
-          "exit_time": 1764878400,
-          "entry_price": 2989000,
-          "exit_price": 2956326.17,
-          "pnl_thb": -15.93,
-          "pnl_pct": -1.59,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1765144800,
-          "exit_time": 1765231200,
-          "entry_price": 2865591.47,
-          "exit_price": 2895211.35,
-          "pnl_thb": 5.34,
-          "pnl_pct": 0.53,
+          "entry_time": 1764925200,
+          "exit_time": 1765026000,
+          "entry_price": 99540.69,
+          "exit_price": 97489.99,
+          "pnl_thb": -25.6,
+          "pnl_pct": -2.56,
           "reason": "death-cross"
         },
         {
           "entry_time": 1765299600,
-          "exit_time": 1765375200,
-          "entry_price": 2983671.16,
-          "exit_price": 2918758.29,
-          "pnl_thb": -26.76,
-          "pnl_pct": -2.68,
+          "exit_time": 1765544400,
+          "entry_price": 105504.19,
+          "exit_price": 97149.75,
+          "pnl_thb": -84.19,
+          "pnl_pct": -8.42,
+          "reason": "stop-loss (5.0%)"
+        },
+        {
+          "entry_time": 1766221200,
+          "exit_time": 1766538000,
+          "entry_price": 93591.3,
+          "exit_price": 91218.92,
+          "pnl_thb": -30.35,
+          "pnl_pct": -3.03,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1765504800,
-          "exit_time": 1765551600,
-          "entry_price": 2930151.59,
-          "exit_price": 2839999.99,
-          "pnl_thb": -35.77,
-          "pnl_pct": -3.58,
-          "reason": "stop-loss (3.0%)"
-        },
-        {
-          "entry_time": 1765803600,
-          "exit_time": 1765814400,
-          "entry_price": 2815366.11,
-          "exit_price": 2724225.52,
-          "pnl_thb": -37.37,
-          "pnl_pct": -3.74,
-          "reason": "stop-loss (3.0%)"
-        },
-        {
-          "entry_time": 1765926000,
-          "exit_time": 1765969200,
-          "entry_price": 2765613.65,
-          "exit_price": 2737655.46,
-          "pnl_thb": -15.11,
-          "pnl_pct": -1.51,
+          "entry_time": 1766984400,
+          "exit_time": 1767891600,
+          "entry_price": 94401.87,
+          "exit_price": 97810.07,
+          "pnl_thb": 31.1,
+          "pnl_pct": 3.11,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1766066400,
-          "exit_time": 1766084400,
-          "entry_price": 2772466.15,
-          "exit_price": 2670000,
-          "pnl_thb": -41.96,
-          "pnl_pct": -4.2,
-          "reason": "stop-loss (3.0%)"
-        },
-        {
-          "entry_time": 1766185200,
-          "exit_time": 1766451600,
-          "entry_price": 2763080.07,
-          "exit_price": 2756379.83,
-          "pnl_thb": -7.42,
-          "pnl_pct": -0.74,
+          "entry_time": 1768294800,
+          "exit_time": 1768654800,
+          "entry_price": 98395.58,
+          "exit_price": 104157.86,
+          "pnl_thb": 53.56,
+          "pnl_pct": 5.36,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1766743200,
-          "exit_time": 1766782800,
-          "entry_price": 2756873.11,
-          "exit_price": 2718500,
-          "pnl_thb": -18.92,
-          "pnl_pct": -1.89,
+          "entry_time": 1769648400,
+          "exit_time": 1769734800,
+          "entry_price": 91899.53,
+          "exit_price": 86340.14,
+          "pnl_thb": -65.49,
+          "pnl_pct": -6.55,
+          "reason": "stop-loss (5.0%)"
+        },
+        {
+          "entry_time": 1771160400,
+          "exit_time": 1771261200,
+          "entry_price": 62503.5,
+          "exit_price": 61947.3,
+          "pnl_thb": -13.9,
+          "pnl_pct": -1.39,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1766998800,
-          "exit_time": 1767042000,
-          "entry_price": 2761000.09,
-          "exit_price": 2763434.85,
-          "pnl_thb": -4.12,
-          "pnl_pct": -0.41,
+          "entry_time": 1771765200,
+          "exit_time": 1771837200,
+          "entry_price": 60894.5,
+          "exit_price": 59818.06,
+          "pnl_thb": -22.68,
+          "pnl_pct": -2.27,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1767322800,
-          "exit_time": 1767700800,
-          "entry_price": 2797436.77,
-          "exit_price": 2938434.19,
-          "pnl_thb": 45.4,
-          "pnl_pct": 4.54,
+          "entry_time": 1772182800,
+          "exit_time": 1772254800,
+          "entry_price": 61178.02,
+          "exit_price": 57955.03,
+          "pnl_thb": -57.68,
+          "pnl_pct": -5.77,
+          "reason": "stop-loss (5.0%)"
+        },
+        {
+          "entry_time": 1772456400,
+          "exit_time": 1772874000,
+          "entry_price": 64549.45,
+          "exit_price": 63069.99,
+          "pnl_thb": -27.92,
+          "pnl_pct": -2.79,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1767931200,
-          "exit_time": 1767967200,
-          "entry_price": 2860769.88,
-          "exit_price": 2830058.83,
-          "pnl_thb": -15.74,
-          "pnl_pct": -1.57,
+          "entry_time": 1773118800,
+          "exit_time": 1773622800,
+          "entry_price": 65085,
+          "exit_price": 73528.3,
+          "pnl_thb": 124.73,
+          "pnl_pct": 12.47,
+          "reason": "take-profit (8.0%)"
+        },
+        {
+          "entry_time": 1773824400,
+          "exit_time": 1773925200,
+          "entry_price": 72910.69,
+          "exit_price": 69359.78,
+          "pnl_thb": -53.7,
+          "pnl_pct": -5.37,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1768291200,
-          "exit_time": 1768420800,
-          "entry_price": 2892494.36,
-          "exit_price": 3071858.85,
-          "pnl_thb": 57.01,
-          "pnl_pct": 5.7,
-          "reason": "take-profit (6.0%)"
+          "entry_time": 1774429200,
+          "exit_time": 1774573200,
+          "entry_price": 71227.85,
+          "exit_price": 67461.17,
+          "pnl_thb": -57.88,
+          "pnl_pct": -5.79,
+          "reason": "stop-loss (5.0%)"
         },
         {
-          "entry_time": 1768442400,
-          "exit_time": 1768525200,
-          "entry_price": 3031033,
-          "exit_price": 3009521.36,
-          "pnl_thb": -12.1,
-          "pnl_pct": -1.21,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1769090400,
-          "exit_time": 1769115600,
-          "entry_price": 2784905.87,
-          "exit_price": 2777326.39,
-          "pnl_thb": -7.72,
+          "entry_time": 1774947600,
+          "exit_time": 1775221200,
+          "entry_price": 67178.81,
+          "exit_price": 67000,
+          "pnl_thb": -7.66,
           "pnl_pct": -0.77,
           "reason": "death-cross"
         },
         {
-          "entry_time": 1769482800,
-          "exit_time": 1769533200,
-          "entry_price": 2759770.52,
-          "exit_price": 2715364.62,
-          "pnl_thb": -21.09,
-          "pnl_pct": -2.11,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1769569200,
-          "exit_time": 1769662800,
-          "entry_price": 2761033.26,
-          "exit_price": 2737277.51,
-          "pnl_thb": -13.6,
-          "pnl_pct": -1.36,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1769821200,
-          "exit_time": 1769868000,
-          "entry_price": 2647300,
-          "exit_price": 2560123.75,
-          "pnl_thb": -37.93,
-          "pnl_pct": -3.79,
-          "reason": "stop-loss (3.0%)"
-        },
-        {
-          "entry_time": 1770390000,
-          "exit_time": 1770465600,
-          "entry_price": 2181257.04,
-          "exit_price": 2182455.72,
-          "pnl_thb": -4.45,
-          "pnl_pct": -0.45,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1770534000,
-          "exit_time": 1770620400,
-          "entry_price": 2202669.39,
-          "exit_price": 2200371.56,
-          "pnl_thb": -6.04,
-          "pnl_pct": -0.6,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1770987600,
-          "exit_time": 1771182000,
-          "entry_price": 2090104.53,
-          "exit_price": 2127840.15,
-          "pnl_thb": 13.05,
-          "pnl_pct": 1.31,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1771574400,
-          "exit_time": 1771801200,
-          "entry_price": 2116475.41,
-          "exit_price": 2102627.03,
-          "pnl_thb": -11.54,
-          "pnl_pct": -1.15,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1772020800,
-          "exit_time": 1772118000,
-          "entry_price": 2057915.92,
-          "exit_price": 2089827.67,
-          "pnl_thb": 10.51,
-          "pnl_pct": 1.05,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1772334000,
-          "exit_time": 1772388000,
-          "entry_price": 2100860.81,
-          "exit_price": 2065315.43,
-          "pnl_thb": -21.92,
-          "pnl_pct": -2.19,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1772452800,
-          "exit_time": 1772539200,
-          "entry_price": 2074134.24,
-          "exit_price": 2128608.24,
-          "pnl_thb": 21.26,
-          "pnl_pct": 2.13,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1772586000,
-          "exit_time": 1772636400,
-          "entry_price": 2167002.17,
-          "exit_price": 2308776.73,
-          "pnl_thb": 60.42,
-          "pnl_pct": 6.04,
-          "reason": "take-profit (6.0%)"
-        },
-        {
-          "entry_time": 1773057600,
-          "exit_time": 1773198000,
-          "entry_price": 2184999.99,
-          "exit_price": 2194473.73,
-          "pnl_thb": -0.66,
-          "pnl_pct": -0.07,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1773280800,
-          "exit_time": 1773313200,
-          "entry_price": 2212111.54,
-          "exit_price": 2241161.09,
-          "pnl_thb": 8.13,
-          "pnl_pct": 0.81,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1773356400,
-          "exit_time": 1773453600,
-          "entry_price": 2261110.77,
-          "exit_price": 2288046.75,
-          "pnl_thb": 6.91,
-          "pnl_pct": 0.69,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1773576000,
-          "exit_time": 1773709200,
-          "entry_price": 2313642.65,
-          "exit_price": 2459464.28,
-          "pnl_thb": 58.03,
-          "pnl_pct": 5.8,
-          "reason": "take-profit (6.0%)"
-        },
-        {
-          "entry_time": 1773712800,
-          "exit_time": 1773759600,
-          "entry_price": 2441059.94,
-          "exit_price": 2388686.49,
-          "pnl_thb": -26.46,
-          "pnl_pct": -2.65,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1774011600,
-          "exit_time": 1774141200,
-          "entry_price": 2292125.86,
-          "exit_price": 2273147.4,
-          "pnl_thb": -13.28,
-          "pnl_pct": -1.33,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1774274400,
-          "exit_time": 1774382400,
-          "entry_price": 2304216.6,
-          "exit_price": 2283051.23,
-          "pnl_thb": -14.19,
-          "pnl_pct": -1.42,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1774738800,
-          "exit_time": 1774832400,
-          "entry_price": 2191014,
-          "exit_price": 2195890.62,
-          "pnl_thb": -2.77,
-          "pnl_pct": -0.28,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1774868400,
-          "exit_time": 1774918800,
-          "entry_price": 2220231.46,
-          "exit_price": 2228386.63,
-          "pnl_thb": -1.33,
-          "pnl_pct": -0.13,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1775012400,
-          "exit_time": 1775098800,
-          "entry_price": 2227742.17,
-          "exit_price": 2178825.21,
-          "pnl_thb": -26.96,
-          "pnl_pct": -2.7,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1775491200,
-          "exit_time": 1775545200,
-          "entry_price": 2268197.98,
-          "exit_price": 2236189.67,
-          "pnl_thb": -19.11,
-          "pnl_pct": -1.91,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1775610000,
-          "exit_time": 1775977200,
-          "entry_price": 2293000,
-          "exit_price": 2309802.39,
-          "pnl_thb": 2.33,
-          "pnl_pct": 0.23,
-          "reason": "death-cross"
-        },
-        {
-          "entry_time": 1776106800,
-          "exit_time": 1776229200,
-          "entry_price": 2360056.87,
-          "exit_price": 2369799.88,
-          "pnl_thb": -0.87,
-          "pnl_pct": -0.09,
-          "reason": "death-cross"
+          "entry_time": 1775509200,
+          "exit_time": 1776114000,
+          "entry_price": 68842.83,
+          "exit_price": 75555,
+          "pnl_thb": 92.5,
+          "pnl_pct": 9.25,
+          "reason": "take-profit (8.0%)"
         }
       ]
     }
