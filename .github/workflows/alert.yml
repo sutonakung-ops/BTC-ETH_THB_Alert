@@ -37,6 +37,14 @@ jobs:
           BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
         run: python trading_bot.py
 
+      - name: Run DCA bot
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
+          BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
+        run: python dca_bot.py
+
       - name: Commit latest.json and bot state
         run: |
           git config user.name "github-actions[bot]"

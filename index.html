@@ -126,8 +126,11 @@
   <div class="updated" id="updated">กำลังโหลดข้อมูล...</div>
   <div class="grid" id="grid"></div>
 
-  <div class="section-title">สถานะบอทเทรดอัตโนมัติ</div>
+  <div class="section-title">สถานะบอทเทรดอัตโนมัติ (จับจังหวะ)</div>
   <div class="bot-card" id="botCard">กำลังโหลด...</div>
+
+  <div class="section-title">พอร์ต DCA (ซื้อสม่ำเสมอทุกวัน)</div>
+  <div class="bot-card" id="dcaCard">กำลังโหลด...</div>
 
   <script>
     function fmtNum(n) {
@@ -223,6 +226,51 @@
       return statusHtml + bodyHtml;
     }
 
+    function renderDcaCard(dca) {
+      if (!dca) {
+        return `<span class="bot-status status-off">ยังไม่มีข้อมูล</span><div>บอท DCA ยังไม่เคยรัน</div>`;
+      }
+
+      const statusHtml = dca.enabled
+        ? `<span class="bot-status status-on">ทำงานปกติ — ${fmtNum(dca.amount_thb_per_coin_per_day)} บาท/เหรียญ/วัน</span>`
+        : `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — ยังไม่ซื้อจริง</span>`;
+
+      let bodyHtml = "";
+      if (dca.total_invested_thb) {
+        const pnlCls = changeClass(dca.total_pnl_thb || 0);
+        bodyHtml += `
+          <div class="row"><span class="label">ลงทุนสะสมรวม</span><span>${fmtNum(dca.total_invested_thb)} บาท</span></div>
+          <div class="row"><span class="label">มูลค่าปัจจุบัน</span><span>${dca.total_value_thb != null ? fmtNum(dca.total_value_thb) + " บาท" : "-"}</span></div>
+          <div class="row"><span class="label">กำไร/ขาดทุนรวม</span>
+            <span class="${pnlCls}">${dca.total_pnl_thb != null ? (dca.total_pnl_thb > 0 ? "+" : "") + fmtNum(dca.total_pnl_thb) + " บาท (" + (dca.total_pnl_pct > 0 ? "+" : "") + dca.total_pnl_pct + "%)" : "-"}</span>
+          </div>
+        `;
+      } else {
+        bodyHtml += `<div class="row"><span class="label">ลงทุนสะสมรวม</span><span>ยังไม่มีการซื้อ</span></div>`;
+      }
+
+      if (dca.coins) {
+        for (const name in dca.coins) {
+          const c = dca.coins[name];
+          if (!c.buy_count) continue;
+          const pnlCls = changeClass(c.pnl_thb || 0);
+          bodyHtml += `
+            <div class="row">
+              <span class="label">${name} (${c.buy_count} ครั้ง, ทุนเฉลี่ย ${c.avg_cost != null ? fmtNum(c.avg_cost) : "-"})</span>
+              <span class="${pnlCls}">${c.pnl_thb != null ? (c.pnl_thb > 0 ? "+" : "") + fmtNum(c.pnl_thb) + " บาท" : "-"}</span>
+            </div>
+          `;
+        }
+      }
+
+      bodyHtml += `<div class="row"><span class="label">ซื้อล่าสุดวันที่</span><span>${dca.last_run_date || "-"}</span></div>`;
+      bodyHtml += `<div class="row"><span class="label">เช็คล่าสุด</span><span>${
+        dca.checked_at ? new Date(dca.checked_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }) : "-"
+      }</span></div>`;
+
+      return statusHtml + bodyHtml;
+    }
+
     fetch("latest.json?t=" + Date.now())
       .then((res) => {
         if (!res.ok) throw new Error("ไม่พบไฟล์ latest.json");
@@ -235,6 +283,7 @@
         document.getElementById("grid").innerHTML =
           renderCoin("BTC", data.BTC) + renderCoin("ETH", data.ETH);
         document.getElementById("botCard").innerHTML = renderBotCard(data.trading_bot);
+        document.getElementById("dcaCard").innerHTML = renderDcaCard(data.dca_bot);
       })
       .catch((err) => {
         document.getElementById("updated").textContent = "";
