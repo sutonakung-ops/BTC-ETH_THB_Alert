@@ -232,7 +232,7 @@
       }
 
       const statusHtml = dca.enabled
-        ? `<span class="bot-status status-on">ทำงานปกติ — ${fmtNum(dca.amount_thb_per_coin_per_period)} บาท/เหรียญ ทุก ${dca.interval_days} วัน</span>`
+        ? `<span class="bot-status status-on">ทำงานปกติ — ${fmtNum(dca.amount_thb_per_coin_per_period)} บาท/เหรียญ ทุก ${dca.interval_days} วัน | ขายทำกำไรที่ +${dca.take_profit_pct}%</span>`
         : `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — ยังไม่ซื้อจริง</span>`;
 
       let bodyHtml = "";
@@ -241,8 +241,16 @@
         bodyHtml += `
           <div class="row"><span class="label">ลงทุนสะสมรวม</span><span>${fmtNum(dca.total_invested_thb)} บาท</span></div>
           <div class="row"><span class="label">มูลค่าปัจจุบัน</span><span>${dca.total_value_thb != null ? fmtNum(dca.total_value_thb) + " บาท" : "-"}</span></div>
-          <div class="row"><span class="label">กำไร/ขาดทุนรวม</span>
+          <div class="row"><span class="label">กำไร/ขาดทุนที่ยังไม่ขาย (unrealized)</span>
             <span class="${pnlCls}">${dca.total_pnl_thb != null ? (dca.total_pnl_thb > 0 ? "+" : "") + fmtNum(dca.total_pnl_thb) + " บาท (" + (dca.total_pnl_pct > 0 ? "+" : "") + dca.total_pnl_pct + "%)" : "-"}</span>
+          </div>
+        `;
+      }
+      if (dca.realized_pnl_total_thb) {
+        const realizedCls = changeClass(dca.realized_pnl_total_thb);
+        bodyHtml += `
+          <div class="row"><span class="label">กำไรที่ขายทำแล้ว (realized, สะสม)</span>
+            <span class="${realizedCls}">${dca.realized_pnl_total_thb > 0 ? "+" : ""}${fmtNum(dca.realized_pnl_total_thb)} บาท</span>
           </div>
         `;
       } else {

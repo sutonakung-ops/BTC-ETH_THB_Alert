@@ -10,6 +10,9 @@
 - ผู้ใช้แจ้งว่ายอดเงินที่เติมเข้าบัญชีแต่ละรอบไม่สม่ำเสมอ — ถ้าเงินในบัญชีไม่พอซื้อครบทุกเหรียญ
   โค้ดจะสั่งซื้อแต่ละเหรียญแยกจากกัน (ไม่ใช่ all-or-nothing) เหรียญที่เงินพอจะซื้อได้ตามปกติ
   เหรียญที่เงินไม่พอจะล้มเหลวเฉพาะตัวนั้นและแจ้งใน Telegram โดยไม่กระทบเหรียญอื่น
+- Take-profit อัตโนมัติ: เช็คทุกรอบว่าเหรียญไหน "กำไรเฉลี่ยรวม" (เทียบกับทุนเฉลี่ยที่ถือสะสมมา)
+  เกิน TAKE_PROFIT_PCT หรือยัง ถ้าเกิน จะขายเหรียญนั้นทั้งหมดกลับเป็นเงินบาททันที แล้วเริ่มสะสม DCA
+  ใหม่จากศูนย์สำหรับเหรียญนั้น (เหรียญอื่นที่ยังไม่ถึงเกณฑ์ไม่กระทบ)
 
 สถานะทั้งหมดเก็บเป็นไฟล์ json ใต้โฟลเดอร์ state/ แล้วให้ GitHub Actions
 commit กลับเข้า repo ทุกครั้งที่รัน (เพราะ Actions runner ใช้แล้วทิ้งไฟล์หายทุกรอบ)
@@ -21,7 +24,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
-from bitkub_trade import BitkubAPIError, place_bid
+from bitkub_trade import BitkubAPIError, place_ask, place_bid
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
@@ -41,6 +44,10 @@ DASHBOARD_FILE = "latest.json"
 # ระบบจับจังหวะช่วงแรก
 DCA_AMOUNT_THB_PER_COIN = 50
 DCA_INTERVAL_DAYS = 7
+
+# ขายทำกำไรอัตโนมัติ: เหรียญไหนกำไรเฉลี่ยรวมเกิน % นี้ ขายทั้งหมดกลับเป็นเงินบาททันที
+# แล้วเริ่มสะสม DCA ใหม่จากศูนย์สำหรับเหรียญนั้น (เหรียญอื่นไม่กระทบ)
+TAKE_PROFIT_PCT = 10.0
 
 DCA_COINS = [
     {"name": "BTC", "trade_symbol": "THB_BTC"},
@@ -107,6 +114,8 @@ def default_state():
             for coin in DCA_COINS
         },
         "log": [],
+        "sell_log": [],
+        "realized_pnl_total_thb": 0.0,
     }
 
 
@@ -147,6 +156,41 @@ def execute_buy(trade_symbol, amount_thb):
     return {"ok": True, "fill_price": fill_price, "amount_coin": amount_coin}
 
 
+def execute_sell(trade_symbol, amount_coin):
+    """สั่งขายจริงทั้งหมดที่ถืออยู่ของเหรียญนี้ (market order) กลับเป็นเงินบาท"""
+    if not BITKUB_API_KEY or not BITKUB_API_SECRET:
+        return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
+    try:
+        result = place_ask(BITKUB_API_KEY, BITKUB_API_SECRET, trade_symbol, amount_coin, rat=0, typ="market")
+    except BitkubAPIError as e:
+        return {"ok": False, "error": str(e)}
+
+    res = result.get("result", result)
+    if result.get("error", 0) not in (0, None):
+        return {"ok": False, "error": f"Bitkub error code {result.get('error')}: {res}"}
+
+    sell_price = None
+    for key in ("rat", "last", "avg"):
+        val = res.get(key) if isinstance(res, dict) else None
+        if val:
+            sell_price = float(val)
+            break
+
+    proceeds_thb = None
+    for key in ("rec",):
+        val = res.get(key) if isinstance(res, dict) else None
+        if val:
+            proceeds_thb = float(val)
+            break
+    if proceeds_thb is None and sell_price:
+        proceeds_thb = amount_coin * sell_price  # ประมาณการ ยังไม่หักค่าธรรมเนียม
+
+    if not sell_price or proceeds_thb is None:
+        return {"ok": False, "error": f"อ่านผลลัพธ์คำสั่งขายไม่ได้: {res}"}
+
+    return {"ok": True, "sell_price": sell_price, "proceeds_thb": proceeds_thb}
+
+
 # ---------------- โปรแกรมหลัก ----------------
 
 def main():
@@ -157,6 +201,8 @@ def main():
             coin["name"],
             {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None},
         )
+    state.setdefault("sell_log", [])
+    state.setdefault("realized_pnl_total_thb", 0.0)
 
     trading_enabled = bool(BITKUB_API_KEY and BITKUB_API_SECRET)
     today = today_str()
@@ -216,6 +262,52 @@ def main():
                 )
             send_telegram(msg)
 
+    # ----- เช็ค take-profit: เหรียญไหนกำไรเฉลี่ยรวมเกิน TAKE_PROFIT_PCT ขายทั้งหมดกลับเป็นเงินบาท -----
+    if trading_enabled:
+        for coin in DCA_COINS:
+            name = coin["name"]
+            h = state["holdings"][name]
+            if h["total_coin"] <= 0:
+                continue
+            tick = ticker.get(coin["trade_symbol"]) if isinstance(ticker, dict) else None
+            current_price = tick.get("last") if isinstance(tick, dict) else None
+            if not current_price:
+                continue
+            avg_cost = h["total_invested_thb"] / h["total_coin"] if h["total_coin"] else None
+            if not avg_cost:
+                continue
+            pnl_pct_now = (current_price - avg_cost) / avg_cost * 100
+            if pnl_pct_now < TAKE_PROFIT_PCT:
+                continue
+
+            outcome = execute_sell(coin["trade_symbol"], h["total_coin"])
+            if outcome["ok"]:
+                realized_pnl = outcome["proceeds_thb"] - h["total_invested_thb"]
+                state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
+                state["sell_log"].append({
+                    "date": today,
+                    "name": name,
+                    "sold_coin": h["total_coin"],
+                    "sell_price": outcome["sell_price"],
+                    "invested_thb": h["total_invested_thb"],
+                    "proceeds_thb": round(outcome["proceeds_thb"], 2),
+                    "realized_pnl_thb": round(realized_pnl, 2),
+                })
+                state["sell_log"] = state["sell_log"][-200:]
+                send_telegram(
+                    f"🎉 ขายทำกำไร {name} ทั้งหมด (กำไรเฉลี่ยรวมถึง +{pnl_pct_now:.1f}%)\n"
+                    f"ทุนสะสม {h['total_invested_thb']:.2f} บาท → ได้คืน {outcome['proceeds_thb']:.2f} บาท "
+                    f"(กำไร {realized_pnl:+.2f} บาท)\n"
+                    f"เริ่มสะสม DCA ของ {name} ใหม่จากศูนย์ตั้งแต่รอบถัดไป"
+                )
+                # เริ่มสะสมใหม่จากศูนย์สำหรับเหรียญนี้ (เหรียญอื่นไม่กระทบ)
+                h["total_invested_thb"] = 0.0
+                h["total_coin"] = 0.0
+                h["buy_count"] = 0
+                h["last_bought_date"] = None
+            else:
+                print(f"{name}: ถึงเกณฑ์ take-profit (+{pnl_pct_now:.1f}%) แต่ขายไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
+
     # ----- คำนวณมูลค่าปัจจุบันของแต่ละเหรียญ (ใช้ได้ทั้งตอนเปิด/ปิดใช้งานจริง) -----
     per_coin = {}
     total_invested = 0.0
@@ -257,6 +349,8 @@ def main():
         "enabled": trading_enabled,
         "amount_thb_per_coin_per_period": DCA_AMOUNT_THB_PER_COIN,
         "interval_days": DCA_INTERVAL_DAYS,
+        "take_profit_pct": TAKE_PROFIT_PCT,
+        "realized_pnl_total_thb": state.get("realized_pnl_total_thb", 0.0),
         "coins": per_coin,
         "total_invested_thb": round(total_invested, 2),
         "total_value_thb": round(total_value, 2) if total_invested else None,
