@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 บอท DCA (Dollar-Cost Averaging) สำหรับ Bitkub
-- ซื้อเหรียญที่กำหนดไว้ด้วยจำนวนเงินคงที่ "ทุกวัน" (ไม่สน timing/สัญญาณใดๆ)
+- ซื้อเหรียญที่กำหนดไว้ด้วยจำนวนเงินคงที่ "ทุกรอบ N วัน" (ไม่สน timing/สัญญาณใดๆ) — ดีฟอลต์ 7 วัน (รายสัปดาห์)
 - ตัดปัญหา overfitting ของการจับจังหวะที่พิสูจน์แล้วว่าไม่มี edge จริงบน Bitkub
   (ดู backtest.py / filter_ablation — ทดสอบ 7 เหรียญ x 8 ชุดตัวกรอง ไม่มีชุดใดกำไรนอกช่วงข้อมูลที่ใช้หา params)
-- รันผ่าน GitHub Actions ทุกชั่วโมงเหมือนบอทอื่น แต่จะ "ซื้อจริง" แค่ครั้งแรกของแต่ละวัน
-  (เช็คจาก state/dca_state.json ว่าซื้อไปแล้วหรือยังสำหรับวันนี้ตามเวลาไทย)
+- รันผ่าน GitHub Actions ทุกชั่วโมงเหมือนบอทอื่น แต่จะ "ซื้อจริง" แค่ครั้งแรกของแต่ละรอบ
+  (เช็คจาก state/dca_state.json ว่าผ่านมาครบ DCA_INTERVAL_DAYS วันจากครั้งล่าสุดหรือยัง — ไม่ผูกกับวันใดวันหนึ่ง
+  ของสัปดาห์ จะเริ่มรอบแรกตอนไหนก็ได้ แล้วนับถัดไปทุก 7 วันจากนั้น)
+- ผู้ใช้แจ้งว่ายอดเงินที่เติมเข้าบัญชีแต่ละรอบไม่สม่ำเสมอ — ถ้าเงินในบัญชีไม่พอซื้อครบทุกเหรียญ
+  โค้ดจะสั่งซื้อแต่ละเหรียญแยกจากกัน (ไม่ใช่ all-or-nothing) เหรียญที่เงินพอจะซื้อได้ตามปกติ
+  เหรียญที่เงินไม่พอจะล้มเหลวเฉพาะตัวนั้นและแจ้งใน Telegram โดยไม่กระทบเหรียญอื่น
 
 สถานะทั้งหมดเก็บเป็นไฟล์ json ใต้โฟลเดอร์ state/ แล้วให้ GitHub Actions
 commit กลับเข้า repo ทุกครั้งที่รัน (เพราะ Actions runner ใช้แล้วทิ้งไฟล์หายทุกรอบ)
@@ -31,11 +35,12 @@ DCA_STATE_FILE = f"{STATE_DIR}/dca_state.json"
 DASHBOARD_FILE = "latest.json"
 
 # ---------------- ตั้งค่า DCA (แก้ตัวเลขตรงนี้ได้เลยถ้าต้องการเปลี่ยน) ----------------
-# งบ 50 บาท/เหรียญ/วัน x 7 เหรียญ = 350 บาท/วัน
-# ผู้ใช้แจ้งว่าจะ "ทยอยเติมเงิน" เข้าบัญชี Bitkub เรื่อยๆ ตามผลลัพธ์ที่เห็น ไม่ใช่ทุนก้อนเดียว 500-1,000 บาท
-# ที่ตั้งไว้ตอนทดสอบระบบจับจังหวะช่วงแรก — ดังนั้นก่อนเปิดใช้งานจริง ควรเติมเงินเข้าบัญชีให้พอใช้ต่อเนื่อง
-# และ/หรือลดจำนวนเหรียญ/จำนวนเงินต่อวันลงได้ตามสบาย
+# งบ 50 บาท/เหรียญ/รอบ x 7 เหรียญ = 350 บาท/รอบ, รอบละ 7 วัน (รายสัปดาห์)
+# ผู้ใช้แจ้งว่าจะ "ทยอยเติมเงิน" เข้าบัญชี Bitkub เป็นรายสัปดาห์ และยอดเติมแต่ละรอบไม่สม่ำเสมอ
+# (ดูหมายเหตุเรื่อง partial-fill ด้านบน) — ไม่ใช่ทุนก้อนเดียว 500-1,000 บาทที่ตั้งไว้ตอนทดสอบ
+# ระบบจับจังหวะช่วงแรก
 DCA_AMOUNT_THB_PER_COIN = 50
+DCA_INTERVAL_DAYS = 7
 
 DCA_COINS = [
     {"name": "BTC", "trade_symbol": "THB_BTC"},
@@ -84,11 +89,21 @@ def today_str():
     return datetime.now(BKK).strftime("%Y-%m-%d")
 
 
+def days_since(date_str, today):
+    d1 = datetime.strptime(date_str, "%Y-%m-%d")
+    d2 = datetime.strptime(today, "%Y-%m-%d")
+    return (d2 - d1).days
+
+
 def default_state():
     return {
-        "last_run_date": None,
         "holdings": {
-            coin["name"]: {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0}
+            coin["name"]: {
+                "total_invested_thb": 0.0,
+                "total_coin": 0.0,
+                "buy_count": 0,
+                "last_bought_date": None,
+            }
             for coin in DCA_COINS
         },
         "log": [],
@@ -138,11 +153,13 @@ def main():
     state = load_json(DCA_STATE_FILE, default_state())
     # กันไฟล์เก่าที่ยังไม่มีเหรียญใหม่ (เผื่อขยายรายชื่อเหรียญทีหลัง)
     for coin in DCA_COINS:
-        state["holdings"].setdefault(coin["name"], {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0})
+        state["holdings"].setdefault(
+            coin["name"],
+            {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None},
+        )
 
     trading_enabled = bool(BITKUB_API_KEY and BITKUB_API_SECRET)
     today = today_str()
-    already_bought_today = state.get("last_run_date") == today
 
     ticker = {}
     try:
@@ -152,39 +169,52 @@ def main():
 
     if not trading_enabled:
         print("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET — ข้าม DCA รอบนี้ (ยังไม่ซื้อจริง)")
-    elif already_bought_today:
-        print(f"ซื้อ DCA ของวันนี้ ({today}) ไปแล้ว รอวันถัดไป")
     else:
-        bought_lines = []
-        failed_lines = []
+        # เช็คทีละเหรียญว่าครบรอบ DCA_INTERVAL_DAYS วันจากครั้งล่าสุดหรือยัง (แยกกันต่อเหรียญ ไม่ผูกเป็นก้อนเดียว)
+        # เพราะยอดเงินที่เติมเข้าบัญชีแต่ละรอบไม่สม่ำเสมอ — เหรียญที่เงินไม่พอจะ "ยังไม่ขยับ last_bought_date"
+        # จึงถูกลองซื้อใหม่ทุกชั่วโมงจนกว่าจะมีเงินพอ โดยไม่ไปซื้อซ้ำเหรียญที่ได้ไปแล้วในรอบนี้
+        due_coins = []
         for coin in DCA_COINS:
-            name = coin["name"]
-            outcome = execute_buy(coin["trade_symbol"], DCA_AMOUNT_THB_PER_COIN)
-            if outcome["ok"]:
-                h = state["holdings"][name]
-                h["total_invested_thb"] = round(h["total_invested_thb"] + DCA_AMOUNT_THB_PER_COIN, 4)
-                h["total_coin"] = h["total_coin"] + outcome["amount_coin"]
-                h["buy_count"] = h["buy_count"] + 1
-                state["log"].append({
-                    "date": today,
-                    "name": name,
-                    "invested_thb": DCA_AMOUNT_THB_PER_COIN,
-                    "fill_price": outcome["fill_price"],
-                    "amount_coin": outcome["amount_coin"],
-                })
-                bought_lines.append(f"  {name}: {DCA_AMOUNT_THB_PER_COIN} บาท @ {outcome['fill_price']:.4f}")
-            else:
-                failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")
+            last = state["holdings"][coin["name"]]["last_bought_date"]
+            if last is None or days_since(last, today) >= DCA_INTERVAL_DAYS:
+                due_coins.append(coin)
 
-        state["log"] = state["log"][-500:]  # กันไฟล์โตไม่จำกัด เก็บแค่ 500 รายการล่าสุด
-        state["last_run_date"] = today
+        if not due_coins:
+            print("ยังไม่ครบรอบ DCA ของทุกเหรียญ รอรอบถัดไป")
+        else:
+            bought_lines = []
+            failed_lines = []
+            for coin in due_coins:
+                name = coin["name"]
+                outcome = execute_buy(coin["trade_symbol"], DCA_AMOUNT_THB_PER_COIN)
+                if outcome["ok"]:
+                    h = state["holdings"][name]
+                    h["total_invested_thb"] = round(h["total_invested_thb"] + DCA_AMOUNT_THB_PER_COIN, 4)
+                    h["total_coin"] = h["total_coin"] + outcome["amount_coin"]
+                    h["buy_count"] = h["buy_count"] + 1
+                    h["last_bought_date"] = today
+                    state["log"].append({
+                        "date": today,
+                        "name": name,
+                        "invested_thb": DCA_AMOUNT_THB_PER_COIN,
+                        "fill_price": outcome["fill_price"],
+                        "amount_coin": outcome["amount_coin"],
+                    })
+                    bought_lines.append(f"  {name}: {DCA_AMOUNT_THB_PER_COIN} บาท @ {outcome['fill_price']:.4f}")
+                else:
+                    failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")
 
-        msg = f"💰 DCA วันนี้ ({today}) — ซื้อ {len(bought_lines)}/{len(DCA_COINS)} เหรียญสำเร็จ\n"
-        if bought_lines:
-            msg += "\n".join(bought_lines)
-        if failed_lines:
-            msg += "\n⚠️ ล้มเหลว:\n" + "\n".join(failed_lines)
-        send_telegram(msg)
+            state["log"] = state["log"][-500:]  # กันไฟล์โตไม่จำกัด เก็บแค่ 500 รายการล่าสุด
+
+            msg = f"💰 DCA รอบสัปดาห์นี้ ({today}) — ซื้อสำเร็จ {len(bought_lines)}/{len(due_coins)} เหรียญที่ครบรอบ\n"
+            if bought_lines:
+                msg += "\n".join(bought_lines)
+            if failed_lines:
+                msg += (
+                    "\n⚠️ ล้มเหลว (อาจเพราะเงินในบัญชีไม่พอ — จะลองใหม่อัตโนมัติทุกชั่วโมงจนกว่าจะเติมเงินพอ):\n"
+                    + "\n".join(failed_lines)
+                )
+            send_telegram(msg)
 
     # ----- คำนวณมูลค่าปัจจุบันของแต่ละเหรียญ (ใช้ได้ทั้งตอนเปิด/ปิดใช้งานจริง) -----
     per_coin = {}
@@ -206,6 +236,7 @@ def main():
             "total_invested_thb": round(h["total_invested_thb"], 2),
             "total_coin": h["total_coin"],
             "buy_count": h["buy_count"],
+            "last_bought_date": h["last_bought_date"],
             "avg_cost": round(avg_cost, 4) if avg_cost is not None else None,
             "current_price": current_price,
             "current_value_thb": round(current_value, 2) if current_value is not None else None,
@@ -224,13 +255,13 @@ def main():
     dashboard = load_json(DASHBOARD_FILE, {})
     dashboard["dca_bot"] = {
         "enabled": trading_enabled,
-        "amount_thb_per_coin_per_day": DCA_AMOUNT_THB_PER_COIN,
+        "amount_thb_per_coin_per_period": DCA_AMOUNT_THB_PER_COIN,
+        "interval_days": DCA_INTERVAL_DAYS,
         "coins": per_coin,
         "total_invested_thb": round(total_invested, 2),
         "total_value_thb": round(total_value, 2) if total_invested else None,
         "total_pnl_thb": round(total_pnl, 2) if total_invested else None,
         "total_pnl_pct": round(total_pnl_pct, 2) if total_pnl_pct is not None else None,
-        "last_run_date": state.get("last_run_date"),
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }
     save_json(DASHBOARD_FILE, dashboard)

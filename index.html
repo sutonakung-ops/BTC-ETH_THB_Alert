@@ -232,7 +232,7 @@
       }
 
       const statusHtml = dca.enabled
-        ? `<span class="bot-status status-on">ทำงานปกติ — ${fmtNum(dca.amount_thb_per_coin_per_day)} บาท/เหรียญ/วัน</span>`
+        ? `<span class="bot-status status-on">ทำงานปกติ — ${fmtNum(dca.amount_thb_per_coin_per_period)} บาท/เหรียญ ทุก ${dca.interval_days} วัน</span>`
         : `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — ยังไม่ซื้อจริง</span>`;
 
       let bodyHtml = "";
@@ -256,14 +256,13 @@
           const pnlCls = changeClass(c.pnl_thb || 0);
           bodyHtml += `
             <div class="row">
-              <span class="label">${name} (${c.buy_count} ครั้ง, ทุนเฉลี่ย ${c.avg_cost != null ? fmtNum(c.avg_cost) : "-"})</span>
+              <span class="label">${name} (${c.buy_count} ครั้ง, ล่าสุด ${c.last_bought_date || "-"}, ทุนเฉลี่ย ${c.avg_cost != null ? fmtNum(c.avg_cost) : "-"})</span>
               <span class="${pnlCls}">${c.pnl_thb != null ? (c.pnl_thb > 0 ? "+" : "") + fmtNum(c.pnl_thb) + " บาท" : "-"}</span>
             </div>
           `;
         }
       }
 
-      bodyHtml += `<div class="row"><span class="label">ซื้อล่าสุดวันที่</span><span>${dca.last_run_date || "-"}</span></div>`;
       bodyHtml += `<div class="row"><span class="label">เช็คล่าสุด</span><span>${
         dca.checked_at ? new Date(dca.checked_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }) : "-"
       }</span></div>`;
