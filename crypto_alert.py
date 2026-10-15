@@ -8,9 +8,22 @@ import requests
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 
+# เหรียญเดียวกับที่ dca_bot.py ซื้อสะสม — ให้ dashboard แสดงราคา/เทรนด์ครบทุกเหรียญที่ถืออยู่จริง
+COINS = [
+    {"name": "BTC", "candle_symbol": "BTC_THB", "ticker_symbol": "THB_BTC"},
+    {"name": "ETH", "candle_symbol": "ETH_THB", "ticker_symbol": "THB_ETH"},
+    {"name": "XRP", "candle_symbol": "XRP_THB", "ticker_symbol": "THB_XRP"},
+    {"name": "ADA", "candle_symbol": "ADA_THB", "ticker_symbol": "THB_ADA"},
+    {"name": "DOGE", "candle_symbol": "DOGE_THB", "ticker_symbol": "THB_DOGE"},
+    {"name": "SOL", "candle_symbol": "SOL_THB", "ticker_symbol": "THB_SOL"},
+    {"name": "KUB", "candle_symbol": "KUB_THB", "ticker_symbol": "THB_KUB"},
+]
+
+
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message})
+
 
 def get_candles(symbol, resolution, hours_back):
     now = int(time.time())
@@ -20,8 +33,10 @@ def get_candles(symbol, resolution, hours_back):
     response = requests.get(url, params=params)
     return response.json()
 
+
 def moving_average(prices, period):
     return sum(prices[-period:]) / period
+
 
 def check_change_alert(name, change):
     if change <= -5:
@@ -30,6 +45,7 @@ def check_change_alert(name, change):
         send_telegram(f"🚀 เตือน: {name} พุ่งเกิน 5% ใน 24 ชม. ({change}%)")
     else:
         print(f"{name} ยังอยู่ในช่วงปกติ ({change}%) — ไม่ส่งแจ้งเตือน")
+
 
 def analyze_trend(name, symbol):
     data = get_candles(symbol, "60", 48)
@@ -62,29 +78,31 @@ def analyze_trend(name, symbol):
         "signal": signal,
     }
 
-# ---- ตรวจ % เปลี่ยนแปลง 24 ชม. (ของเดิม) ----
-response = requests.get("https://api.bitkub.com/api/market/ticker")
-data = response.json()
 
-btc_change = data["THB_BTC"]["percentChange"]
-eth_change = data["THB_ETH"]["percentChange"]
+def main():
+    # ---- ดึง % เปลี่ยนแปลง 24 ชม. ของทุกเหรียญในครั้งเดียว ----
+    response = requests.get("https://api.bitkub.com/api/market/ticker")
+    ticker = response.json()
 
-check_change_alert("BTC", btc_change)
-check_change_alert("ETH", eth_change)
+    result = {"updated_at": datetime.now(timezone.utc).isoformat()}
 
-# ---- วิเคราะห์เทรนด์ด้วย MA (ของใหม่) ----
-btc_trend = analyze_trend("BTC", "BTC_THB")
-eth_trend = analyze_trend("ETH", "ETH_THB")
+    for coin in COINS:
+        name = coin["name"]
+        change = ticker.get(coin["ticker_symbol"], {}).get("percentChange")
+        if change is None:
+            print(f"ข้าม {name}: ไม่พบข้อมูล ticker")
+            continue
+        check_change_alert(name, change)
+        trend = analyze_trend(name, coin["candle_symbol"])
+        result[name] = {"change_24h": change, **trend}
 
-# ---- บันทึกผลล่าสุดไว้ให้หน้าเว็บ Dashboard อ่าน ----
-result = {
-    "updated_at": datetime.now(timezone.utc).isoformat(),
-    "BTC": {"change_24h": btc_change, **btc_trend},
-    "ETH": {"change_24h": eth_change, **eth_trend},
-}
+    # ---- บันทึกผลล่าสุดไว้ให้หน้าเว็บ Dashboard อ่าน ----
+    with open("latest.json", "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2, ensure_ascii=False)
 
-with open("latest.json", "w", encoding="utf-8") as f:
-    json.dump(result, f, indent=2, ensure_ascii=False)
+    print("บันทึกไฟล์ latest.json แล้ว")
+    print("เช็คราคาเสร็จสิ้น")
 
-print("บันทึกไฟล์ latest.json แล้ว")
-print("เช็คราคาเสร็จสิ้น")
+
+if __name__ == "__main__":
+    main()

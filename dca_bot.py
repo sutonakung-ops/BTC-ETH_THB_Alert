@@ -49,6 +49,14 @@ DCA_INTERVAL_DAYS = 7
 # แล้วเริ่มสะสม DCA ใหม่จากศูนย์สำหรับเหรียญนั้น (เหรียญอื่นไม่กระทบ)
 TAKE_PROFIT_PCT = 10.0
 
+# ส่งสรุปพอร์ตรวมทาง Telegram ทุกๆ กี่วัน (รายสัปดาห์)
+SUMMARY_INTERVAL_DAYS = 7
+
+# แจ้งเตือนครั้งเดียวถ้าพอร์ตรวม (unrealized) ขาดทุนเกินระดับนี้ — ไม่ใช่เงื่อนไขหยุดซื้อ
+# (DCA ยังคงซื้อต่อตามปกติ แค่แจ้งให้รู้) และจะไม่แจ้งซ้ำจนกว่าจะฟื้นกลับมาเกิน CRASH_RECOVERY_THRESHOLD_PCT ก่อน
+CRASH_ALERT_THRESHOLD_PCT = -15.0
+CRASH_RECOVERY_THRESHOLD_PCT = -5.0
+
 DCA_COINS = [
     {"name": "BTC", "trade_symbol": "THB_BTC"},
     {"name": "ETH", "trade_symbol": "THB_ETH"},
@@ -203,6 +211,8 @@ def main():
         )
     state.setdefault("sell_log", [])
     state.setdefault("realized_pnl_total_thb", 0.0)
+    state.setdefault("last_summary_date", None)
+    state.setdefault("crash_alert_active", False)
 
     trading_enabled = bool(BITKUB_API_KEY and BITKUB_API_SECRET)
     today = today_str()
@@ -212,6 +222,7 @@ def main():
         ticker = get_ticker()
     except requests.RequestException as e:
         print(f"ดึงราคาล่าสุดไม่สำเร็จ: {e}")
+    ticker_ok = isinstance(ticker, dict) and len(ticker) > 0
 
     if not trading_enabled:
         print("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET — ข้าม DCA รอบนี้ (ยังไม่ซื้อจริง)")
@@ -339,8 +350,54 @@ def main():
         if current_value is not None:
             total_value += current_value
 
-    total_pnl = total_value - total_invested if total_invested else 0.0
-    total_pnl_pct = (total_pnl / total_invested * 100) if total_invested else None
+    # หมายเหตุ: ถ้าดึงราคาล่าสุด (ticker) ไม่สำเร็จรอบนี้ ไม่คำนวณ pnl รวม (เป็น None)
+    # กันไม่ให้เข้าใจผิดว่าพอร์ตขาดทุน 100% ทั้งที่จริงแค่ดึงราคาไม่ได้ชั่วคราว
+    if ticker_ok:
+        total_pnl = total_value - total_invested if total_invested else 0.0
+        total_pnl_pct = (total_pnl / total_invested * 100) if total_invested else None
+    else:
+        total_pnl = None
+        total_pnl_pct = None
+
+    # ----- สรุปพอร์ตรวมส่ง Telegram ทุกรอบ SUMMARY_INTERVAL_DAYS วัน -----
+    if total_invested and (
+        state["last_summary_date"] is None
+        or days_since(state["last_summary_date"], today) >= SUMMARY_INTERVAL_DAYS
+    ):
+        lines = [f"📊 สรุปพอร์ต DCA รายสัปดาห์ ({today})"]
+        lines.append(f"ลงทุนสะสมรวม: {total_invested:,.2f} บาท")
+        lines.append(f"มูลค่าปัจจุบัน: {total_value:,.2f} บาท")
+        if total_pnl is not None and total_pnl_pct is not None:
+            pnl_sign = "+" if total_pnl >= 0 else ""
+            lines.append(
+                f"กำไร/ขาดทุนที่ยังไม่ขาย: {pnl_sign}{total_pnl:,.2f} บาท "
+                f"({pnl_sign}{total_pnl_pct:.2f}%)"
+            )
+        realized = state.get("realized_pnl_total_thb", 0.0)
+        if realized:
+            lines.append(f"กำไรที่ขายทำแล้วสะสม: {'+' if realized >= 0 else ''}{realized:,.2f} บาท")
+        lines.append("")
+        for name, c in per_coin.items():
+            if not c["buy_count"]:
+                continue
+            pct = c["pnl_pct"]
+            pct_str = f"{'+' if pct and pct >= 0 else ''}{pct:.1f}%" if pct is not None else "-"
+            lines.append(f"  {name}: ลงทุน {c['total_invested_thb']:,.0f} บาท, {pct_str}")
+        send_telegram("\n".join(lines))
+        state["last_summary_date"] = today
+
+    # ----- แจ้งเตือนครั้งเดียวถ้าพอร์ตรวมขาดทุนหนักผิดปกติ (ไม่หยุดซื้อ แค่แจ้งให้รู้) -----
+    if total_pnl_pct is not None:
+        if total_pnl_pct <= CRASH_ALERT_THRESHOLD_PCT and not state.get("crash_alert_active"):
+            send_telegram(
+                f"🔻 เตือน: พอร์ต DCA รวมขาดทุน {total_pnl_pct:.1f}% จากทุนสะสม "
+                f"(เกินเกณฑ์ {CRASH_ALERT_THRESHOLD_PCT}%) — DCA ยังซื้อต่อตามปกติ ไม่ได้หยุดอัตโนมัติ "
+                f"แจ้งให้ทราบเฉยๆ เผื่ออยากพิจารณาเพิ่มเงินหรือปรับแผน"
+            )
+            state["crash_alert_active"] = True
+        elif total_pnl_pct >= CRASH_RECOVERY_THRESHOLD_PCT and state.get("crash_alert_active"):
+            send_telegram(f"🔺 พอร์ต DCA ฟื้นตัวกลับมาที่ {total_pnl_pct:+.1f}% แล้ว")
+            state["crash_alert_active"] = False
 
     save_json(DCA_STATE_FILE, state)
 
@@ -353,8 +410,8 @@ def main():
         "realized_pnl_total_thb": state.get("realized_pnl_total_thb", 0.0),
         "coins": per_coin,
         "total_invested_thb": round(total_invested, 2),
-        "total_value_thb": round(total_value, 2) if total_invested else None,
-        "total_pnl_thb": round(total_pnl, 2) if total_invested else None,
+        "total_value_thb": round(total_value, 2) if (total_invested and ticker_ok) else None,
+        "total_pnl_thb": round(total_pnl, 2) if total_pnl is not None else None,
         "total_pnl_pct": round(total_pnl_pct, 2) if total_pnl_pct is not None else None,
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }

@@ -287,8 +287,11 @@
         const updatedDate = new Date(data.updated_at);
         document.getElementById("updated").textContent =
           "อัปเดตล่าสุด: " + updatedDate.toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
-        document.getElementById("grid").innerHTML =
-          renderCoin("BTC", data.BTC) + renderCoin("ETH", data.ETH);
+        const coinNames = ["BTC", "ETH", "XRP", "ADA", "DOGE", "SOL", "KUB"];
+        document.getElementById("grid").innerHTML = coinNames
+          .filter((name) => data[name])
+          .map((name) => renderCoin(name, data[name]))
+          .join("");
         document.getElementById("botCard").innerHTML = renderBotCard(data.trading_bot);
         document.getElementById("dcaCard").innerHTML = renderDcaCard(data.dca_bot);
       })
