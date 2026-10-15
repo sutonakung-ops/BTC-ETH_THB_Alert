@@ -1,59 +1,59 @@
 {
-  "updated_at": "2026-10-15T10:29:59.872185+00:00",
+  "updated_at": "2026-10-15T11:05:25.208700+00:00",
   "BTC": {
-    "change_24h": -2.98,
-    "price": 2712333.7,
-    "ma12": 2727111.57,
-    "ma24": 2743324.65,
-    "gap_percent": -0.591,
+    "change_24h": -3.15,
+    "price": 2708330.18,
+    "ma12": 2724010.53,
+    "ma24": 2739552.67,
+    "gap_percent": -0.5673,
     "signal": "Death Cross (ขาลง)"
   },
   "ETH": {
-    "change_24h": -5.62,
-    "price": 79123.85,
-    "ma12": 79864.76,
-    "ma24": 80989.49,
-    "gap_percent": -1.3887,
+    "change_24h": -5.84,
+    "price": 79079.35,
+    "ma12": 79683.04,
+    "ma24": 80789.79,
+    "gap_percent": -1.3699,
     "signal": "Death Cross (ขาลง)"
   },
   "XRP": {
-    "change_24h": -4.51,
-    "price": 43.79,
-    "ma12": 44.09,
-    "ma24": 44.54,
-    "gap_percent": -1.0038,
+    "change_24h": -5.1,
+    "price": 43.7,
+    "ma12": 44.01,
+    "ma24": 44.44,
+    "gap_percent": -0.9797,
     "signal": "Death Cross (ขาลง)"
   },
   "ADA": {
-    "change_24h": -6.35,
-    "price": 7.37,
-    "ma12": 7.49,
-    "ma24": 7.6,
-    "gap_percent": -1.4647,
+    "change_24h": -6.14,
+    "price": 7.38,
+    "ma12": 7.47,
+    "ma24": 7.59,
+    "gap_percent": -1.5474,
     "signal": "Death Cross (ขาลง)"
   },
   "DOGE": {
-    "change_24h": -4.97,
+    "change_24h": -5.12,
     "price": 2.68,
-    "ma12": 2.7,
+    "ma12": 2.69,
     "ma24": 2.73,
-    "gap_percent": -1.3792,
+    "gap_percent": -1.3587,
     "signal": "Death Cross (ขาลง)"
   },
   "SOL": {
-    "change_24h": -4.46,
-    "price": 3419.02,
-    "ma12": 3459.96,
-    "ma24": 3491.3,
-    "gap_percent": -0.8975,
+    "change_24h": -4.62,
+    "price": 3420.33,
+    "ma12": 3453.55,
+    "ma24": 3484.42,
+    "gap_percent": -0.8858,
     "signal": "Death Cross (ขาลง)"
   },
   "KUB": {
-    "change_24h": -1.76,
+    "change_24h": -1.81,
     "price": 18.97,
     "ma12": 19.01,
-    "ma24": 19.09,
-    "gap_percent": -0.3842,
+    "ma24": 19.07,
+    "gap_percent": -0.3212,
     "signal": "Death Cross (ขาลง)"
   },
   "trading_bot": {
@@ -66,7 +66,7 @@
       "halted": false
     },
     "trade_count_today": 0,
-    "checked_at": "2026-10-15T10:30:12.096830+00:00"
+    "checked_at": "2026-10-15T11:05:38.731811+00:00"
   },
   "dca_bot": {
     "enabled": false,
@@ -81,7 +81,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2712539.22,
+        "current_price": 2707928.85,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -92,7 +92,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 79165.72,
+        "current_price": 79060,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -103,7 +103,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 43.79,
+        "current_price": 43.7,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -114,7 +114,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 7.391,
+        "current_price": 7.381,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -125,7 +125,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2.6828,
+        "current_price": 2.68,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -136,7 +136,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 3419.02,
+        "current_price": 3420.33,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -157,6 +157,6 @@
     "total_value_thb": null,
     "total_pnl_thb": 0.0,
     "total_pnl_pct": null,
-    "checked_at": "2026-10-15T10:30:13.399248+00:00"
+    "checked_at": "2026-10-15T11:05:39.732100+00:00"
   }
 }
