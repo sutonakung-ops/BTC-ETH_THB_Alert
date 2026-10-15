@@ -1,0 +1,51 @@
+{
+  "holdings": {
+    "BTC": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
+    },
+    "ETH": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
+    },
+    "XRP": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
+    },
+    "ADA": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
+    },
+    "DOGE": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
+    },
+    "SOL": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
+    },
+    "KUB": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
+    }
+  },
+  "log": [],
+  "sell_log": [],
+  "realized_pnl_total_thb": 0.0,
+  "last_summary_date": null,
+  "crash_alert_active": false
+}
