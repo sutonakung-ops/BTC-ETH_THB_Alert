@@ -23,47 +23,39 @@
     --border: #1f2630;
   }
   * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background:
-      radial-gradient(ellipse at top, rgba(95,196,174,0.06), transparent 60%),
-      var(--bg);
+      linear-gradient(180deg, rgba(9,11,16,0.45) 0%, rgba(9,11,16,0.7) 45%, rgba(9,11,16,0.92) 100%),
+      url("assets/hero.webp") center top / cover no-repeat fixed;
     color: var(--text);
     padding-bottom: 48px;
   }
-  .hero {
-    position: relative;
-    height: 240px;
-    background-image:
-      linear-gradient(180deg, rgba(9,11,16,0.25) 0%, rgba(9,11,16,0.55) 55%, var(--bg) 100%),
-      url("assets/hero.webp");
-    background-size: cover;
-    background-position: center 20%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 24px 16px;
-    border-bottom: 1px solid var(--border);
+  .page-header {
+    text-align: center;
+    padding: 36px 16px 22px;
   }
-  .hero h1 {
-    margin: 0 0 4px;
-    font-size: 1.3rem;
+  .page-header h1 {
+    margin: 0 0 6px;
+    font-size: 1.4rem;
     letter-spacing: 0.02em;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+    text-shadow: 0 2px 14px rgba(0,0,0,0.9);
   }
-  .hero .tagline {
+  .page-header .tagline {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--lavender);
-    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.9);
     letter-spacing: 0.03em;
   }
   .updated {
     text-align: center;
     color: var(--muted);
     font-size: 0.85rem;
-    margin: 20px 0 24px;
+    margin: 0 0 24px;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.8);
   }
   .grid {
     display: grid;
@@ -74,13 +66,15 @@
     padding: 0 16px;
   }
   .card {
-    background: linear-gradient(160deg, var(--card-glow), transparent 60%), var(--card);
-    border: 1px solid var(--border);
+    background: linear-gradient(160deg, var(--card-glow), transparent 60%), rgba(18,22,31,0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
     padding: 20px;
     transition: border-color 0.2s ease;
   }
-  .card:hover { border-color: rgba(95,196,174,0.35); }
+  .card:hover { border-color: rgba(95,196,174,0.4); }
   .card h2 {
     margin: 0 0 12px;
     font-size: 1.15rem;
@@ -129,12 +123,15 @@
     color: var(--lavender);
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.8);
   }
   .bot-card {
     max-width: 840px;
     margin: 0 auto;
-    background: linear-gradient(160deg, var(--card-glow), transparent 60%), var(--card);
-    border: 1px solid var(--border);
+    background: linear-gradient(160deg, var(--card-glow), transparent 60%), rgba(18,22,31,0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 14px;
     padding: 20px;
   }
@@ -160,7 +157,7 @@
 </style>
 </head>
 <body>
-  <div class="hero">
+  <div class="page-header">
     <h1>📊 Crypto Price Alert Dashboard</h1>
     <p class="tagline">ตรวจราคา · วิเคราะห์เทรนด์ · สะสม DCA อัตโนมัติ</p>
   </div>
