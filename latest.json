@@ -1,59 +1,59 @@
 {
-  "updated_at": "2026-10-15T20:02:36.041716+00:00",
+  "updated_at": "2026-10-15T21:01:03.833877+00:00",
   "BTC": {
-    "change_24h": 0.35,
-    "price": 2762921.99,
-    "ma12": 2738299.29,
-    "ma24": 2735319.17,
-    "gap_percent": 0.1089,
+    "change_24h": 0.06,
+    "price": 2752711.64,
+    "ma12": 2739965.14,
+    "ma24": 2734971.17,
+    "gap_percent": 0.1826,
     "signal": "ยังสรุปแนวโน้มไม่ได้"
   },
   "ETH": {
-    "change_24h": 0.54,
-    "price": 82279.35,
-    "ma12": 80677.05,
-    "ma24": 80442.98,
-    "gap_percent": 0.291,
-    "signal": "ยังสรุปแนวโน้มไม่ได้"
+    "change_24h": 1.39,
+    "price": 82326.88,
+    "ma12": 80907.74,
+    "ma24": 80481.09,
+    "gap_percent": 0.5301,
+    "signal": "Golden Cross (ขาขึ้น)"
   },
   "XRP": {
-    "change_24h": 0.69,
-    "price": 45.01,
-    "ma12": 44.41,
+    "change_24h": 0.76,
+    "price": 44.92,
+    "ma12": 44.46,
     "ma24": 44.32,
-    "gap_percent": 0.1899,
-    "signal": "ยังสรุปแนวโน้มไม่ได้"
+    "gap_percent": 0.3149,
+    "signal": "Golden Cross (ขาขึ้น)"
   },
   "ADA": {
-    "change_24h": 0.78,
-    "price": 7.75,
-    "ma12": 7.58,
+    "change_24h": -0.27,
+    "price": 7.7,
+    "ma12": 7.6,
     "ma24": 7.56,
-    "gap_percent": 0.2837,
-    "signal": "ยังสรุปแนวโน้มไม่ได้"
+    "gap_percent": 0.5092,
+    "signal": "Golden Cross (ขาขึ้น)"
   },
   "DOGE": {
-    "change_24h": -1.07,
-    "price": 2.73,
+    "change_24h": -0.89,
+    "price": 2.72,
     "ma12": 2.7,
     "ma24": 2.7,
-    "gap_percent": -0.1299,
+    "gap_percent": -0.1439,
     "signal": "ยังสรุปแนวโน้มไม่ได้"
   },
   "SOL": {
-    "change_24h": 1.37,
-    "price": 3555.73,
-    "ma12": 3495.32,
-    "ma24": 3484.06,
-    "gap_percent": 0.3232,
+    "change_24h": 1.15,
+    "price": 3544.19,
+    "ma12": 3502.07,
+    "ma24": 3484.7,
+    "gap_percent": 0.4987,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "KUB": {
-    "change_24h": -2.03,
-    "price": 18.8,
-    "ma12": 18.91,
-    "ma24": 18.97,
-    "gap_percent": -0.3119,
+    "change_24h": -2.5,
+    "price": 18.7,
+    "ma12": 18.88,
+    "ma24": 18.95,
+    "gap_percent": -0.3826,
     "signal": "Death Cross (ขาลง)"
   },
   "trading_bot": {
@@ -66,7 +66,7 @@
       "halted": false
     },
     "trade_count_today": 0,
-    "checked_at": "2026-10-15T20:02:46.632663+00:00"
+    "checked_at": "2026-10-15T21:01:16.897531+00:00"
   },
   "dca_bot": {
     "enabled": false,
@@ -81,7 +81,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2762921.99,
+        "current_price": 2752711.64,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -92,7 +92,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 82279.35,
+        "current_price": 82326.88,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -103,7 +103,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 45.01,
+        "current_price": 44.92,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -114,7 +114,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 7.751,
+        "current_price": 7.7,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -125,7 +125,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2.7328,
+        "current_price": 2.7237,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -136,7 +136,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 3555.73,
+        "current_price": 3544.19,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -147,7 +147,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 18.8,
+        "current_price": 18.7,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -157,6 +157,6 @@
     "total_value_thb": null,
     "total_pnl_thb": 0.0,
     "total_pnl_pct": null,
-    "checked_at": "2026-10-15T20:02:48.297800+00:00"
+    "checked_at": "2026-10-15T21:01:17.896617+00:00"
   }
 }
