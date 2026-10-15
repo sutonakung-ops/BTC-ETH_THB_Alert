@@ -58,35 +58,77 @@
     text-shadow: 0 1px 6px rgba(0,0,0,0.8);
   }
   .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-    max-width: 840px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 640px;
     margin: 0 auto;
     padding: 0 16px;
   }
-  .card {
+  .coin-row {
     background: linear-gradient(160deg, var(--card-glow), transparent 60%), rgba(18,22,31,0.6);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 20px;
+    border-radius: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
     transition: border-color 0.2s ease;
   }
-  .card:hover { border-color: rgba(95,196,174,0.4); }
-  .card h2 {
-    margin: 0 0 12px;
-    font-size: 1.15rem;
-    color: var(--text);
-    letter-spacing: 0.02em;
+  .coin-row:hover, .coin-row.expanded { border-color: rgba(95,196,174,0.4); }
+  .coin-row-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .price {
-    font-size: 1.8rem;
+  .coin-row-main .name {
     font-weight: 700;
-    margin: 4px 0 12px;
-    color: var(--text);
+    font-size: 0.95rem;
+    width: 42px;
+    flex-shrink: 0;
   }
+  .coin-row-main .price {
+    font-size: 0.98rem;
+    font-weight: 700;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .coin-row-main .change {
+    width: 54px;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 0.85rem;
+  }
+  .coin-row-main .signal-icon {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .coin-row-main .chevron {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+    width: 12px;
+    text-align: center;
+  }
+  .coin-row.expanded .chevron { transform: rotate(90deg); }
+  .coin-row-details {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .coin-row.expanded .coin-row-details { display: block; }
   .row {
     display: flex;
     justify-content: space-between;
@@ -101,11 +143,12 @@
   .neutral { color: var(--yellow); font-weight: 600; }
   .signal-badge {
     display: inline-block;
-    margin-top: 10px;
-    padding: 6px 12px;
+    margin-top: 8px;
+    padding: 5px 10px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 600;
+    white-space: nowrap;
   }
   .badge-up { background: var(--teal-dim); color: var(--teal); }
   .badge-down { background: var(--red-dim); color: var(--red); }
@@ -116,8 +159,8 @@
     margin-top: 40px;
   }
   .section-title {
-    max-width: 840px;
-    margin: 32px auto 12px;
+    max-width: 640px;
+    margin: 28px auto 12px;
     padding: 0 16px;
     font-size: 0.95rem;
     color: var(--lavender);
@@ -126,7 +169,7 @@
     text-shadow: 0 1px 8px rgba(0,0,0,0.8);
   }
   .bot-card {
-    max-width: 840px;
+    max-width: 640px;
     margin: 0 auto;
     background: linear-gradient(160deg, var(--card-glow), transparent 60%), rgba(18,22,31,0.6);
     backdrop-filter: blur(16px);
@@ -187,26 +230,54 @@
       return "badge-neutral";
     }
 
+    function signalIcon(signal) {
+      if (signal.includes("Golden") || signal.includes("ขาขึ้น")) {
+        return { char: "▲", style: "background: var(--teal-dim); color: var(--teal);" };
+      }
+      if (signal.includes("Death") || signal.includes("ขาลง")) {
+        return { char: "▼", style: "background: var(--red-dim); color: var(--red);" };
+      }
+      return { char: "–", style: "background: rgba(224,195,95,0.15); color: var(--yellow);" };
+    }
+
+    function fmtCompactPrice(n) {
+      const num = Number(n);
+      if (num >= 1000) return num.toLocaleString("en-US", { maximumFractionDigits: 0 });
+      return num.toLocaleString("en-US", { maximumFractionDigits: 2 });
+    }
+
     function renderCoin(name, d) {
       const changeCls = changeClass(d.change_24h);
       const gapCls = changeClass(d.gap_percent);
+      const icon = signalIcon(d.signal);
       return `
-        <div class="card">
-          <h2>${name}</h2>
-          <div class="price">${fmtNum(d.price)} THB</div>
-          <div class="row">
-            <span class="label">เปลี่ยนแปลง 24 ชม.</span>
-            <span class="${changeCls}">${d.change_24h > 0 ? "+" : ""}${d.change_24h}%</span>
+        <div class="coin-row" data-coin="${name}">
+          <div class="coin-row-main">
+            <span class="name">${name}</span>
+            <span class="price">${fmtCompactPrice(d.price)}</span>
+            <span class="change ${changeCls}">${d.change_24h > 0 ? "+" : ""}${d.change_24h}%</span>
+            <span class="signal-icon" style="${icon.style}" title="${d.signal}">${icon.char}</span>
+            <span class="chevron">▶</span>
           </div>
-          <div class="row">
-            <span class="label">MA12 / MA24</span>
-            <span>${fmtNum(d.ma12)} / ${fmtNum(d.ma24)}</span>
+          <div class="coin-row-details">
+            <div class="row">
+              <span class="label">ราคา</span>
+              <span>${fmtNum(d.price)} THB</span>
+            </div>
+            <div class="row">
+              <span class="label">เปลี่ยนแปลง 24 ชม.</span>
+              <span class="${changeCls}">${d.change_24h > 0 ? "+" : ""}${d.change_24h}%</span>
+            </div>
+            <div class="row">
+              <span class="label">MA12 / MA24</span>
+              <span>${fmtNum(d.ma12)} / ${fmtNum(d.ma24)}</span>
+            </div>
+            <div class="row">
+              <span class="label">ส่วนต่าง MA</span>
+              <span class="${gapCls}">${d.gap_percent > 0 ? "+" : ""}${d.gap_percent}%</span>
+            </div>
+            <div class="signal-badge ${signalClass(d.signal)}">${d.signal}</div>
           </div>
-          <div class="row">
-            <span class="label">ส่วนต่าง MA</span>
-            <span class="${gapCls}">${d.gap_percent > 0 ? "+" : ""}${d.gap_percent}%</span>
-          </div>
-          <div class="signal-badge ${signalClass(d.signal)}">${d.signal}</div>
         </div>
       `;
     }
@@ -330,6 +401,9 @@
           .filter((name) => data[name])
           .map((name) => renderCoin(name, data[name]))
           .join("");
+        document.querySelectorAll(".coin-row").forEach((row) => {
+          row.addEventListener("click", () => row.classList.toggle("expanded"));
+        });
         document.getElementById("botCard").innerHTML = renderBotCard(data.trading_bot);
         document.getElementById("dcaCard").innerHTML = renderDcaCard(data.dca_bot);
       })
