@@ -8,9 +8,6 @@ import requests
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
-# CryptoPanic ไว้ให้คะแนนข่าว/เซนติเมนต์รายเหรียญ (ใช้ร่วมกับ risk_pct ในการเลือกเหรียญ DCA)
-# ไม่บังคับ — ถ้าไม่ตั้งค่า จะถือว่าข่าวเป็นกลาง (0) ทุกเหรียญ ไม่กระทบการทำงานส่วนอื่น
-CRYPTOPANIC_API_KEY = os.environ.get("CRYPTOPANIC_API_KEY", "").strip()
 
 STATE_DIR = "state"
 TG_OFFSET_FILE = f"{STATE_DIR}/telegram_offset.json"
@@ -90,37 +87,26 @@ def compute_risk_pct(closes):
     return statistics.pstdev(closes) / mean_price * 100
 
 
-def fetch_news_sentiment(name):
+def fetch_market_sentiment():
     """
-    ดึงข่าวล่าสุดของเหรียญจาก CryptoPanic แล้วคำนวณคะแนนเซนติเมนต์แบบง่าย
-    จากโหวต positive/negative ของแต่ละข่าว -> ช่วง -1 (ลบล้วน) ถึง +1 (บวกล้วน)
-    ถ้าไม่ได้ตั้งค่า CRYPTOPANIC_API_KEY หรือดึงไม่สำเร็จ ถือเป็นกลาง (0.0) เสมอ ไม่ทำให้รอบทำงานล้มเหลว
+    ดึง Fear & Greed Index ของตลาดคริปโตรวม จาก alternative.me (ฟรี ไม่ต้องสมัคร ไม่ต้องมีคีย์)
+    แปลงสเกล 0 (Extreme Fear) - 100 (Extreme Greed) เป็น -1 ถึง +1 (ใช้ร่วมกับ risk_pct เลือกเหรียญ DCA)
+    หมายเหตุ: เป็นเซนติเมนต์ "รวมทั้งตลาด" ไม่ใช่รายเหรียญ (เดิมตั้งใจใช้ CryptoPanic ที่ให้ข่าวรายเหรียญ
+    แต่ปี 2026 CryptoPanic เปลี่ยนเป็นต้องสมัครแพลนเสียเงินเท่านั้น จึงเปลี่ยนมาใช้ตัวนี้แทน)
+    ถ้าดึงไม่สำเร็จ ถือเป็นกลาง (0.0) เสมอ ไม่ทำให้รอบทำงานล้มเหลว
     """
-    if not CRYPTOPANIC_API_KEY:
-        return 0.0
     try:
-        url = "https://cryptopanic.com/api/v1/posts/"
-        params = {"auth_token": CRYPTOPANIC_API_KEY, "currencies": name, "public": "true"}
-        resp = requests.get(url, params=params, timeout=15)
-        posts = resp.json().get("results", [])
-    except (requests.RequestException, ValueError) as e:
-        print(f"{name}: ดึงข่าว CryptoPanic ไม่สำเร็จ ({e}) — ถือว่าข่าวเป็นกลาง")
+        resp = requests.get("https://api.alternative.me/fng/", params={"limit": 1}, timeout=15)
+        data = resp.json().get("data", [])
+        value = float(data[0]["value"])
+    except (requests.RequestException, ValueError, KeyError, IndexError, TypeError) as e:
+        print(f"ดึง Fear & Greed Index ไม่สำเร็จ ({e}) — ถือว่าตลาดเป็นกลาง")
         return 0.0
-
-    pos, neg = 0, 0
-    for post in posts[:30]:
-        votes = post.get("votes", {}) if isinstance(post, dict) else {}
-        pos += int(votes.get("positive", 0) or 0) + int(votes.get("liked", 0) or 0)
-        neg += int(votes.get("negative", 0) or 0) + int(votes.get("disliked", 0) or 0) + int(votes.get("toxic", 0) or 0)
-
-    total = pos + neg
-    if total == 0:
-        return 0.0
-    sentiment = (pos - neg) / total
+    sentiment = (value - 50.0) / 50.0
     return max(-1.0, min(1.0, sentiment))
 
 
-def analyze_trend(name, symbol):
+def analyze_trend(name, symbol, market_sentiment):
     data = get_candles(symbol, "60", 48)
     closes = data.get("c")
     if not closes or len(closes) < 24:
@@ -130,7 +116,7 @@ def analyze_trend(name, symbol):
     ma24 = moving_average(closes, 24)
     gap_percent = (ma12 - ma24) / ma24 * 100
     risk_pct = compute_risk_pct(closes[-48:])
-    news_sentiment = fetch_news_sentiment(name)
+    news_sentiment = market_sentiment
 
     print(f"--- {name} เทรนด์ ---")
     print("ราคาปัจจุบัน:", round(current_price, 2))
@@ -256,11 +242,13 @@ def main():
 
     trending = pick_trending_coins(ticker, TOP_N_TRENDING)
     active_names = [c["name"] for c in trending]
+    market_sentiment = fetch_market_sentiment()  # ดึงครั้งเดียวต่อรอบ ใช้ร่วมกันทุกเหรียญ (ดู fetch_market_sentiment)
 
     result = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
         "active_coins": active_names,
         "control": control,
+        "market_sentiment": round(market_sentiment, 3),
     }
 
     for coin in trending:
@@ -271,7 +259,7 @@ def main():
             continue
         check_change_alert(name, change)
         try:
-            trend = analyze_trend(name, coin["candle_symbol"])
+            trend = analyze_trend(name, coin["candle_symbol"], market_sentiment)
         except (requests.RequestException, ValueError, KeyError, TypeError) as e:
             print(f"ข้าม {name}: วิเคราะห์เทรนด์ไม่สำเร็จ — {e}")
             continue
