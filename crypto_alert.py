@@ -1,5 +1,6 @@
 import json
 import os
+import statistics
 import time
 from datetime import datetime, timezone
 
@@ -7,6 +8,9 @@ import requests
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+# CryptoPanic ไว้ให้คะแนนข่าว/เซนติเมนต์รายเหรียญ (ใช้ร่วมกับ risk_pct ในการเลือกเหรียญ DCA)
+# ไม่บังคับ — ถ้าไม่ตั้งค่า จะถือว่าข่าวเป็นกลาง (0) ทุกเหรียญ ไม่กระทบการทำงานส่วนอื่น
+CRYPTOPANIC_API_KEY = os.environ.get("CRYPTOPANIC_API_KEY", "").strip()
 
 STATE_DIR = "state"
 TG_OFFSET_FILE = f"{STATE_DIR}/telegram_offset.json"
@@ -74,6 +78,48 @@ def check_change_alert(name, change):
         print(f"{name} ยังอยู่ในช่วงปกติ ({change}%) — ไม่ส่งแจ้งเตือน")
 
 
+def compute_risk_pct(closes):
+    """
+    'ความเสี่ยง' ของเหรียญ = ความผันผวนราคาย้อนหลัง 48 ชม. วัดจาก
+    ส่วนเบี่ยงเบนมาตรฐานของราคาปิดรายชั่วโมง หารด้วยราคาเฉลี่ยในช่วงเดียวกัน (เป็น %)
+    ยิ่งราคาแกว่งแรงในช่วงที่ผ่านมา ยิ่งถือว่าเสี่ยงสูง (ใช้เลือกเหรียญ DCA ร่วมกับข่าว)
+    """
+    mean_price = statistics.mean(closes)
+    if not mean_price:
+        return None
+    return statistics.pstdev(closes) / mean_price * 100
+
+
+def fetch_news_sentiment(name):
+    """
+    ดึงข่าวล่าสุดของเหรียญจาก CryptoPanic แล้วคำนวณคะแนนเซนติเมนต์แบบง่าย
+    จากโหวต positive/negative ของแต่ละข่าว -> ช่วง -1 (ลบล้วน) ถึง +1 (บวกล้วน)
+    ถ้าไม่ได้ตั้งค่า CRYPTOPANIC_API_KEY หรือดึงไม่สำเร็จ ถือเป็นกลาง (0.0) เสมอ ไม่ทำให้รอบทำงานล้มเหลว
+    """
+    if not CRYPTOPANIC_API_KEY:
+        return 0.0
+    try:
+        url = "https://cryptopanic.com/api/v1/posts/"
+        params = {"auth_token": CRYPTOPANIC_API_KEY, "currencies": name, "public": "true"}
+        resp = requests.get(url, params=params, timeout=15)
+        posts = resp.json().get("results", [])
+    except (requests.RequestException, ValueError) as e:
+        print(f"{name}: ดึงข่าว CryptoPanic ไม่สำเร็จ ({e}) — ถือว่าข่าวเป็นกลาง")
+        return 0.0
+
+    pos, neg = 0, 0
+    for post in posts[:30]:
+        votes = post.get("votes", {}) if isinstance(post, dict) else {}
+        pos += int(votes.get("positive", 0) or 0) + int(votes.get("liked", 0) or 0)
+        neg += int(votes.get("negative", 0) or 0) + int(votes.get("disliked", 0) or 0) + int(votes.get("toxic", 0) or 0)
+
+    total = pos + neg
+    if total == 0:
+        return 0.0
+    sentiment = (pos - neg) / total
+    return max(-1.0, min(1.0, sentiment))
+
+
 def analyze_trend(name, symbol):
     data = get_candles(symbol, "60", 48)
     closes = data.get("c")
@@ -83,11 +129,15 @@ def analyze_trend(name, symbol):
     ma12 = moving_average(closes, 12)
     ma24 = moving_average(closes, 24)
     gap_percent = (ma12 - ma24) / ma24 * 100
+    risk_pct = compute_risk_pct(closes[-48:])
+    news_sentiment = fetch_news_sentiment(name)
 
     print(f"--- {name} เทรนด์ ---")
     print("ราคาปัจจุบัน:", round(current_price, 2))
     print("MA12:", round(ma12, 2), " | MA24:", round(ma24, 2))
     print("ส่วนต่าง:", round(gap_percent, 4), "%")
+    print("ความเสี่ยง (ผันผวน 48 ชม.):", round(risk_pct, 4) if risk_pct is not None else "-", "%")
+    print("ข่าว/เซนติเมนต์:", round(news_sentiment, 3))
 
     if gap_percent > 0.3:
         signal = "Golden Cross (ขาขึ้น)"
@@ -105,6 +155,9 @@ def analyze_trend(name, symbol):
         "ma24": round(ma24, 2),
         "gap_percent": round(gap_percent, 4),
         "signal": signal,
+        "risk_pct": round(risk_pct, 4) if risk_pct is not None else None,
+        "news_sentiment": round(news_sentiment, 3),
+        "closes": [round(c, 6) for c in closes[-48:]],
     }
 
 

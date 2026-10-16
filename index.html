@@ -206,6 +206,51 @@
     margin-top: 10px;
     font-size: 0.9rem;
   }
+  .chart-wrap {
+    margin-top: 8px;
+    position: relative;
+  }
+  .chart-wrap svg { display: block; width: 100%; height: 44px; }
+  .chart-entry-label {
+    font-size: 0.68rem;
+    color: var(--lavender);
+    margin-top: 2px;
+  }
+  .queue-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+  .queue-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.82rem;
+    padding: 4px 0;
+  }
+  .queue-tag {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    padding: 1px 8px;
+    border-radius: 10px;
+  }
+  .tag-bought { background: var(--teal-dim); color: var(--teal); }
+  .tag-skipped { background: rgba(136,148,163,0.15); color: var(--muted); }
+  .tag-pending { background: rgba(224,195,95,0.15); color: var(--yellow); }
+  .pnl-highlight {
+    text-align: center;
+    padding: 14px 10px 18px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pnl-highlight .pnl-value {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+  }
+  .pnl-highlight .pnl-caption {
+    color: var(--yellow);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
 </style>
 </head>
 <body>
@@ -215,12 +260,14 @@
     <p class="tagline">ตรวจราคา · วิเคราะห์เทรนด์ · สะสม DCA อัตโนมัติ</p>
   </div>
   <div class="updated" id="updated">กำลังโหลดข้อมูล...</div>
-  <div class="grid" id="grid"></div>
 
   <div class="section-title">สถานะบอทเทรดอัตโนมัติ (จับจังหวะ)</div>
   <div class="bot-card" id="botCard">กำลังโหลด...</div>
 
-  <div class="section-title">พอร์ต DCA (ซื้อสม่ำเสมอทุกวัน)</div>
+  <div class="section-title">ราคาเหรียญ &amp; แนวโน้ม</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="section-title">พอร์ต DCA (งบรวมรายสัปดาห์ เลือกเหรียญเอง)</div>
   <div class="bot-card" id="dcaCard">กำลังโหลด...</div>
 
   <script>
@@ -256,7 +303,40 @@
       return num.toLocaleString("en-US", { maximumFractionDigits: 2 });
     }
 
-    function renderCoin(name, d) {
+    // กราฟเส้นราคาย้อนหลัง 48 ชม. (SVG เบาๆ ไม่ใช้ไลบรารีภายนอก) พร้อมเส้นประจุดที่ "ทุนเฉลี่ย" ที่เคยซื้อสะสมไว้
+    // (ถือเป็นจุดอ้างอิง "เข้า" เพราะ DCA ซื้อสะสมหลายรอบ ไม่ใช่จุดเข้าเดียว ณ เวลาใดเวลาหนึ่ง)
+    function renderSparkline(closes, entryPrice) {
+      if (!Array.isArray(closes) || closes.length < 2) return "";
+      const values = closes.slice();
+      const hasEntry = typeof entryPrice === "number" && entryPrice > 0;
+      const rangeValues = hasEntry ? values.concat([entryPrice]) : values;
+      const min = Math.min(...rangeValues);
+      const max = Math.max(...rangeValues);
+      const span = max - min || 1;
+      const W = 300, H = 44, PAD = 4;
+      const xStep = (W - PAD * 2) / (values.length - 1);
+      const toY = (v) => H - PAD - ((v - min) / span) * (H - PAD * 2);
+      const points = values.map((v, i) => `${(PAD + i * xStep).toFixed(1)},${toY(v).toFixed(1)}`).join(" ");
+      const lineColor = values[values.length - 1] >= values[0] ? "var(--teal)" : "var(--red)";
+      let entryLine = "";
+      let entryLabel = "";
+      if (hasEntry) {
+        const y = toY(entryPrice).toFixed(1);
+        entryLine = `<line x1="${PAD}" y1="${y}" x2="${W - PAD}" y2="${y}" stroke="var(--lavender)" stroke-width="1" stroke-dasharray="3,3" />`;
+        entryLabel = `<div class="chart-entry-label">┄ ทุนเฉลี่ย ${fmtCompactPrice(entryPrice)} บาท</div>`;
+      }
+      return `
+        <div class="chart-wrap">
+          <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+            ${entryLine}
+            <polyline points="${points}" fill="none" stroke="${lineColor}" stroke-width="2" />
+          </svg>
+          ${entryLabel}
+        </div>
+      `;
+    }
+
+    function renderCoin(name, d, entryPrice) {
       const changeCls = changeClass(d.change_24h);
       const gapCls = changeClass(d.gap_percent);
       const icon = signalIcon(d.signal);
@@ -269,6 +349,7 @@
             <span class="signal-icon" style="${icon.style}" title="${d.signal}">${icon.char}</span>
             <span class="chevron">▶</span>
           </div>
+          ${renderSparkline(d.closes, entryPrice)}
           <div class="coin-row-details">
             <div class="row">
               <span class="label">ราคา</span>
@@ -286,6 +367,16 @@
               <span class="label">ส่วนต่าง MA</span>
               <span class="${gapCls}">${d.gap_percent > 0 ? "+" : ""}${d.gap_percent}%</span>
             </div>
+            ${d.risk_pct != null ? `
+            <div class="row">
+              <span class="label">ความเสี่ยง (ผันผวน 48 ชม.)</span>
+              <span>${d.risk_pct}%</span>
+            </div>` : ""}
+            ${d.news_sentiment != null ? `
+            <div class="row">
+              <span class="label">ข่าว/เซนติเมนต์</span>
+              <span class="${d.news_sentiment > 0 ? "up" : d.news_sentiment < 0 ? "down" : "neutral"}">${d.news_sentiment > 0 ? "+" : ""}${d.news_sentiment}</span>
+            </div>` : ""}
             <div class="signal-badge ${signalClass(d.signal)}">${d.signal}</div>
           </div>
         </div>
@@ -356,7 +447,7 @@
       if (dca.paused) {
         statusHtml = `<span class="bot-status status-halted">หยุดทำงานชั่วคราว (สั่งผ่าน Telegram)</span>`;
       } else if (dca.enabled) {
-        statusHtml = `<span class="bot-status status-on">ทำงานปกติ — ${fmtNum(dca.amount_thb_per_coin_per_period)} บาท/เหรียญ ทุก ${dca.interval_days} วัน | ขายทำกำไรที่ +${dca.take_profit_pct}%</span>`;
+        statusHtml = `<span class="bot-status status-on">ทำงานปกติ — งบ ${fmtNum(dca.weekly_budget_thb)} บาท/สัปดาห์ (บอทเลือกเหรียญเสี่ยงต่ำสุด+ข่าวดีก่อน ครั้งละ ${fmtNum(dca.unit_thb_per_buy)} บาท) | ขายทำกำไรที่ +${dca.take_profit_pct}%</span>`;
       } else {
         statusHtml = `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — ยังไม่ซื้อจริง</span>`;
       }
@@ -364,13 +455,36 @@
       let bodyHtml = "";
       if (dca.total_invested_thb) {
         const pnlCls = changeClass(dca.total_pnl_thb || 0);
+        if (dca.total_pnl_pct != null) {
+          bodyHtml += `
+            <div class="pnl-highlight">
+              <div class="pnl-value ${pnlCls}">${dca.total_pnl_pct > 0 ? "+" : ""}${dca.total_pnl_pct}%</div>
+              <div class="pnl-caption">กำไร/ขาดทุนรวมพอร์ต DCA (unrealized)</div>
+            </div>
+          `;
+        }
         bodyHtml += `
           <div class="row"><span class="label">ลงทุนสะสมรวม</span><span>${fmtNum(dca.total_invested_thb)} บาท</span></div>
           <div class="row"><span class="label">มูลค่าปัจจุบัน</span><span>${dca.total_value_thb != null ? fmtNum(dca.total_value_thb) + " บาท" : "-"}</span></div>
           <div class="row"><span class="label">กำไร/ขาดทุนที่ยังไม่ขาย (unrealized)</span>
-            <span class="${pnlCls}">${dca.total_pnl_thb != null ? (dca.total_pnl_thb > 0 ? "+" : "") + fmtNum(dca.total_pnl_thb) + " บาท (" + (dca.total_pnl_pct > 0 ? "+" : "") + dca.total_pnl_pct + "%)" : "-"}</span>
+            <span class="${pnlCls}">${dca.total_pnl_thb != null ? (dca.total_pnl_thb > 0 ? "+" : "") + fmtNum(dca.total_pnl_thb) + " บาท" : "-"}</span>
           </div>
         `;
+      }
+
+      if (dca.cycle_ranking && dca.cycle_ranking.length) {
+        bodyHtml += `<div class="row"><span class="label">คิวซื้อสัปดาห์นี้ (${dca.cycle_date || "-"}) · งบคงเหลือ ${dca.cycle_budget_remaining_thb != null ? fmtNum(dca.cycle_budget_remaining_thb) : "-"} บาท</span><span></span></div>`;
+        bodyHtml += `<div class="queue-list">`;
+        dca.cycle_ranking.forEach((name) => {
+          const c = (dca.coins && dca.coins[name]) || {};
+          let tag = `<span class="queue-tag tag-pending">รอคิว</span>`;
+          if (c.bought_this_cycle) tag = `<span class="queue-tag tag-bought">✓ ซื้อแล้ว</span>`;
+          else if (c.skipped_budget_this_cycle) tag = `<span class="queue-tag tag-skipped">งบหมด</span>`;
+          const riskStr = c.risk_pct != null ? `เสี่ยง ${c.risk_pct}%` : "";
+          const newsStr = c.news_sentiment != null ? ` · ข่าว ${c.news_sentiment > 0 ? "+" : ""}${c.news_sentiment}` : "";
+          bodyHtml += `<div class="queue-item"><span>${name} <span class="label">${riskStr}${newsStr}</span></span>${tag}</div>`;
+        });
+        bodyHtml += `</div>`;
       }
       if (dca.realized_pnl_total_thb) {
         const realizedCls = changeClass(dca.realized_pnl_total_thb);
@@ -429,8 +543,13 @@
         const coinNames = data.active_coins && data.active_coins.length
           ? data.active_coins.filter((name) => data[name])
           : Object.keys(data).filter((key) => !NON_COIN_KEYS.has(key) && data[key] && typeof data[key] === "object");
+        const dcaCoins = (data.dca_bot && data.dca_bot.coins) || {};
         document.getElementById("grid").innerHTML = coinNames
-          .map((name) => renderCoin(name, data[name]))
+          .map((name) => {
+            const c = dcaCoins[name];
+            const entryPrice = c && c.buy_count ? c.avg_cost : null;
+            return renderCoin(name, data[name], entryPrice);
+          })
           .join("");
         document.querySelectorAll(".coin-row").forEach((row) => {
           row.addEventListener("click", () => row.classList.toggle("expanded"));
