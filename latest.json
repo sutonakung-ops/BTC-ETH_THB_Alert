@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-16T07:17:44.773529+00:00",
+  "updated_at": "2026-10-16T07:26:07.964716+00:00",
   "active_coins": [
     "BTC",
     "NEAR",
@@ -19,14 +19,14 @@
   },
   "market_sentiment": 0.26,
   "BTC": {
-    "change_24h": 1.29,
-    "quote_volume_thb": 200988367.1,
-    "price": 2751897.3,
-    "ma12": 2754876.77,
-    "ma24": 2745034.6,
-    "gap_percent": 0.3585,
+    "change_24h": 1.23,
+    "quote_volume_thb": 199506802.7,
+    "price": 2752808,
+    "ma12": 2754952.66,
+    "ma24": 2745072.55,
+    "gap_percent": 0.3599,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 0.8784,
+    "risk_pct": 0.8785,
     "news_sentiment": 0.26,
     "closes": [
       2797684.91,
@@ -76,18 +76,18 @@
       2750395,
       2753344.99,
       2752496.87,
-      2751897.3
+      2752808
     ]
   },
   "NEAR": {
-    "change_24h": 11.74,
-    "quote_volume_thb": 119784356.59,
-    "price": 174.05,
-    "ma12": 176.53,
-    "ma24": 170.65,
-    "gap_percent": 3.4434,
+    "change_24h": 11.03,
+    "quote_volume_thb": 119504834.34,
+    "price": 174.18,
+    "ma12": 176.54,
+    "ma24": 170.66,
+    "gap_percent": 3.4464,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 5.0398,
+    "risk_pct": 5.0411,
     "news_sentiment": 0.26,
     "closes": [
       168.95,
@@ -137,18 +137,18 @@
       174.3,
       175.34,
       174.4,
-      174.05
+      174.18
     ]
   },
   "XRP": {
-    "change_24h": 2.53,
-    "quote_volume_thb": 50935795.44,
-    "price": 44.92,
+    "change_24h": 2.25,
+    "quote_volume_thb": 49918017.01,
+    "price": 44.93,
     "ma12": 44.83,
     "ma24": 44.58,
-    "gap_percent": 0.5477,
+    "gap_percent": 0.5486,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 1.4404,
+    "risk_pct": 1.4405,
     "news_sentiment": 0.26,
     "closes": [
       45.98,
@@ -198,18 +198,18 @@
       44.74,
       44.83,
       44.95,
-      44.92
+      44.93
     ]
   },
   "ETH": {
-    "change_24h": 3.64,
-    "quote_volume_thb": 48173636.7,
-    "price": 82233.39,
-    "ma12": 82008.97,
-    "ma24": 81229.42,
-    "gap_percent": 0.9597,
+    "change_24h": 3.48,
+    "quote_volume_thb": 48828478.08,
+    "price": 82230.98,
+    "ma12": 82008.77,
+    "ma24": 81229.32,
+    "gap_percent": 0.9596,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 1.7622,
+    "risk_pct": 1.7621,
     "news_sentiment": 0.26,
     "closes": [
       84079.24,
@@ -259,18 +259,18 @@
       81820.57,
       82008.77,
       82019.88,
-      82233.39
+      82230.98
     ]
   },
   "DOGE": {
-    "change_24h": 2.99,
-    "quote_volume_thb": 14272627.79,
+    "change_24h": 2.63,
+    "quote_volume_thb": 15350079.46,
     "price": 2.76,
     "ma12": 2.74,
     "ma24": 2.72,
-    "gap_percent": 0.7317,
+    "gap_percent": 0.7249,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 1.6776,
+    "risk_pct": 1.6759,
     "news_sentiment": 0.26,
     "closes": [
       2.8326,
@@ -320,12 +320,12 @@
       2.7448,
       2.7589,
       2.7613,
-      2.76
+      2.7555
     ]
   },
   "XLM": {
-    "change_24h": 2.89,
-    "quote_volume_thb": 10830982.7,
+    "change_24h": 2.87,
+    "quote_volume_thb": 12339808.96,
     "price": 6.2,
     "ma12": 6.14,
     "ma24": 6.13,
@@ -385,14 +385,14 @@
     ]
   },
   "SOL": {
-    "change_24h": 4.05,
-    "quote_volume_thb": 10730503.44,
-    "price": 3565.72,
-    "ma12": 3546.63,
-    "ma24": 3517.02,
-    "gap_percent": 0.8421,
+    "change_24h": 3.71,
+    "quote_volume_thb": 10738393.42,
+    "price": 3561.32,
+    "ma12": 3546.27,
+    "ma24": 3516.83,
+    "gap_percent": 0.837,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 1.4641,
+    "risk_pct": 1.4616,
     "news_sentiment": 0.26,
     "closes": [
       3596.87,
@@ -442,12 +442,12 @@
       3537.68,
       3553.87,
       3575.12,
-      3565.72
+      3561.32
     ]
   },
   "CRV": {
-    "change_24h": 2.72,
-    "quote_volume_thb": 10242890.39,
+    "change_24h": 2.36,
+    "quote_volume_thb": 10082419.45,
     "price": 11.72,
     "ma12": 11.86,
     "ma24": 11.82,
@@ -507,14 +507,14 @@
     ]
   },
   "OP": {
-    "change_24h": 8.97,
-    "quote_volume_thb": 10143297.39,
-    "price": 4.7,
+    "change_24h": 8.01,
+    "quote_volume_thb": 9950732.77,
+    "price": 4.68,
     "ma12": 4.63,
     "ma24": 4.57,
-    "gap_percent": 1.3109,
+    "gap_percent": 1.293,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 4.0513,
+    "risk_pct": 4.0491,
     "news_sentiment": 0.26,
     "closes": [
       5.073,
@@ -564,18 +564,18 @@
       4.561,
       4.615,
       4.71,
-      4.7
+      4.68
     ]
   },
   "STRK": {
-    "change_24h": 15.66,
-    "quote_volume_thb": 9630494.65,
-    "price": 2.78,
+    "change_24h": 14.51,
+    "quote_volume_thb": 9626093.4,
+    "price": 2.72,
     "ma12": 2.87,
     "ma24": 2.85,
-    "gap_percent": 0.6688,
+    "gap_percent": 0.5754,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 6.4319,
+    "risk_pct": 6.4271,
     "news_sentiment": 0.26,
     "closes": [
       2.7478,
@@ -625,7 +625,7 @@
       2.843,
       2.8508,
       2.7996,
-      2.7816
+      2.7173
     ]
   },
   "trading_bot": {
@@ -639,7 +639,7 @@
       "halted": false
     },
     "trade_count_today": 0,
-    "checked_at": "2026-10-16T07:18:00.117354+00:00"
+    "checked_at": "2026-10-16T07:26:24.447199+00:00"
   },
   "dca_bot": {
     "enabled": true,
@@ -683,11 +683,11 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2751897.3,
+        "current_price": 2752808,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 0.8784,
+        "risk_pct": 0.8785,
         "news_sentiment": 0.26,
         "bought_this_cycle": false,
         "skipped_budget_this_cycle": false
@@ -699,11 +699,11 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 82233.39,
+        "current_price": 82230.98,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 1.7622,
+        "risk_pct": 1.7621,
         "news_sentiment": 0.26,
         "bought_this_cycle": false,
         "skipped_budget_this_cycle": false
@@ -715,11 +715,11 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 44.92,
+        "current_price": 44.93,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 1.4404,
+        "risk_pct": 1.4405,
         "news_sentiment": 0.26,
         "bought_this_cycle": false,
         "skipped_budget_this_cycle": false
@@ -731,7 +731,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 7.74,
+        "current_price": 7.726,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
@@ -747,11 +747,11 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2.76,
+        "current_price": 2.7553,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 1.6776,
+        "risk_pct": 1.6759,
         "news_sentiment": 0.26,
         "bought_this_cycle": false,
         "skipped_budget_this_cycle": false
@@ -763,11 +763,11 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 3565.72,
+        "current_price": 3561.32,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 1.4641,
+        "risk_pct": 1.4616,
         "news_sentiment": 0.26,
         "bought_this_cycle": false,
         "skipped_budget_this_cycle": false
@@ -779,7 +779,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 19,
+        "current_price": 18.97,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
@@ -811,11 +811,11 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 174.05,
+        "current_price": 174.18,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 5.0398,
+        "risk_pct": 5.0411,
         "news_sentiment": 0.26,
         "bought_this_cycle": false,
         "skipped_budget_this_cycle": false
@@ -827,7 +827,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 33.46,
+        "current_price": 33.5,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
@@ -859,11 +859,11 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 4.7,
+        "current_price": 4.68,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 4.0513,
+        "risk_pct": 4.0491,
         "news_sentiment": 0.26,
         "bought_this_cycle": false,
         "skipped_budget_this_cycle": false
@@ -891,11 +891,11 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2.7816,
+        "current_price": 2.7166,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 6.4319,
+        "risk_pct": 6.4271,
         "news_sentiment": 0.26,
         "bought_this_cycle": false,
         "skipped_budget_this_cycle": false
@@ -905,6 +905,6 @@
     "total_value_thb": null,
     "total_pnl_thb": 0.0,
     "total_pnl_pct": null,
-    "checked_at": "2026-10-16T07:18:16.248559+00:00"
+    "checked_at": "2026-10-16T07:26:39.818692+00:00"
   }
 }
