@@ -110,44 +110,44 @@
   },
   "last_errors": {
     "BTC": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:40.930165+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:03.418194+00:00"
     },
     "SOL": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:42.113748+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:04.767222+00:00"
     },
     "XRP": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:43.280774+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:05.950556+00:00"
     },
     "XLM": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:44.861737+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:07.134565+00:00"
     },
     "ETH": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:46.064724+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:09.015905+00:00"
     },
     "DOGE": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:47.723383+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:10.249612+00:00"
     },
     "ADA": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:48.891045+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:11.521420+00:00"
     },
     "CRV": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:50.497942+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:12.706997+00:00"
     },
     "NEAR": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:51.854933+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:14.073142+00:00"
     },
     "OP": {
-      "error": "Bitkub error code 6: {'error': 6}",
-      "at": "2026-10-16T06:16:53.983709+00:00"
+      "error": "Bitkub error code 60: {'error': 60}",
+      "at": "2026-10-16T07:18:15.719966+00:00"
     }
   }
 }
