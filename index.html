@@ -260,6 +260,7 @@
     <p class="tagline">ตรวจราคา · วิเคราะห์เทรนด์ · สะสม DCA อัตโนมัติ</p>
   </div>
   <div class="updated" id="updated">กำลังโหลดข้อมูล...</div>
+  <div class="updated" id="liveUpdated" style="margin-top:-18px; font-size:0.74rem;"></div>
 
   <div class="section-title">สถานะบอทเทรดอัตโนมัติ (จับจังหวะ)</div>
   <div class="bot-card" id="botCard">กำลังโหลด...</div>
@@ -344,8 +345,8 @@
         <div class="coin-row" data-coin="${name}">
           <div class="coin-row-main">
             <span class="name">${name}</span>
-            <span class="price">${fmtCompactPrice(d.price)}</span>
-            <span class="change ${changeCls}">${d.change_24h > 0 ? "+" : ""}${d.change_24h}%</span>
+            <span class="price price-value" data-raw="${d.price}">${fmtCompactPrice(d.price)}</span>
+            <span class="change change-value ${changeCls}" data-raw="${d.change_24h}">${d.change_24h > 0 ? "+" : ""}${d.change_24h}%</span>
             <span class="signal-icon" style="${icon.style}" title="${d.signal}">${icon.char}</span>
             <span class="chevron">▶</span>
           </div>
@@ -353,11 +354,11 @@
           <div class="coin-row-details">
             <div class="row">
               <span class="label">ราคา</span>
-              <span>${fmtNum(d.price)} THB</span>
+              <span class="price-detail">${fmtNum(d.price)} THB</span>
             </div>
             <div class="row">
               <span class="label">เปลี่ยนแปลง 24 ชม.</span>
-              <span class="${changeCls}">${d.change_24h > 0 ? "+" : ""}${d.change_24h}%</span>
+              <span class="change-detail ${changeCls}">${d.change_24h > 0 ? "+" : ""}${d.change_24h}%</span>
             </div>
             <div class="row">
               <span class="label">MA12 / MA24</span>
@@ -519,49 +520,104 @@
       return statusHtml + bodyHtml;
     }
 
-    fetch("latest.json?t=" + Date.now())
-      .then((res) => {
-        if (!res.ok) throw new Error("ไม่พบไฟล์ latest.json");
-        return res.json();
-      })
-      .then((data) => {
-        const updatedDate = new Date(data.updated_at);
-        document.getElementById("updated").textContent =
-          "อัปเดตล่าสุด: " + updatedDate.toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
+    // รายชื่อเหรียญที่กำลังแสดงอยู่ตอนนี้ (อัปเดตทุกครั้งที่ loadDashboard() เรนเดอร์ใหม่)
+    // ใช้ไปต่อให้ refreshLivePrices() รู้ว่าต้องดึงราคาสดของเหรียญไหนบ้าง
+    let liveCoinNames = [];
 
-        const pauseBanner = document.getElementById("pauseBanner");
-        if (data.control && data.control.paused) {
-          pauseBanner.style.display = "block";
-          pauseBanner.textContent = "⏸ ระบบหยุดการซื้อขายทั้งหมดชั่วคราว (สั่งผ่าน Telegram) — ราคายังอัปเดตปกติ แค่ไม่มีคำสั่งซื้อ/ขายใหม่";
-        } else {
-          pauseBanner.style.display = "none";
-        }
+    function loadDashboard() {
+      return fetch("latest.json?t=" + Date.now())
+        .then((res) => {
+          if (!res.ok) throw new Error("ไม่พบไฟล์ latest.json");
+          return res.json();
+        })
+        .then((data) => {
+          const updatedDate = new Date(data.updated_at);
+          document.getElementById("updated").textContent =
+            "วิเคราะห์ล่าสุด: " + updatedDate.toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
 
-        // รายชื่อเหรียญเอามาจาก key ที่เหลือใน latest.json เอง (ไม่ fix ตายตัวอีกต่อไป เพราะ
-        // crypto_alert.py ปรับรายชื่อเหรียญ "ติดเทรนด์" top 10 ตามปริมาณซื้อขายอัตโนมัติทุกรอบ)
-        const NON_COIN_KEYS = new Set(["updated_at", "active_coins", "control", "trading_bot", "dca_bot"]);
-        const coinNames = data.active_coins && data.active_coins.length
-          ? data.active_coins.filter((name) => data[name])
-          : Object.keys(data).filter((key) => !NON_COIN_KEYS.has(key) && data[key] && typeof data[key] === "object");
-        const dcaCoins = (data.dca_bot && data.dca_bot.coins) || {};
-        document.getElementById("grid").innerHTML = coinNames
-          .map((name) => {
-            const c = dcaCoins[name];
-            const entryPrice = c && c.buy_count ? c.avg_cost : null;
-            return renderCoin(name, data[name], entryPrice);
-          })
-          .join("");
-        document.querySelectorAll(".coin-row").forEach((row) => {
-          row.addEventListener("click", () => row.classList.toggle("expanded"));
+          const pauseBanner = document.getElementById("pauseBanner");
+          if (data.control && data.control.paused) {
+            pauseBanner.style.display = "block";
+            pauseBanner.textContent = "⏸ ระบบหยุดการซื้อขายทั้งหมดชั่วคราว (สั่งผ่าน Telegram) — ราคายังอัปเดตปกติ แค่ไม่มีคำสั่งซื้อ/ขายใหม่";
+          } else {
+            pauseBanner.style.display = "none";
+          }
+
+          // รายชื่อเหรียญเอามาจาก key ที่เหลือใน latest.json เอง (ไม่ fix ตายตัวอีกต่อไป เพราะ
+          // crypto_alert.py ปรับรายชื่อเหรียญ "ติดเทรนด์" top 10 ตามปริมาณซื้อขายอัตโนมัติทุกรอบ)
+          const NON_COIN_KEYS = new Set(["updated_at", "active_coins", "control", "trading_bot", "dca_bot", "market_sentiment"]);
+          const coinNames = data.active_coins && data.active_coins.length
+            ? data.active_coins.filter((name) => data[name])
+            : Object.keys(data).filter((key) => !NON_COIN_KEYS.has(key) && data[key] && typeof data[key] === "object");
+          liveCoinNames = coinNames;
+          const dcaCoins = (data.dca_bot && data.dca_bot.coins) || {};
+          document.getElementById("grid").innerHTML = coinNames
+            .map((name) => {
+              const c = dcaCoins[name];
+              const entryPrice = c && c.buy_count ? c.avg_cost : null;
+              return renderCoin(name, data[name], entryPrice);
+            })
+            .join("");
+          document.querySelectorAll(".coin-row").forEach((row) => {
+            row.addEventListener("click", () => row.classList.toggle("expanded"));
+          });
+          document.getElementById("botCard").innerHTML = renderBotCard(data.trading_bot);
+          document.getElementById("dcaCard").innerHTML = renderDcaCard(data.dca_bot);
+          refreshLivePrices(); // ดึงราคาสดทับทันทีหลังเรนเดอร์ใหม่ ไม่ต้องรอรอบถัดไป
+        })
+        .catch((err) => {
+          document.getElementById("updated").textContent = "";
+          document.getElementById("grid").innerHTML =
+            `<div class="error">⚠️ โหลดข้อมูลไม่สำเร็จ: ${err.message}</div>`;
         });
-        document.getElementById("botCard").innerHTML = renderBotCard(data.trading_bot);
-        document.getElementById("dcaCard").innerHTML = renderDcaCard(data.dca_bot);
-      })
-      .catch((err) => {
-        document.getElementById("updated").textContent = "";
-        document.getElementById("grid").innerHTML =
-          `<div class="error">⚠️ โหลดข้อมูลไม่สำเร็จ: ${err.message}</div>`;
-      });
+    }
+
+    // ราคาสดแบบเรียลไทม์: ดึงตรงจาก Bitkub public ticker จากฝั่งเบราว์เซอร์เอง (ไม่ต้องรอรอบวิเคราะห์ของบอท
+    // ที่รันทุก 1 ชม.) อัปเดตเฉพาะตัวเลขราคา/เปอร์เซ็นต์เปลี่ยนแปลงในหน้าเดิม ไม่แตะกราฟ/สัญญาณ/MA
+    // ซึ่งต้องรอผลวิเคราะห์จากบอทเท่านั้น ถ้าดึงไม่สำเร็จ (เช่นโดนบล็อก CORS) จะเงียบๆ ไม่ขึ้น error รบกวน
+    function refreshLivePrices() {
+      if (!liveCoinNames.length) return;
+      fetch("https://api.bitkub.com/api/market/ticker?t=" + Date.now())
+        .then((res) => {
+          if (!res.ok) throw new Error("bad response");
+          return res.json();
+        })
+        .then((ticker) => {
+          liveCoinNames.forEach((name) => {
+            const t = ticker[`THB_${name}`];
+            if (!t || t.last == null) return;
+            const price = Number(t.last);
+            const change = t.percentChange != null ? Number(t.percentChange) : null;
+            const row = document.querySelector(`.coin-row[data-coin="${name}"]`);
+            if (!row) return;
+            const cls = changeClass(change || 0);
+
+            const priceEl = row.querySelector(".price-value");
+            if (priceEl) priceEl.textContent = fmtCompactPrice(price);
+            const priceDetailEl = row.querySelector(".price-detail");
+            if (priceDetailEl) priceDetailEl.textContent = fmtNum(price) + " THB";
+
+            if (change != null) {
+              const changeText = (change > 0 ? "+" : "") + change + "%";
+              const changeEl = row.querySelector(".change-value");
+              if (changeEl) { changeEl.textContent = changeText; changeEl.className = `change change-value ${cls}`; }
+              const changeDetailEl = row.querySelector(".change-detail");
+              if (changeDetailEl) { changeDetailEl.textContent = changeText; changeDetailEl.className = `change-detail ${cls}`; }
+            }
+          });
+          const liveEl = document.getElementById("liveUpdated");
+          liveEl.textContent = "🟢 ราคาสด: " + new Date().toLocaleTimeString("th-TH", { timeZone: "Asia/Bangkok" });
+        })
+        .catch(() => {
+          // ดึงราคาสดไม่สำเร็จ (เช่นเบราว์เซอร์บล็อก cross-origin) — ใช้ราคาจากรอบวิเคราะห์ล่าสุดต่อไปเงียบๆ
+          const liveEl = document.getElementById("liveUpdated");
+          if (liveEl) liveEl.textContent = "";
+        });
+    }
+
+    loadDashboard();
+    setInterval(loadDashboard, 60000);   // โหลดผลวิเคราะห์/สถานะบอทใหม่ทุก 1 นาที (เผื่อ repo มีคอมมิตใหม่)
+    setInterval(refreshLivePrices, 8000); // ราคาสดอัปเดตถี่กว่า ทุก 8 วินาที
   </script>
 </body>
 </html>
