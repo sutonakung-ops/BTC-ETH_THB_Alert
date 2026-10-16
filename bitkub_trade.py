@@ -21,7 +21,17 @@ class BitkubAPIError(Exception):
 
 
 def _timestamp_ms():
-    return str(int(time.time() * 1000))
+    """
+    ใช้เวลาจากเซิร์ฟเวอร์ Bitkub เอง (GET /api/v3/servertime) แทนนาฬิกาเครื่องที่รันโค้ด (GitHub Actions runner)
+    เพราะ error code 6 "Missing or invalid signature" ของ Bitkub เกิดได้จากนาฬิกาเหลื่อมกันเกิน tolerance
+    ที่เขากำหนดไว้ (ไม่ประกาศตัวเลขชัดเจน) แม้จะคลาดกันแค่ไม่กี่วินาที — ใช้เวลาเซิร์ฟเวอร์ตรงๆ ตัดปัญหานี้ทิ้งไปเลย
+    ถ้าดึงเวลาเซิร์ฟเวอร์ไม่สำเร็จ (เน็ตมีปัญหาชั่วคราว) fallback ไปใช้นาฬิกาเครื่องแทน ดีกว่าหยุดทำงานไปเลย
+    """
+    try:
+        resp = requests.get(f"{API_BASE}/api/v3/servertime", timeout=10)
+        return str(int(resp.json()))
+    except (requests.RequestException, ValueError, TypeError):
+        return str(int(time.time() * 1000))
 
 
 def _sign(api_secret, timestamp, method, path, body=""):
