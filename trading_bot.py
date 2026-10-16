@@ -32,7 +32,8 @@ POSITION_FILE = f"{STATE_DIR}/position.json"
 PENDING_FILE = f"{STATE_DIR}/pending_signal.json"
 TRADE_LOG_FILE = f"{STATE_DIR}/trade_log.json"
 RISK_FILE = f"{STATE_DIR}/daily_risk.json"
-TG_OFFSET_FILE = f"{STATE_DIR}/telegram_offset.json"
+CONTROL_FILE = f"{STATE_DIR}/control.json"
+COMMANDS_FILE = f"{STATE_DIR}/telegram_commands.json"
 DASHBOARD_FILE = "latest.json"
 
 # ---------------- ตั้งค่าความเสี่ยง (แก้ตัวเลขตรงนี้ได้เลยถ้าต้องการเปลี่ยน) ----------------
@@ -49,10 +50,6 @@ COINS = [
     {"name": "BTC", "candle_symbol": "BTC_THB", "trade_symbol": "THB_BTC"},
     {"name": "ETH", "candle_symbol": "ETH_THB", "trade_symbol": "THB_ETH"},
 ]
-
-CONFIRM_WORDS = {"yes", "y", "ใช่", "ยืนยัน", "/confirm", "confirm"}
-CANCEL_WORDS = {"no", "n", "ไม่", "ยกเลิก", "/cancel", "cancel"}
-
 
 # ---------------- ฟังก์ชันพื้นฐาน ----------------
 
@@ -87,16 +84,6 @@ def get_candles(symbol, resolution, hours_back):
     params = {"symbol": symbol, "resolution": resolution, "from": start, "to": now}
     response = requests.get(url, params=params, timeout=20)
     return response.json()
-
-
-def get_telegram_replies(offset):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getUpdates"
-    params = {"offset": offset, "timeout": 0}
-    try:
-        resp = requests.get(url, params=params, timeout=15)
-        return resp.json().get("result", [])
-    except requests.RequestException:
-        return []
 
 
 def today_str():
@@ -197,7 +184,7 @@ def main():
     had_pending_at_start = pending is not None
     trade_log = load_json(TRADE_LOG_FILE, [])
     risk = load_json(RISK_FILE, {})
-    tg_state = load_json(TG_OFFSET_FILE, {"offset": 0})
+    control = load_json(CONTROL_FILE, {"paused": False})
 
     if risk.get("date") != today_str():
         risk = {"date": today_str(), "realized_pnl_thb": 0.0, "halted": False}
@@ -205,6 +192,24 @@ def main():
     trading_enabled = bool(BITKUB_API_KEY and BITKUB_API_SECRET)
     if not trading_enabled:
         print("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET — ข้ามการเทรดจริง (วิเคราะห์อย่างเดียว)")
+
+    if control.get("paused"):
+        # หยุดทำงานทั้งหมดตามคำสั่ง Telegram — ไม่เช็คสัญญาณ ไม่เปิด/ปิดไม้ใดๆ จนกว่าจะสั่ง "เริ่ม"
+        # (ข้อความ หยุด/เริ่ม/ยืนยัน/ยกเลิก ถูกอ่านรวมไว้ที่ crypto_alert.py ซึ่งรันก่อนหน้านี้ในงานเดียวกันแล้ว)
+        print("ระบบถูกสั่งหยุดทำงานผ่าน Telegram อยู่ — ข้ามรอบนี้ทั้งหมด (ไม่เปิด/ปิดไม้)")
+        dashboard = load_json(DASHBOARD_FILE, {})
+        dashboard["trading_bot"] = {
+            "enabled": trading_enabled,
+            "paused": True,
+            "position": position,
+            "pending_signal": pending,
+            "daily_risk": risk,
+            "trade_count_today": len([t for t in trade_log if t["closed_at"].startswith(today_str())]),
+            "checked_at": datetime.now(timezone.utc).isoformat(),
+        }
+        save_json(DASHBOARD_FILE, dashboard)
+        print("trading_bot: ทำงานเสร็จสิ้น (หยุดชั่วคราว)")
+        return
 
     # ----- 1. ดึงราคา + คำนวณ indicator ของทุกเหรียญ (ใช้สูตรเดียวกับ backtest.py จาก strategy.py) -----
     market = {}
@@ -216,21 +221,10 @@ def main():
         indicators["trade_symbol"] = coin["trade_symbol"]
         market[coin["name"]] = indicators
 
-    # ----- 2. อ่านข้อความตอบกลับจาก Telegram -----
-    confirm_seen, cancel_seen = False, False
-    replies = get_telegram_replies(tg_state.get("offset", 0))
-    new_offset = tg_state.get("offset", 0)
-    for upd in replies:
-        new_offset = max(new_offset, upd["update_id"] + 1)
-        msg = upd.get("message", {})
-        if str(msg.get("chat", {}).get("id")) != str(TELEGRAM_CHAT_ID):
-            continue
-        text = (msg.get("text") or "").strip().lower()
-        if text in CONFIRM_WORDS:
-            confirm_seen = True
-        elif text in CANCEL_WORDS:
-            cancel_seen = True
-    tg_state["offset"] = new_offset
+    # ----- 2. อ่านคำสั่งยืนยัน/ยกเลิกที่ crypto_alert.py ดึงจาก Telegram ไว้ให้แล้วในรอบนี้ -----
+    commands = load_json(COMMANDS_FILE, {"confirm": False, "cancel": False})
+    confirm_seen = bool(commands.get("confirm"))
+    cancel_seen = bool(commands.get("cancel"))
 
     # ----- 3. ถ้ามีสัญญาณค้างรอยืนยันอยู่ -----
     if pending:
@@ -342,12 +336,12 @@ def main():
     save_json(PENDING_FILE, pending)
     save_json(TRADE_LOG_FILE, trade_log)
     save_json(RISK_FILE, risk)
-    save_json(TG_OFFSET_FILE, tg_state)
 
     # ----- อัปเดตหน้า dashboard ให้โชว์สถานะบอทเทรดด้วย -----
     dashboard = load_json(DASHBOARD_FILE, {})
     dashboard["trading_bot"] = {
         "enabled": trading_enabled,
+        "paused": False,
         "position": position,
         "pending_signal": pending,
         "daily_risk": risk,

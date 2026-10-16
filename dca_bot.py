@@ -35,6 +35,7 @@ BKK = timezone(timedelta(hours=7))
 
 STATE_DIR = "state"
 DCA_STATE_FILE = f"{STATE_DIR}/dca_state.json"
+CONTROL_FILE = f"{STATE_DIR}/control.json"
 DASHBOARD_FILE = "latest.json"
 
 # ---------------- ตั้งค่า DCA (แก้ตัวเลขตรงนี้ได้เลยถ้าต้องการเปลี่ยน) ----------------
@@ -57,15 +58,14 @@ SUMMARY_INTERVAL_DAYS = 7
 CRASH_ALERT_THRESHOLD_PCT = -15.0
 CRASH_RECOVERY_THRESHOLD_PCT = -5.0
 
-DCA_COINS = [
-    {"name": "BTC", "trade_symbol": "THB_BTC"},
-    {"name": "ETH", "trade_symbol": "THB_ETH"},
-    {"name": "XRP", "trade_symbol": "THB_XRP"},
-    {"name": "ADA", "trade_symbol": "THB_ADA"},
-    {"name": "DOGE", "trade_symbol": "THB_DOGE"},
-    {"name": "SOL", "trade_symbol": "THB_SOL"},
-    {"name": "KUB", "trade_symbol": "THB_KUB"},
-]
+# รายชื่อเหรียญตั้งต้น (ใช้ตอนยังไม่เคยมี state มาก่อน) — หลังจากนั้นรายชื่อเหรียญ "ที่กำลังซื้ออยู่" จะถูกปรับ
+# อัตโนมัติทุกรอบตามเหรียญติดเทรนด์ล่าสุด (ดู active_coins ที่ crypto_alert.py คำนวณไว้ใน latest.json)
+# เหรียญที่เคยซื้อสะสมไว้แล้วแต่หลุดเทรนด์จะ "ไม่ซื้อเพิ่ม" แต่ยังถือของเดิมรอ take-profit ตามปกติ ไม่ขายทิ้ง
+DEFAULT_SEED_COINS = ["BTC", "ETH", "XRP", "ADA", "DOGE", "SOL", "KUB"]
+
+
+def trade_symbol_of(name):
+    return f"THB_{name}"
 
 
 # ---------------- ฟังก์ชันพื้นฐาน ----------------
@@ -113,13 +113,13 @@ def days_since(date_str, today):
 def default_state():
     return {
         "holdings": {
-            coin["name"]: {
+            name: {
                 "total_invested_thb": 0.0,
                 "total_coin": 0.0,
                 "buy_count": 0,
                 "last_bought_date": None,
             }
-            for coin in DCA_COINS
+            for name in DEFAULT_SEED_COINS
         },
         "log": [],
         "sell_log": [],
@@ -203,10 +203,18 @@ def execute_sell(trade_symbol, amount_coin):
 
 def main():
     state = load_json(DCA_STATE_FILE, default_state())
-    # กันไฟล์เก่าที่ยังไม่มีเหรียญใหม่ (เผื่อขยายรายชื่อเหรียญทีหลัง)
-    for coin in DCA_COINS:
+    dashboard_so_far = load_json(DASHBOARD_FILE, {})
+    control = load_json(CONTROL_FILE, {"paused": False})
+    paused = bool(control.get("paused"))
+
+    # รายชื่อเหรียญ "ติดเทรนด์" ล่าสุด (คำนวณไว้แล้วโดย crypto_alert.py ที่รันก่อนหน้าในงานเดียวกัน)
+    # ถ้าไม่มีข้อมูล (เช่นรันสคริปต์นี้แยกเดี่ยว) ให้ fallback ไปใช้รายชื่อตั้งต้น
+    active_coins = dashboard_so_far.get("active_coins") or list(DEFAULT_SEED_COINS)
+
+    # กันไฟล์เก่า/เหรียญติดเทรนด์ใหม่ที่ยังไม่เคยมีใน state (เพิ่มเข้าไปแบบยอดเริ่มต้นเป็นศูนย์)
+    for name in active_coins:
         state["holdings"].setdefault(
-            coin["name"],
+            name,
             {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None},
         )
     state.setdefault("sell_log", [])
@@ -226,24 +234,26 @@ def main():
 
     if not trading_enabled:
         print("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET — ข้าม DCA รอบนี้ (ยังไม่ซื้อจริง)")
+    elif paused:
+        print("ระบบถูกสั่งหยุดทำงานผ่าน Telegram อยู่ — ข้ามการซื้อ DCA รอบนี้ทั้งหมด")
     else:
         # เช็คทีละเหรียญว่าครบรอบ DCA_INTERVAL_DAYS วันจากครั้งล่าสุดหรือยัง (แยกกันต่อเหรียญ ไม่ผูกเป็นก้อนเดียว)
         # เพราะยอดเงินที่เติมเข้าบัญชีแต่ละรอบไม่สม่ำเสมอ — เหรียญที่เงินไม่พอจะ "ยังไม่ขยับ last_bought_date"
         # จึงถูกลองซื้อใหม่ทุกชั่วโมงจนกว่าจะมีเงินพอ โดยไม่ไปซื้อซ้ำเหรียญที่ได้ไปแล้วในรอบนี้
+        # ซื้อเฉพาะเหรียญที่ "ยังติดเทรนด์" เท่านั้น (หลุด top 10 แล้วจะไม่ซื้อเพิ่ม แต่ของเดิมยังถือรอ take-profit)
         due_coins = []
-        for coin in DCA_COINS:
-            last = state["holdings"][coin["name"]]["last_bought_date"]
+        for name in active_coins:
+            last = state["holdings"][name]["last_bought_date"]
             if last is None or days_since(last, today) >= DCA_INTERVAL_DAYS:
-                due_coins.append(coin)
+                due_coins.append(name)
 
         if not due_coins:
             print("ยังไม่ครบรอบ DCA ของทุกเหรียญ รอรอบถัดไป")
         else:
             bought_lines = []
             failed_lines = []
-            for coin in due_coins:
-                name = coin["name"]
-                outcome = execute_buy(coin["trade_symbol"], DCA_AMOUNT_THB_PER_COIN)
+            for name in due_coins:
+                outcome = execute_buy(trade_symbol_of(name), DCA_AMOUNT_THB_PER_COIN)
                 if outcome["ok"]:
                     h = state["holdings"][name]
                     h["total_invested_thb"] = round(h["total_invested_thb"] + DCA_AMOUNT_THB_PER_COIN, 4)
@@ -274,13 +284,13 @@ def main():
             send_telegram(msg)
 
     # ----- เช็ค take-profit: เหรียญไหนกำไรเฉลี่ยรวมเกิน TAKE_PROFIT_PCT ขายทั้งหมดกลับเป็นเงินบาท -----
-    if trading_enabled:
-        for coin in DCA_COINS:
-            name = coin["name"]
+    # เช็คทุกเหรียญที่เคยถือสะสมไว้ (ไม่ใช่แค่เหรียญที่ยังติดเทรนด์) เพราะของเก่าที่หลุดเทรนด์ก็ยังต้องขายได้ตามแผน
+    if trading_enabled and not paused:
+        for name in list(state["holdings"].keys()):
             h = state["holdings"][name]
             if h["total_coin"] <= 0:
                 continue
-            tick = ticker.get(coin["trade_symbol"]) if isinstance(ticker, dict) else None
+            tick = ticker.get(trade_symbol_of(name)) if isinstance(ticker, dict) else None
             current_price = tick.get("last") if isinstance(tick, dict) else None
             if not current_price:
                 continue
@@ -291,7 +301,7 @@ def main():
             if pnl_pct_now < TAKE_PROFIT_PCT:
                 continue
 
-            outcome = execute_sell(coin["trade_symbol"], h["total_coin"])
+            outcome = execute_sell(trade_symbol_of(name), h["total_coin"])
             if outcome["ok"]:
                 realized_pnl = outcome["proceeds_thb"] - h["total_invested_thb"]
                 state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
@@ -323,11 +333,10 @@ def main():
     per_coin = {}
     total_invested = 0.0
     total_value = 0.0
-    for coin in DCA_COINS:
-        name = coin["name"]
+    for name in state["holdings"]:
         h = state["holdings"][name]
         current_price = None
-        tick = ticker.get(coin["trade_symbol"]) if isinstance(ticker, dict) else None
+        tick = ticker.get(trade_symbol_of(name)) if isinstance(ticker, dict) else None
         if isinstance(tick, dict):
             current_price = tick.get("last")
         current_value = (h["total_coin"] * current_price) if current_price else None
@@ -336,6 +345,7 @@ def main():
         pnl_pct = (pnl_thb / h["total_invested_thb"] * 100) if pnl_thb is not None and h["total_invested_thb"] else None
 
         per_coin[name] = {
+            "active": name in active_coins,
             "total_invested_thb": round(h["total_invested_thb"], 2),
             "total_coin": h["total_coin"],
             "buy_count": h["buy_count"],
@@ -404,6 +414,8 @@ def main():
     dashboard = load_json(DASHBOARD_FILE, {})
     dashboard["dca_bot"] = {
         "enabled": trading_enabled,
+        "paused": paused,
+        "active_coins": active_coins,
         "amount_thb_per_coin_per_period": DCA_AMOUNT_THB_PER_COIN,
         "interval_days": DCA_INTERVAL_DAYS,
         "take_profit_pct": TAKE_PROFIT_PCT,

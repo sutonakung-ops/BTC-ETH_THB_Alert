@@ -33,6 +33,15 @@
     color: var(--text);
     padding-bottom: 48px;
   }
+  .pause-banner {
+    text-align: center;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--yellow);
+    background: rgba(224, 195, 95, 0.12);
+    border-bottom: 1px solid rgba(224, 195, 95, 0.3);
+  }
   .page-header {
     text-align: center;
     padding: 36px 16px 22px;
@@ -200,6 +209,7 @@
 </style>
 </head>
 <body>
+  <div class="pause-banner" id="pauseBanner" style="display:none;"></div>
   <div class="page-header">
     <h1>📊 Crypto Price Alert Dashboard</h1>
     <p class="tagline">ตรวจราคา · วิเคราะห์เทรนด์ · สะสม DCA อัตโนมัติ</p>
@@ -288,7 +298,9 @@
       }
 
       let statusHtml;
-      if (!bot.enabled) {
+      if (bot.paused) {
+        statusHtml = `<span class="bot-status status-halted">หยุดทำงานชั่วคราว (สั่งผ่าน Telegram)</span>`;
+      } else if (!bot.enabled) {
         statusHtml = `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — วิเคราะห์อย่างเดียว ไม่เทรดจริง</span>`;
       } else if (bot.daily_risk && bot.daily_risk.halted) {
         statusHtml = `<span class="bot-status status-halted">หยุดเปิดไม้ใหม่วันนี้ (ชนเพดานขาดทุนรายวัน)</span>`;
@@ -340,9 +352,14 @@
         return `<span class="bot-status status-off">ยังไม่มีข้อมูล</span><div>บอท DCA ยังไม่เคยรัน</div>`;
       }
 
-      const statusHtml = dca.enabled
-        ? `<span class="bot-status status-on">ทำงานปกติ — ${fmtNum(dca.amount_thb_per_coin_per_period)} บาท/เหรียญ ทุก ${dca.interval_days} วัน | ขายทำกำไรที่ +${dca.take_profit_pct}%</span>`
-        : `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — ยังไม่ซื้อจริง</span>`;
+      let statusHtml;
+      if (dca.paused) {
+        statusHtml = `<span class="bot-status status-halted">หยุดทำงานชั่วคราว (สั่งผ่าน Telegram)</span>`;
+      } else if (dca.enabled) {
+        statusHtml = `<span class="bot-status status-on">ทำงานปกติ — ${fmtNum(dca.amount_thb_per_coin_per_period)} บาท/เหรียญ ทุก ${dca.interval_days} วัน | ขายทำกำไรที่ +${dca.take_profit_pct}%</span>`;
+      } else {
+        statusHtml = `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — ยังไม่ซื้อจริง</span>`;
+      }
 
       let bodyHtml = "";
       if (dca.total_invested_thb) {
@@ -371,9 +388,10 @@
           const c = dca.coins[name];
           if (!c.buy_count) continue;
           const pnlCls = changeClass(c.pnl_thb || 0);
+          const inactiveTag = c.active === false ? " · หลุด Top 10 (ถือรอขาย ไม่ซื้อเพิ่ม)" : "";
           bodyHtml += `
             <div class="row">
-              <span class="label">${name} (${c.buy_count} ครั้ง, ล่าสุด ${c.last_bought_date || "-"}, ทุนเฉลี่ย ${c.avg_cost != null ? fmtNum(c.avg_cost) : "-"})</span>
+              <span class="label">${name} (${c.buy_count} ครั้ง, ล่าสุด ${c.last_bought_date || "-"}, ทุนเฉลี่ย ${c.avg_cost != null ? fmtNum(c.avg_cost) : "-"}${inactiveTag})</span>
               <span class="${pnlCls}">${c.pnl_thb != null ? (c.pnl_thb > 0 ? "+" : "") + fmtNum(c.pnl_thb) + " บาท" : "-"}</span>
             </div>
           `;
@@ -396,9 +414,22 @@
         const updatedDate = new Date(data.updated_at);
         document.getElementById("updated").textContent =
           "อัปเดตล่าสุด: " + updatedDate.toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
-        const coinNames = ["BTC", "ETH", "XRP", "ADA", "DOGE", "SOL", "KUB"];
+
+        const pauseBanner = document.getElementById("pauseBanner");
+        if (data.control && data.control.paused) {
+          pauseBanner.style.display = "block";
+          pauseBanner.textContent = "⏸ ระบบหยุดการซื้อขายทั้งหมดชั่วคราว (สั่งผ่าน Telegram) — ราคายังอัปเดตปกติ แค่ไม่มีคำสั่งซื้อ/ขายใหม่";
+        } else {
+          pauseBanner.style.display = "none";
+        }
+
+        // รายชื่อเหรียญเอามาจาก key ที่เหลือใน latest.json เอง (ไม่ fix ตายตัวอีกต่อไป เพราะ
+        // crypto_alert.py ปรับรายชื่อเหรียญ "ติดเทรนด์" top 10 ตามปริมาณซื้อขายอัตโนมัติทุกรอบ)
+        const NON_COIN_KEYS = new Set(["updated_at", "active_coins", "control", "trading_bot", "dca_bot"]);
+        const coinNames = data.active_coins && data.active_coins.length
+          ? data.active_coins.filter((name) => data[name])
+          : Object.keys(data).filter((key) => !NON_COIN_KEYS.has(key) && data[key] && typeof data[key] === "object");
         document.getElementById("grid").innerHTML = coinNames
-          .filter((name) => data[name])
           .map((name) => renderCoin(name, data[name]))
           .join("");
         document.querySelectorAll(".coin-row").forEach((row) => {
