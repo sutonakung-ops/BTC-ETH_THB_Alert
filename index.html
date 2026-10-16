@@ -67,10 +67,11 @@
     text-shadow: 0 1px 6px rgba(0,0,0,0.8);
   }
   .grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-width: 640px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    align-items: start;
+    gap: 10px;
+    max-width: 1280px;
     margin: 0 auto;
     padding: 0 16px;
   }
@@ -168,7 +169,7 @@
     margin-top: 40px;
   }
   .section-title {
-    max-width: 640px;
+    max-width: 1280px;
     margin: 28px auto 12px;
     padding: 0 16px;
     font-size: 0.95rem;
@@ -178,7 +179,7 @@
     text-shadow: 0 1px 8px rgba(0,0,0,0.8);
   }
   .bot-card {
-    max-width: 640px;
+    max-width: 1280px;
     margin: 0 auto;
     background: linear-gradient(160deg, var(--card-glow), transparent 60%), rgba(18,22,31,0.6);
     backdrop-filter: blur(16px);
