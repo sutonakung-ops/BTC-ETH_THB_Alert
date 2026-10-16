@@ -1,63 +1,115 @@
 {
-  "updated_at": "2026-10-16T02:04:50.764272+00:00",
+  "updated_at": "2026-10-16T02:07:31.530193+00:00",
+  "active_coins": [
+    "USDT",
+    "BTC",
+    "NEAR",
+    "ETH",
+    "XRP",
+    "DOGE",
+    "SOL",
+    "ADA",
+    "USDC",
+    "CRV"
+  ],
+  "control": {
+    "paused": false,
+    "updated_at": null,
+    "reason": null
+  },
+  "USDT": {
+    "change_24h": -0.15,
+    "quote_volume_thb": 862287264.03,
+    "price": 33.54,
+    "ma12": 33.54,
+    "ma24": 33.52,
+    "gap_percent": 0.0323,
+    "signal": "ยังสรุปแนวโน้มไม่ได้"
+  },
   "BTC": {
-    "change_24h": 0.44,
-    "price": 2755474.22,
-    "ma12": 2759657.28,
-    "ma24": 2738479.79,
-    "gap_percent": 0.7733,
+    "change_24h": 0.29,
+    "quote_volume_thb": 283316803.9,
+    "price": 2753657.58,
+    "ma12": 2759505.9,
+    "ma24": 2738404.09,
+    "gap_percent": 0.7706,
+    "signal": "Golden Cross (ขาขึ้น)"
+  },
+  "NEAR": {
+    "change_24h": 11.26,
+    "quote_volume_thb": 127247169.29,
+    "price": 178.04,
+    "ma12": 177.38,
+    "ma24": 166.99,
+    "gap_percent": 6.2222,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "ETH": {
-    "change_24h": 0.87,
-    "price": 81650.69,
-    "ma12": 82023.63,
-    "ma24": 80671.71,
-    "gap_percent": 1.6758,
+    "change_24h": 0.6,
+    "quote_volume_thb": 94163569.07,
+    "price": 81669.78,
+    "ma12": 82025.22,
+    "ma24": 80672.51,
+    "gap_percent": 1.6768,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "XRP": {
-    "change_24h": 0.7,
+    "change_24h": 0.31,
+    "quote_volume_thb": 68495726.46,
     "price": 44.68,
     "ma12": 44.88,
     "ma24": 44.37,
     "gap_percent": 1.1608,
     "signal": "Golden Cross (ขาขึ้น)"
   },
-  "ADA": {
-    "change_24h": 0.87,
-    "price": 7.69,
-    "ma12": 7.72,
-    "ma24": 7.58,
-    "gap_percent": 1.8841,
-    "signal": "Golden Cross (ขาขึ้น)"
-  },
   "DOGE": {
-    "change_24h": -0.45,
-    "price": 2.72,
+    "change_24h": -0.26,
+    "quote_volume_thb": 21522705.37,
+    "price": 2.73,
     "ma12": 2.73,
     "ma24": 2.7,
-    "gap_percent": 0.9121,
+    "gap_percent": 0.9198,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "SOL": {
-    "change_24h": 0.86,
+    "change_24h": 0.75,
+    "quote_volume_thb": 20634968.72,
     "price": 3526.36,
     "ma12": 3546.07,
     "ma24": 3493.57,
     "gap_percent": 1.5027,
     "signal": "Golden Cross (ขาขึ้น)"
   },
-  "KUB": {
-    "change_24h": 0.52,
-    "price": 19.2,
-    "ma12": 18.97,
-    "ma24": 18.95,
-    "gap_percent": 0.0836,
+  "ADA": {
+    "change_24h": 0.87,
+    "quote_volume_thb": 15233230.58,
+    "price": 7.69,
+    "ma12": 7.72,
+    "ma24": 7.58,
+    "gap_percent": 1.8841,
+    "signal": "Golden Cross (ขาขึ้น)"
+  },
+  "USDC": {
+    "change_24h": -0.06,
+    "quote_volume_thb": 14583636.02,
+    "price": 33.59,
+    "ma12": 33.57,
+    "ma24": 33.56,
+    "gap_percent": 0.0149,
     "signal": "ยังสรุปแนวโน้มไม่ได้"
+  },
+  "CRV": {
+    "change_24h": 7.31,
+    "quote_volume_thb": 12685953.85,
+    "price": 11.74,
+    "ma12": 11.99,
+    "ma24": 11.71,
+    "gap_percent": 2.3519,
+    "signal": "Golden Cross (ขาขึ้น)"
   },
   "trading_bot": {
     "enabled": true,
+    "paused": false,
     "position": null,
     "pending_signal": null,
     "daily_risk": {
@@ -66,38 +118,54 @@
       "halted": false
     },
     "trade_count_today": 0,
-    "checked_at": "2026-10-16T02:05:01.499041+00:00"
+    "checked_at": "2026-10-16T02:07:48.167715+00:00"
   },
   "dca_bot": {
     "enabled": true,
+    "paused": false,
+    "active_coins": [
+      "USDT",
+      "BTC",
+      "NEAR",
+      "ETH",
+      "XRP",
+      "DOGE",
+      "SOL",
+      "ADA",
+      "USDC",
+      "CRV"
+    ],
     "amount_thb_per_coin_per_period": 50,
     "interval_days": 7,
     "take_profit_pct": 10.0,
     "realized_pnl_total_thb": 0.0,
     "coins": {
       "BTC": {
+        "active": true,
         "total_invested_thb": 0.0,
         "total_coin": 0.0,
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2755474.22,
+        "current_price": 2753657.58,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
       },
       "ETH": {
+        "active": true,
         "total_invested_thb": 0.0,
         "total_coin": 0.0,
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 81650.69,
+        "current_price": 81669.78,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
       },
       "XRP": {
+        "active": true,
         "total_invested_thb": 0.0,
         "total_coin": 0.0,
         "buy_count": 0,
@@ -109,6 +177,7 @@
         "pnl_pct": null
       },
       "ADA": {
+        "active": true,
         "total_invested_thb": 0.0,
         "total_coin": 0.0,
         "buy_count": 0,
@@ -120,17 +189,19 @@
         "pnl_pct": null
       },
       "DOGE": {
+        "active": true,
         "total_invested_thb": 0.0,
         "total_coin": 0.0,
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2.72,
+        "current_price": 2.725,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
       },
       "SOL": {
+        "active": true,
         "total_invested_thb": 0.0,
         "total_coin": 0.0,
         "buy_count": 0,
@@ -142,6 +213,7 @@
         "pnl_pct": null
       },
       "KUB": {
+        "active": false,
         "total_invested_thb": 0.0,
         "total_coin": 0.0,
         "buy_count": 0,
@@ -151,12 +223,60 @@
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
+      },
+      "USDT": {
+        "active": true,
+        "total_invested_thb": 0.0,
+        "total_coin": 0.0,
+        "buy_count": 0,
+        "last_bought_date": null,
+        "avg_cost": null,
+        "current_price": 33.54,
+        "current_value_thb": 0.0,
+        "pnl_thb": 0.0,
+        "pnl_pct": null
+      },
+      "NEAR": {
+        "active": true,
+        "total_invested_thb": 0.0,
+        "total_coin": 0.0,
+        "buy_count": 0,
+        "last_bought_date": null,
+        "avg_cost": null,
+        "current_price": 178.04,
+        "current_value_thb": 0.0,
+        "pnl_thb": 0.0,
+        "pnl_pct": null
+      },
+      "USDC": {
+        "active": true,
+        "total_invested_thb": 0.0,
+        "total_coin": 0.0,
+        "buy_count": 0,
+        "last_bought_date": null,
+        "avg_cost": null,
+        "current_price": 33.59,
+        "current_value_thb": 0.0,
+        "pnl_thb": 0.0,
+        "pnl_pct": null
+      },
+      "CRV": {
+        "active": true,
+        "total_invested_thb": 0.0,
+        "total_coin": 0.0,
+        "buy_count": 0,
+        "last_bought_date": null,
+        "avg_cost": null,
+        "current_price": 11.74,
+        "current_value_thb": 0.0,
+        "pnl_thb": 0.0,
+        "pnl_pct": null
       }
     },
     "total_invested_thb": 0.0,
     "total_value_thb": null,
     "total_pnl_thb": 0.0,
     "total_pnl_pct": null,
-    "checked_at": "2026-10-16T02:05:08.667071+00:00"
+    "checked_at": "2026-10-16T02:07:56.558378+00:00"
   }
 }
