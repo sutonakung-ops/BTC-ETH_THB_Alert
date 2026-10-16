@@ -41,13 +41,28 @@ def _sign(api_secret, timestamp, method, path, body=""):
     ).hexdigest()
 
 
+def _signature_path(path):
+    """
+    ตัวอย่าง Python ในเอกสาร https://api.bitkub.com/docs/authentication เซ็น signature
+    โดยใช้ path แบบไม่มี version segment (เช่น '/api/market/place-bid') แม้ว่า endpoint ตัวจริง
+    ที่เรียกคือ '/api/v3/market/place-bid' (มี /v3/) — สองอันนี้ไม่ตรงกัน
+    เราจึงต้องตัด '/v3/' หรือ '/v4/' ออกเฉพาะตอนคำนวณ signature เท่านั้น
+    (คำขอ HTTP จริงยังยิงไปที่ path แบบมี version ตามปกติ ไม่เปลี่ยน)
+    นี่คือสาเหตุของ error code 6 "Missing or invalid signature" ที่เกิดขึ้นทุกครั้ง
+    """
+    for prefix in ("/api/v3/", "/api/v4/"):
+        if path.startswith(prefix):
+            return "/api/" + path[len(prefix):]
+    return path
+
+
 def _private_request(api_key, api_secret, method, path, body_dict=None):
     if not api_key or not api_secret:
         raise BitkubAPIError("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET")
 
     timestamp = _timestamp_ms()
     body = json.dumps(body_dict, separators=(",", ":")) if body_dict is not None else ""
-    signature = _sign(api_secret, timestamp, method.upper(), path, body)
+    signature = _sign(api_secret, timestamp, method.upper(), _signature_path(path), body)
 
     headers = {
         "Accept": "application/json",
