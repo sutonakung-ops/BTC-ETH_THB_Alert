@@ -315,6 +315,8 @@ def main():
                 bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท @ {outcome['fill_price']:.4f}")
             else:
                 failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")
+                state["last_errors"] = state.get("last_errors", {})
+                state["last_errors"][name] = {"error": outcome["error"], "at": datetime.now(timezone.utc).isoformat()}
 
         state["log"] = state["log"][-500:]  # กันไฟล์โตไม่จำกัด เก็บแค่ 500 รายการล่าสุด
 
