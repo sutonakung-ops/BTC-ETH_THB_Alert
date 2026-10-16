@@ -45,6 +45,13 @@ jobs:
           BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
         run: python dca_bot.py
 
+      - name: Diagnose Bitkub auth (temporary)
+        env:
+          BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
+          BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
+        run: python diagnose_bitkub_auth.py
+        continue-on-error: true
+
       - name: Commit latest.json and bot state
         run: |
           git config user.name "github-actions[bot]"
