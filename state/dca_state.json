@@ -83,5 +83,23 @@
   "sell_log": [],
   "realized_pnl_total_thb": 0.0,
   "last_summary_date": null,
-  "crash_alert_active": false
+  "crash_alert_active": false,
+  "dca_cycle": {
+    "cycle_date": "2026-10-16",
+    "ranking": [
+      "BTC",
+      "SOL",
+      "XRP",
+      "XLM",
+      "ETH",
+      "DOGE",
+      "ADA",
+      "CRV",
+      "NEAR",
+      "OP"
+    ],
+    "budget_remaining_thb": 300,
+    "bought": {},
+    "skipped_budget": {}
+  }
 }
