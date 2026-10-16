@@ -107,5 +107,47 @@
     "budget_remaining_thb": 300,
     "bought": {},
     "skipped_budget": {}
+  },
+  "last_errors": {
+    "BTC": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:06.459980+00:00"
+    },
+    "SOL": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:08.164410+00:00"
+    },
+    "XRP": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:09.458603+00:00"
+    },
+    "XLM": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:10.757522+00:00"
+    },
+    "ETH": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:12.167240+00:00"
+    },
+    "DOGE": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:13.344202+00:00"
+    },
+    "ADA": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:14.608143+00:00"
+    },
+    "CRV": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:16.327069+00:00"
+    },
+    "NEAR": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:17.522974+00:00"
+    },
+    "OP": {
+      "error": "Bitkub error code 6: {'error': 6}",
+      "at": "2026-10-16T05:33:18.738342+00:00"
+    }
   }
 }
