@@ -47,8 +47,9 @@ RSI_OVERBOUGHT = 70            # ถ้า RSI สูงกว่านี้ �
 MA_GAP_THRESHOLD = 0.3         # ส่วนต่าง MA12/MA24 ต้องมากกว่านี้ถึงจะถือเป็นสัญญาณจริง
 
 COINS = [
-    {"name": "BTC", "candle_symbol": "BTC_THB", "trade_symbol": "THB_BTC"},
-    {"name": "ETH", "candle_symbol": "ETH_THB", "trade_symbol": "THB_ETH"},
+    # trade_symbol ต้องเป็นตัวพิมพ์เล็ก ("thb_btc") สำหรับยิง place-bid/place-ask จริงตามเอกสาร v3
+    {"name": "BTC", "candle_symbol": "BTC_THB", "trade_symbol": "thb_btc"},
+    {"name": "ETH", "candle_symbol": "ETH_THB", "trade_symbol": "thb_eth"},
 ]
 
 # ---------------- ฟังก์ชันพื้นฐาน ----------------

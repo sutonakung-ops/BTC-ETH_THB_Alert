@@ -73,6 +73,7 @@ DEFAULT_SEED_COINS = ["BTC", "ETH", "XRP", "ADA", "DOGE", "SOL", "KUB"]
 
 
 def trade_symbol_of(name):
+    # ใช้รูปแบบตัวพิมพ์ใหญ่ "THB_BTC" สำหรับ lookup ใน ticker/candle ของ Bitkub (ticker API คืนคีย์แบบนี้)
     return f"THB_{name}"
 
 
@@ -174,7 +175,9 @@ def execute_buy(trade_symbol, amount_thb):
     if not BITKUB_API_KEY or not BITKUB_API_SECRET:
         return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
     try:
-        result = place_bid(BITKUB_API_KEY, BITKUB_API_SECRET, trade_symbol, amount_thb, rat=0, typ="market")
+        # Bitkub v3 place-bid/place-ask ต้องการ sym เป็นตัวพิมพ์เล็ก (เช่น "thb_btc") ตามเอกสาร rest-v3.md
+        # แม้ว่า ticker/candle API จะใช้ตัวพิมพ์ใหญ่ "THB_BTC" ก็ตาม — แปลงแค่ตอนยิงคำสั่งซื้อขายจริง
+        result = place_bid(BITKUB_API_KEY, BITKUB_API_SECRET, trade_symbol.lower(), amount_thb, rat=0, typ="market")
     except BitkubAPIError as e:
         return {"ok": False, "error": str(e)}
 
@@ -209,7 +212,7 @@ def execute_sell(trade_symbol, amount_coin):
     if not BITKUB_API_KEY or not BITKUB_API_SECRET:
         return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
     try:
-        result = place_ask(BITKUB_API_KEY, BITKUB_API_SECRET, trade_symbol, amount_coin, rat=0, typ="market")
+        result = place_ask(BITKUB_API_KEY, BITKUB_API_SECRET, trade_symbol.lower(), amount_coin, rat=0, typ="market")
     except BitkubAPIError as e:
         return {"ok": False, "error": str(e)}
 
