@@ -1,60 +1,60 @@
 {
-  "updated_at": "2026-10-15T23:52:41.495939+00:00",
+  "updated_at": "2026-10-16T00:34:42.916762+00:00",
   "BTC": {
-    "change_24h": 0.37,
-    "price": 2756520,
-    "ma12": 2748421.25,
-    "ma24": 2736526.63,
-    "gap_percent": 0.4347,
+    "change_24h": 0.43,
+    "price": 2759708.01,
+    "ma12": 2753299.13,
+    "ma24": 2737195.38,
+    "gap_percent": 0.5883,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "ETH": {
-    "change_24h": 0.54,
-    "price": 81863.18,
-    "ma12": 81392.15,
-    "ma24": 80545.1,
-    "gap_percent": 1.0516,
+    "change_24h": 0.42,
+    "price": 81881,
+    "ma12": 81657.76,
+    "ma24": 80570.92,
+    "gap_percent": 1.3489,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "XRP": {
-    "change_24h": -0.2,
-    "price": 44.68,
-    "ma12": 44.62,
-    "ma24": 44.32,
-    "gap_percent": 0.6712,
+    "change_24h": -0.04,
+    "price": 44.78,
+    "ma12": 44.73,
+    "ma24": 44.33,
+    "gap_percent": 0.9023,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "ADA": {
-    "change_24h": -0.4,
+    "change_24h": -0.34,
     "price": 7.7,
-    "ma12": 7.65,
+    "ma12": 7.68,
     "ma24": 7.56,
-    "gap_percent": 1.1848,
+    "gap_percent": 1.5582,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "DOGE": {
-    "change_24h": -1.11,
+    "change_24h": -1.24,
     "price": 2.72,
     "ma12": 2.71,
     "ma24": 2.7,
-    "gap_percent": 0.3386,
+    "gap_percent": 0.5251,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "SOL": {
-    "change_24h": 0.85,
-    "price": 3534.82,
-    "ma12": 3521.94,
-    "ma24": 3488.21,
-    "gap_percent": 0.967,
+    "change_24h": 0.64,
+    "price": 3538.29,
+    "ma12": 3532.7,
+    "ma24": 3489.59,
+    "gap_percent": 1.2352,
     "signal": "Golden Cross (ขาขึ้น)"
   },
   "KUB": {
-    "change_24h": 0.32,
+    "change_24h": -0.52,
     "price": 19.08,
-    "ma12": 18.89,
-    "ma24": 18.95,
-    "gap_percent": -0.332,
-    "signal": "Death Cross (ขาลง)"
+    "ma12": 18.92,
+    "ma24": 18.94,
+    "gap_percent": -0.1232,
+    "signal": "ยังสรุปแนวโน้มไม่ได้"
   },
   "trading_bot": {
     "enabled": false,
@@ -66,7 +66,7 @@
       "halted": false
     },
     "trade_count_today": 0,
-    "checked_at": "2026-10-15T23:52:53.648283+00:00"
+    "checked_at": "2026-10-16T00:34:55.403484+00:00"
   },
   "dca_bot": {
     "enabled": false,
@@ -81,7 +81,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2756520,
+        "current_price": 2759708.01,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -92,7 +92,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 81863.18,
+        "current_price": 81881,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -103,7 +103,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 44.7,
+        "current_price": 44.78,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -114,7 +114,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 7.704,
+        "current_price": 7.7,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -125,7 +125,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2.7199,
+        "current_price": 2.7201,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -136,7 +136,7 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 3534.82,
+        "current_price": 3538.29,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null
@@ -157,6 +157,6 @@
     "total_value_thb": null,
     "total_pnl_thb": 0.0,
     "total_pnl_pct": null,
-    "checked_at": "2026-10-15T23:52:54.726251+00:00"
+    "checked_at": "2026-10-16T00:34:56.390849+00:00"
   }
 }
