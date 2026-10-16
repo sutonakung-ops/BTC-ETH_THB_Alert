@@ -17,6 +17,10 @@ COMMANDS_FILE = f"{STATE_DIR}/telegram_commands.json"  # ไฟล์ชั่�
 # เกณฑ์: เรียงตามปริมาณซื้อขาย 24 ชม. (quoteVolume หน่วยบาท) บน Bitkub มากไปน้อย
 TOP_N_TRENDING = 10
 
+# Stablecoin ผูกค่ากับ USD 1:1 ราคาแทบไม่ขยับ แม้ปริมาณซื้อขายจะสูงก็ไม่มีความหมายสำหรับ DCA
+# (เป้าหมายคือสะสมเหรียญที่มีโอกาสโต ไม่ใช่ถือเงินตรารูปแบบหนึ่งไปอีกรูปแบบหนึ่ง) ตัดออกจากการจัดอันดับเทรนด์เสมอ
+STABLECOIN_EXCLUDE = {"USDT", "USDC", "DAI", "BUSD", "TUSD", "USDD", "FDUSD", "PYUSD", "THBEX"}
+
 # คำสั่งควบคุมผ่าน Telegram (ตอบกลับแชทบอท)
 STOP_WORDS = {"หยุด", "หยุดทุกอย่าง", "หยุดบอท", "stop", "/stop", "halt", "/halt"}
 START_WORDS = {"เริ่ม", "เริ่มใหม่", "ทำงานต่อ", "start", "/start", "resume", "/resume"}
@@ -120,6 +124,8 @@ def pick_trending_coins(ticker, top_n):
         if str(info.get("isFrozen", "0")) == "1":
             continue
         name = ticker_symbol[len("THB_"):]
+        if name in STABLECOIN_EXCLUDE:
+            continue
         try:
             volume = float(info.get("quoteVolume") or 0)
         except (TypeError, ValueError):
