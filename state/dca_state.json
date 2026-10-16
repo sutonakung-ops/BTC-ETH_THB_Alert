@@ -65,6 +65,18 @@
       "total_coin": 0.0,
       "buy_count": 0,
       "last_bought_date": null
+    },
+    "OP": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
+    },
+    "XLM": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     }
   },
   "log": [],
