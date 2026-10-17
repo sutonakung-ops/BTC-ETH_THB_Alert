@@ -25,16 +25,16 @@
       "last_bought_date": null
     },
     "DOGE": {
-      "total_invested_thb": 100.0,
-      "total_coin": 37.27590384739864,
-      "buy_count": 2,
-      "last_bought_date": "2026-10-17"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "SOL": {
-      "total_invested_thb": 100.0,
-      "total_coin": 0.02852927008232094,
-      "buy_count": 2,
-      "last_bought_date": "2026-10-17"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "KUB": {
       "total_invested_thb": 0.0,
@@ -49,10 +49,10 @@
       "last_bought_date": null
     },
     "NEAR": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 50.0,
+      "total_coin": 0.3114876650884625,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-18"
     },
     "USDC": {
       "total_invested_thb": 0.0,
@@ -85,10 +85,10 @@
       "last_bought_date": null
     },
     "WLD": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 50.0,
+      "total_coin": 3.092145949288806,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-18"
     },
     "ZEREBRO": {
       "total_invested_thb": 0.0,
@@ -103,10 +103,10 @@
       "last_bought_date": null
     },
     "EPIC": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 50.0,
+      "total_coin": 5.555555555555555,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-18"
     },
     "ICNT": {
       "total_invested_thb": 0.0,
@@ -227,6 +227,30 @@
       "fill_price": 43.63,
       "amount_coin": 1.1460004584001833,
       "order_id": "6ad34d3ccd5e1a48732938dds5oh6d"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "WLD",
+      "invested_thb": 50,
+      "fill_price": 16.17,
+      "amount_coin": 3.092145949288806,
+      "order_id": "6ad3eaf9cd5e1a48733bddf4my81nv"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "NEAR",
+      "invested_thb": 50,
+      "fill_price": 160.52,
+      "amount_coin": 0.3114876650884625,
+      "order_id": "6ad3eafce14a4bb9221530d01pgosa"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "EPIC",
+      "invested_thb": 50,
+      "fill_price": 9.0,
+      "amount_coin": 5.555555555555555,
+      "order_id": "6ad3eb0108271ad1ba7ad3d7hw5uk5"
     }
   ],
   "sell_log": [
@@ -239,9 +263,29 @@
       "proceeds_thb": 48.06,
       "realized_pnl_thb": -1.94,
       "reason": "signal_cut"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "DOGE",
+      "sold_coin": 37.27590384739864,
+      "sell_price": 2.6003,
+      "invested_thb": 100.0,
+      "proceeds_thb": 96.44,
+      "realized_pnl_thb": -3.56,
+      "reason": "signal_cut"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "SOL",
+      "sold_coin": 0.02852927008232094,
+      "sell_price": 3385.52,
+      "invested_thb": 100.0,
+      "proceeds_thb": 96.1,
+      "realized_pnl_thb": -3.9,
+      "reason": "signal_cut"
     }
   ],
-  "realized_pnl_total_thb": -1.94,
+  "realized_pnl_total_thb": -9.4,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -260,30 +304,39 @@
     ],
     "bought": {
       "BTC": true,
-      "DOGE": true,
       "ETH": true,
-      "SOL": true,
       "XLM": true,
-      "XRP": true
+      "XRP": true,
+      "WLD": true,
+      "NEAR": true,
+      "EPIC": true
     },
     "sold": {
       "ADA": {
         "reason": "signal_cut",
         "at": "2026-10-17T21:37:58.880436+00:00"
+      },
+      "DOGE": {
+        "reason": "signal_cut",
+        "at": "2026-10-17T21:38:59.612068+00:00"
+      },
+      "SOL": {
+        "reason": "signal_cut",
+        "at": "2026-10-17T21:39:04.243123+00:00"
       }
     }
   },
   "last_errors": {
-    "NEAR": {
-      "error": "Bitkub error code 18: {'error': 18}",
-      "at": "2026-10-17T09:27:05.186825+00:00"
-    },
     "OP": {
       "error": "Bitkub error code 18: {'error': 18}",
       "at": "2026-10-17T09:27:06.668100+00:00"
+    },
+    "BR": {
+      "error": "Bitkub error code 61: {'error': 61}",
+      "at": "2026-10-17T21:39:12.053823+00:00"
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 48.06,
+  "cash_pool_thb": 90.6,
   "profit_reserved_thb": 0.0
 }

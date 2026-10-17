@@ -20,7 +20,15 @@
       "amount_coin": 0.01424314762167921,
       "features": null,
       "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-17T21:39:04.243435+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 3385.52,
+      "proceeds_thb": 47.9794,
+      "pnl_thb": -2.0206,
+      "pnl_pct": -4.041,
+      "position_pnl_pct_at_trigger": -3.343,
+      "win": false
     },
     {
       "lot_id": "6ad33f5ecd5e1a487327a8e7s5oh6d",
@@ -64,7 +72,15 @@
       "amount_coin": 18.62266751089426,
       "features": null,
       "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-17T21:38:59.612343+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 2.6003,
+      "proceeds_thb": 48.1824,
+      "pnl_thb": -1.8176,
+      "pnl_pct": -3.635,
+      "position_pnl_pct_at_trigger": -3.083,
+      "win": false
     },
     {
       "lot_id": "6ad33f64e14a4bb9220b812bj8xy3w",
@@ -116,7 +132,15 @@
       "amount_coin": 18.65323633650438,
       "features": null,
       "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-17T21:38:59.612351+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 2.6003,
+      "proceeds_thb": 48.2615,
+      "pnl_thb": -1.7385,
+      "pnl_pct": -3.477,
+      "position_pnl_pct_at_trigger": -3.083,
+      "win": false
     },
     {
       "lot_id": "6ad34d3445d27757b3763905j542k5",
@@ -138,7 +162,15 @@
       "amount_coin": 0.014286122460641731,
       "features": null,
       "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-17T21:39:04.243445+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 3385.52,
+      "proceeds_thb": 48.1241,
+      "pnl_thb": -1.8759,
+      "pnl_pct": -3.752,
+      "position_pnl_pct_at_trigger": -3.343,
+      "win": false
     },
     {
       "lot_id": "6ad34d396cad0adf8543050b7spahm",
@@ -160,6 +192,87 @@
       "amount_coin": 1.1460004584001833,
       "features": null,
       "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad3eaf9cd5e1a48733bddf4my81nv",
+      "coin": "WLD",
+      "opened_at": "2026-10-17T21:39:07.520866+00:00",
+      "invested_thb": 50,
+      "fill_price": 16.17,
+      "amount_coin": 3.092145949288806,
+      "rebuy": false,
+      "features": {
+        "coin": {
+          "risk_pct": 2.5615,
+          "signal": "Death Cross (ขาลง)",
+          "gap_percent": -1.6412,
+          "change_24h": -0.94,
+          "premium_pct": 0.264,
+          "depth_imbalance": 0.334,
+          "buy_flow_pct": 31.2
+        },
+        "market": {
+          "market_sentiment": 0.1,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.03,
+          "analysed_at": "2026-10-17T21:10:10.019394+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad3eafce14a4bb9221530d01pgosa",
+      "coin": "NEAR",
+      "opened_at": "2026-10-17T21:39:10.655409+00:00",
+      "invested_thb": 50,
+      "fill_price": 160.52,
+      "amount_coin": 0.3114876650884625,
+      "rebuy": false,
+      "features": {
+        "coin": {
+          "risk_pct": 2.4404,
+          "signal": "Death Cross (ขาลง)",
+          "gap_percent": -0.8529,
+          "change_24h": 0.54,
+          "premium_pct": 0.174,
+          "depth_imbalance": 0.621,
+          "buy_flow_pct": 44.8
+        },
+        "market": {
+          "market_sentiment": 0.1,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.03,
+          "analysed_at": "2026-10-17T21:10:10.019394+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad3eb0108271ad1ba7ad3d7hw5uk5",
+      "coin": "EPIC",
+      "opened_at": "2026-10-17T21:39:14.594127+00:00",
+      "invested_thb": 50,
+      "fill_price": 9.0,
+      "amount_coin": 5.555555555555555,
+      "rebuy": false,
+      "features": {
+        "coin": {
+          "risk_pct": 11.0517,
+          "signal": "Golden Cross (ขาขึ้น)",
+          "gap_percent": 6.8112,
+          "change_24h": 12.21,
+          "premium_pct": 1.067,
+          "depth_imbalance": -0.139,
+          "buy_flow_pct": 57.3
+        },
+        "market": {
+          "market_sentiment": 0.1,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.03,
+          "analysed_at": "2026-10-17T21:10:10.019394+00:00"
+        }
+      },
       "status": "open"
     }
   ]
