@@ -103,10 +103,10 @@
       "last_bought_date": null
     },
     "EPIC": {
-      "total_invested_thb": 50.0,
-      "total_coin": 5.555555555555555,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-18"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "ICNT": {
       "total_invested_thb": 0.0,
@@ -289,9 +289,19 @@
       "proceeds_thb": 96.1,
       "realized_pnl_thb": -3.9,
       "reason": "signal_cut"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "EPIC",
+      "sold_coin": 5.555555555555555,
+      "sell_price": 9.52,
+      "invested_thb": 50.0,
+      "proceeds_thb": 52.62,
+      "realized_pnl_thb": 2.62,
+      "reason": "take_profit"
     }
   ],
-  "realized_pnl_total_thb": -9.4,
+  "realized_pnl_total_thb": -6.78,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -314,8 +324,7 @@
       "XLM": true,
       "XRP": true,
       "WLD": true,
-      "NEAR": true,
-      "EPIC": true
+      "NEAR": true
     },
     "sold": {
       "ADA": {
@@ -329,6 +338,10 @@
       "SOL": {
         "reason": "signal_cut",
         "at": "2026-10-17T21:39:04.243123+00:00"
+      },
+      "EPIC": {
+        "reason": "take_profit",
+        "at": "2026-10-17T23:25:04.457937+00:00"
       }
     }
   },
@@ -343,8 +356,8 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 90.6,
-  "profit_reserved_thb": 0.0,
+  "cash_pool_thb": 140.6,
+  "profit_reserved_thb": 2.62,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
   }
