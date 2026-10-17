@@ -1,4 +1,5 @@
 import json
+import re
 import os
 import statistics
 import time
@@ -17,6 +18,9 @@ COMMANDS_FILE = f"{STATE_DIR}/telegram_commands.json"  # ไฟล์ชั่�
 # จำนวนเหรียญ "ติดเทรนด์" สูงสุดที่จะดึงเข้า dashboard/DCA อัตโนมัติ
 # เกณฑ์: เรียงตามปริมาณซื้อขาย 24 ชม. (quoteVolume หน่วยบาท) บน Bitkub มากไปน้อย
 TOP_N_TRENDING = 10
+ALWAYS_INCLUDE = ["BTC", "ETH"]
+MAX_DEPOSIT_THB = 10000  # กันพิมพ์ผิดหลัก
+DEPOSIT_INBOX_FILE = "state/deposit_inbox.json"  # dca_bot.py อ่านแล้วเติมเข้ากองเงินบอท
 
 # Stablecoin ผูกค่ากับ USD 1:1 ราคาแทบไม่ขยับ แม้ปริมาณซื้อขายจะสูงก็ไม่มีความหมายสำหรับ DCA
 # (เป้าหมายคือสะสมเหรียญที่มีโอกาสโต ไม่ใช่ถือเงินตรารูปแบบหนึ่งไปอีกรูปแบบหนึ่ง) ตัดออกจากการจัดอันดับเทรนด์เสมอ
@@ -187,7 +191,12 @@ def pick_trending_coins(ticker, top_n):
             volume = 0.0
         rows.append({"name": name, "ticker_symbol": ticker_symbol, "candle_symbol": f"{name}_THB", "quote_volume_thb": volume})
     rows.sort(key=lambda r: r["quote_volume_thb"], reverse=True)
-    return rows[:top_n]
+    top = rows[:top_n]
+    # BTC และ ETH อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย (ผู้ใช้ขอ "ไม่เว้น BTC และ ETH")
+    for must in ALWAYS_INCLUDE:
+        if not any(r["name"] == must for r in top):
+            top += [r for r in rows if r["name"] == must]
+    return top
 
 
 def process_telegram_commands():
@@ -237,6 +246,18 @@ def process_telegram_commands():
                     "reason": f"telegram: {text}",
                 }
                 send_telegram("▶️ กลับมาทำงานตามปกติแล้ว (DCA bot และ trading bot)")
+        elif re.match(r"^(เติมเงิน|ฝากเงิน|เติม|ฝาก)\s*[\d,]+(\.\d+)?\s*(บาท)?$", text):
+            amount = float(re.sub(r"[^\d.]", "", text.replace(",", "")))
+            if 0 < amount <= MAX_DEPOSIT_THB:
+                inbox = load_json(DEPOSIT_INBOX_FILE, [])
+                inbox.append({"amount_thb": amount, "at": datetime.now(timezone.utc).isoformat()})
+                save_json(DEPOSIT_INBOX_FILE, inbox)
+                send_telegram(
+                    f"💵 รับทราบ เติมกองเงินบอท {amount:,.2f} บาท\n"
+                    "บอทจะใช้ซื้อตามลำดับความเสี่ยงในรอบถัดไป (อย่าลืมโอนเงินเข้า Bitkub ให้ครบด้วย)"
+                )
+            else:
+                send_telegram(f"⚠️ จำนวนเงินไม่ถูกต้อง (รับได้ 1 - {MAX_DEPOSIT_THB:,.0f} บาทต่อครั้ง)")
         elif text in CONFIRM_WORDS:
             confirm_seen = True
         elif text in CANCEL_WORDS:

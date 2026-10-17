@@ -451,7 +451,7 @@
       if (dca.paused) {
         statusHtml = `<span class="bot-status status-halted">หยุดทำงานชั่วคราว (สั่งผ่าน Telegram)</span>`;
       } else if (dca.enabled) {
-        statusHtml = `<span class="bot-status status-on">ทำงานปกติ — งบ ${fmtNum(dca.weekly_budget_thb)} บาท/สัปดาห์ (บอทเลือกเหรียญเสี่ยงต่ำสุด+ข่าวดีก่อน ครั้งละ ${fmtNum(dca.unit_thb_per_buy)} บาท) | ขายทำกำไรที่ +${dca.take_profit_pct}% / ตัดขาดทุนที่ -${dca.stop_loss_pct ?? '-'}%</span>`;
+        statusHtml = `<span class="bot-status status-on">ทำงานปกติ — ซื้อจากกองเงินบอท ครั้งละ ${fmtNum(dca.unit_thb_per_buy)} บาท (เสี่ยงต่ำสุดก่อน) | ขายทำกำไร +${dca.take_profit_pct}% / ตัดขาดทุน -${dca.stop_loss_pct ?? '-'}%</span>`;
       } else {
         statusHtml = `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — ยังไม่ซื้อจริง</span>`;
       }
@@ -477,13 +477,14 @@
       }
 
       if (dca.cycle_ranking && dca.cycle_ranking.length) {
-        bodyHtml += `<div class="row"><span class="label">คิวซื้อสัปดาห์นี้ (${dca.cycle_date || "-"}) · งบคงเหลือ ${dca.cycle_budget_remaining_thb != null ? fmtNum(dca.cycle_budget_remaining_thb) : "-"} บาท</span><span></span></div>`;
+        bodyHtml += `<div class="row"><span class="label">กองเงินบอท (พร้อมซื้อ)</span><span>${dca.cash_pool_thb != null ? fmtNum(dca.cash_pool_thb) : "-"} บาท</span></div>`;
+        bodyHtml += `<div class="row"><span class="label">กำไรที่แยกเก็บไว้</span><span class="up">${dca.profit_reserved_thb != null ? fmtNum(dca.profit_reserved_thb) : "-"} บาท</span></div>`;
+        bodyHtml += `<div class="row"><span class="label">ลำดับซื้อรอบนี้ (${dca.cycle_date || "-"})</span><span></span></div>`;
         bodyHtml += `<div class="queue-list">`;
         dca.cycle_ranking.forEach((name) => {
           const c = (dca.coins && dca.coins[name]) || {};
           let tag = `<span class="queue-tag tag-pending">รอคิว</span>`;
           if (c.bought_this_cycle) tag = `<span class="queue-tag tag-bought">✓ ซื้อแล้ว</span>`;
-          else if (c.skipped_budget_this_cycle) tag = `<span class="queue-tag tag-skipped">งบหมด</span>`;
           const riskStr = c.risk_pct != null ? `เสี่ยง ${c.risk_pct}%` : "";
           const newsStr = c.news_sentiment != null ? ` · ข่าว ${c.news_sentiment > 0 ? "+" : ""}${c.news_sentiment}` : "";
           bodyHtml += `<div class="queue-item"><span>${name} <span class="label">${riskStr}${newsStr}</span></span>${tag}</div>`;

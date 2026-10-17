@@ -43,15 +43,24 @@ DASHBOARD_FILE = "latest.json"
 # ให้บอทเลือกเองว่าจะซื้อเหรียญไหนในงบนี้" ตามคำขอผู้ใช้ (ฝากเงินเข้าทุกสัปดาห์ สัปดาห์ละ 300 บาท)
 #
 # วิธีเลือก: เรียงเหรียญที่ "ติดเทรนด์" (active_coins) ตามคะแนนความเสี่ยงจากน้อยไปมาก แล้วซื้อไล่ลงมา
-# ครั้งละ DCA_UNIT_THB บาท จนกว่างบ WEEKLY_BUDGET_THB จะหมด (เหรียญที่อยู่ท้ายแถวถ้างบไม่พอ จะไม่ได้ซื้อ
+# ครั้งละ DCA_UNIT_THB บาท จนกว่าเงินในกองจะไม่พอ (เหรียญที่อยู่ท้ายแถวถ้าเงินไม่พอ จะไม่ได้ซื้อ
 # สัปดาห์นั้น — ตามที่ผู้ใช้ต้องการ "ไล่ซื้อจากเสี่ยงน้อยสุดไปมากสุด อันดับสุดท้ายไม่ต้องซื้อถ้างบหมด")
 #
 # คะแนนความเสี่ยง = risk_pct (ความผันผวนราคาย้อนหลัง 48 ชม. ที่ crypto_alert.py คำนวณไว้)
 # หักลบด้วยคะแนนข่าว/เซนติเมนต์ (news_sentiment จาก CryptoPanic, -1 ถึง +1) คูณน้ำหนัก
 # ข่าวดี -> คะแนนความเสี่ยงลดลง (มีโอกาสถูกเลือกซื้อก่อน), ข่าวร้าย -> คะแนนเพิ่มขึ้น (ถูกเลื่อนไปท้ายแถว)
-WEEKLY_BUDGET_THB = 300
-DCA_UNIT_THB = 50  # ซื้อเหรียญละเท่านี้ต่อครั้งที่ถูกเลือก (300/50 = ซื้อได้สูงสุด 6 เหรียญ/สัปดาห์)
+#
+# ระบบกองเงินหมุนเวียน (ตามคำขอผู้ใช้ 17 ต.ค. 2569):
+# - บอทใช้เงินจาก "กองเงินบอท" (cash_pool_thb ใน state) เท่านั้น ไม่แตะเงินบาทส่วนอื่นในบัญชี
+# - กองเงินเพิ่มเมื่อผู้ใช้แจ้งเติมเงิน (พิมพ์ "เติม 300" ใน Telegram) — ไม่มีการเติมอัตโนมัติรายสัปดาห์
+# - ขายทำกำไร (TP): ทุนเดิมกลับเข้ากองเพื่อซื้อเหรียญถัดไปทันที ส่วนกำไรแยกเก็บ (profit_reserved_thb) ไม่เอาไปซื้อต่อ
+# - ตัดขาดทุน (SL): เงินที่ขายได้ทั้งหมดกลับเข้ากอง (ไม่มีกำไรให้แยก)
+# - ซื้อไล่ตามลำดับความเสี่ยงน้อย -> มาก ครั้งละ DCA_UNIT_THB บาท จนเงินในกองไม่พอแล้วหยุด
+# - จัดลำดับใหม่ทุก DCA_INTERVAL_DAYS วัน ในรอบเดียวกันเหรียญหนึ่งซื้อได้ครั้งเดียว (กันซื้อกลับเหรียญที่เพิ่งขาย)
+DCA_UNIT_THB = 50  # ซื้อเหรียญละเท่านี้ต่อครั้ง
 DCA_INTERVAL_DAYS = 7
+MUST_INCLUDE_COINS = ["BTC", "ETH"]  # อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย
+DEPOSIT_INBOX_FILE = "state/deposit_inbox.json"  # crypto_alert.py เขียนยอดเติมเงินจาก Telegram ไว้ที่นี่
 NEWS_SENTIMENT_WEIGHT = 5.0  # ข่าวบวก/ลบเต็มสเกล (+-1) ขยับคะแนนความเสี่ยงได้สูงสุด 5 แต้ม
 
 # ขายอัตโนมัติ (ผู้ใช้เลือกให้ใช้ TP/SL ชุดเดียวกับบอทเทรดกับเหรียญ DCA แทนการเปิดไม้ใหม่ด้วยเงินบาท)
@@ -144,7 +153,9 @@ def default_state():
         "log": [],
         "sell_log": [],
         "realized_pnl_total_thb": 0.0,
-        "dca_cycle": None,  # รอบงบรวมรายสัปดาห์ปัจจุบัน (ดู build_new_cycle)
+        "dca_cycle": None,  # รอบจัดลำดับปัจจุบัน (ดู build_new_cycle)
+        "cash_pool_thb": 0.0,
+        "profit_reserved_thb": 0.0,
     }
 
 
@@ -160,8 +171,9 @@ def build_new_cycle(today, active_coins, dashboard_so_far):
     ถ้าเหรียญไหนยังไม่มีข้อมูล risk_pct (เช่น เพิ่งเพิ่มฟีเจอร์ หรือดึงแท่งเทียนไม่สำเร็จรอบก่อน)
     จะต่อท้ายแถวตามลำดับเดิมใน active_coins แทน (ไม่ตัดออก กันบอทหยุดซื้อเฉยๆ เพราะข้อมูลขาดชั่วคราว)
     """
+    candidates = list(active_coins) + [c for c in MUST_INCLUDE_COINS if c not in active_coins]
     ranked, unranked = [], []
-    for name in active_coins:
+    for name in candidates:
         info = dashboard_so_far.get(name, {}) if isinstance(dashboard_so_far, dict) else {}
         risk_pct = info.get("risk_pct")
         if risk_pct is None:
@@ -173,9 +185,7 @@ def build_new_cycle(today, active_coins, dashboard_so_far):
     return {
         "cycle_date": today,
         "ranking": ranking,
-        "budget_remaining_thb": WEEKLY_BUDGET_THB,
         "bought": {},
-        "skipped_budget": {},
     }
 
 
@@ -274,6 +284,128 @@ def reconcile_pending_orders(state, today):
     return [po["name"] for po in pending if po not in still]
 
 
+def run_take_profit_stop_loss(state, ticker, today):
+    """
+    เช็คทุกเหรียญที่ถืออยู่ (รวมเหรียญที่หลุดเทรนด์): กำไรถึง TAKE_PROFIT_PCT หรือขาดทุนถึง STOP_LOSS_PCT
+    เทียบกับทุนเฉลี่ย -> ขายทั้งหมด แล้วคืนเงินเข้ากองตามกติกา (ดูหัวไฟล์)
+    """
+    for name in list(state["holdings"].keys()):
+        h = state["holdings"][name]
+        if h["total_coin"] <= 0:
+            continue
+        if any(po["name"] == name for po in state["pending_orders"]):
+            continue  # ยังมีคำสั่งซื้อที่รอยืนยัน จำนวนเหรียญ/ทุนเฉลี่ยยังไม่ครบ อย่าเพิ่งขาย
+        tick = ticker.get(trade_symbol_of(name)) if isinstance(ticker, dict) else None
+        current_price = tick.get("last") if isinstance(tick, dict) else None
+        if not current_price:
+            continue
+        avg_cost = h["total_invested_thb"] / h["total_coin"] if h["total_coin"] else None
+        if not avg_cost:
+            continue
+        pnl_pct_now = (current_price - avg_cost) / avg_cost * 100
+        if -STOP_LOSS_PCT < pnl_pct_now < TAKE_PROFIT_PCT:
+            continue
+        is_stop_loss = pnl_pct_now <= -STOP_LOSS_PCT
+
+        outcome = execute_sell(trade_symbol_of(name), h["total_coin"], fallback_price=current_price)
+        if outcome["ok"]:
+            invested = h["total_invested_thb"]
+            realized_pnl = outcome["proceeds_thb"] - invested
+            if realized_pnl > 0:
+                # กำไรแยกเก็บ ทุนเดิมกลับเข้ากองไปซื้อเหรียญถัดไป
+                state["profit_reserved_thb"] = round(state.get("profit_reserved_thb", 0.0) + realized_pnl, 2)
+                back_to_pool = invested
+            else:
+                back_to_pool = outcome["proceeds_thb"]
+            state["cash_pool_thb"] = round(state.get("cash_pool_thb", 0.0) + back_to_pool, 2)
+            state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
+            state["sell_log"].append({
+                "date": today,
+                "name": name,
+                "sold_coin": h["total_coin"],
+                "sell_price": outcome["sell_price"],
+                "invested_thb": h["total_invested_thb"],
+                "proceeds_thb": round(outcome["proceeds_thb"], 2),
+                "realized_pnl_thb": round(realized_pnl, 2),
+                "reason": "stop_loss" if is_stop_loss else "take_profit",
+            })
+            state["sell_log"] = state["sell_log"][-200:]
+            if is_stop_loss:
+                head = f"🛑 ตัดขาดทุน {name} ทั้งหมด (ขาดทุนเฉลี่ยรวมถึง {pnl_pct_now:.1f}%)"
+            else:
+                head = f"🎉 ขายทำกำไร {name} ทั้งหมด (กำไรเฉลี่ยรวมถึง +{pnl_pct_now:.1f}%)"
+            send_telegram(
+                f"{head}\n"
+                f"ทุนสะสม {h['total_invested_thb']:.2f} บาท → ได้คืน {outcome['proceeds_thb']:.2f} บาท "
+                f"({realized_pnl:+.2f} บาท)\n"
+                + (f"แยกกำไร {realized_pnl:.2f} บาทเก็บไว้ (กำไรสะสม {state['profit_reserved_thb']:.2f} บาท)\n"
+                   if realized_pnl > 0 else "")
+                + f"คืนเข้ากองซื้อ {back_to_pool:.2f} บาท → กองเงินบอทมี {state['cash_pool_thb']:.2f} บาท"
+            )
+            # เริ่มสะสมใหม่จากศูนย์สำหรับเหรียญนี้ (เหรียญอื่นไม่กระทบ)
+            h["total_invested_thb"] = 0.0
+            h["total_coin"] = 0.0
+            h["buy_count"] = 0
+            h["last_bought_date"] = None
+        else:
+            print(f"{name}: ถึงเกณฑ์ขาย ({pnl_pct_now:+.1f}%) แต่ขายไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
+
+
+def run_buys(state, cycle, today):
+    """ซื้อไล่ตามลำดับความเสี่ยงด้วยเงินในกอง ครั้งละ DCA_UNIT_THB จนเงินในกองไม่พอ"""
+    bought_lines, failed_lines = [], []
+    for name in cycle["ranking"]:
+        if name in cycle["bought"]:
+            continue
+        if state["cash_pool_thb"] < DCA_UNIT_THB:
+            break
+        outcome = execute_buy(trade_symbol_of(name), DCA_UNIT_THB)
+        if outcome["ok"]:
+            h = state["holdings"].setdefault(
+                name, {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None}
+            )
+            h["total_invested_thb"] = round(h["total_invested_thb"] + DCA_UNIT_THB, 4)
+            h["buy_count"] = h["buy_count"] + 1
+            h["last_bought_date"] = today
+            if outcome.get("pending"):
+                # Bitkub รับคำสั่งแล้ว แต่ยังอ่านราคาจริงไม่ได้ — เก็บไว้ยืนยันรอบหน้า (ไม่ซื้อซ้ำ)
+                state["pending_orders"].append({
+                    "name": name, "sym": outcome["sym"], "order_id": outcome["order_id"],
+                    "side": "buy", "amt_thb": DCA_UNIT_THB, "date": today,
+                })
+                bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท (รอยืนยันราคา)")
+            else:
+                h["total_coin"] = h["total_coin"] + outcome["amount_coin"]
+                state["log"].append({
+                    "date": today,
+                    "name": name,
+                    "invested_thb": DCA_UNIT_THB,
+                    "fill_price": outcome["fill_price"],
+                    "amount_coin": outcome["amount_coin"],
+                    "order_id": outcome["order_id"],
+                })
+                bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท @ {outcome['fill_price']:,.4f}")
+            cycle["bought"][name] = True
+            state["cash_pool_thb"] = round(state["cash_pool_thb"] - DCA_UNIT_THB, 2)
+            state.get("last_errors", {}).pop(name, None)
+        else:
+            failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")
+            state["last_errors"] = state.get("last_errors", {})
+            state["last_errors"][name] = {"error": outcome["error"], "at": datetime.now(timezone.utc).isoformat()}
+            if "error code 18" in outcome["error"]:
+                break  # เงินบาทในบัญชีจริงไม่พอ ลองใหม่รอบหน้า
+
+    state["log"] = state["log"][-500:]  # กันไฟล์โตไม่จำกัด เก็บแค่ 500 รายการล่าสุด
+
+    if bought_lines or failed_lines:
+        msg = f"💰 DCA ซื้อตามลำดับความเสี่ยง — กองเงินบอทคงเหลือ {state['cash_pool_thb']:,.2f} บาท\n"
+        if bought_lines:
+            msg += "ซื้อแล้ว:\n" + "\n".join(bought_lines) + "\n"
+        if failed_lines:
+            msg += "⚠️ ล้มเหลว (จะลองใหม่อัตโนมัติรอบหน้า):\n" + "\n".join(failed_lines)
+        send_telegram(msg)
+
+
 # ---------------- โปรแกรมหลัก ----------------
 
 def main():
@@ -297,6 +429,11 @@ def main():
     state.setdefault("last_summary_date", None)
     state.setdefault("crash_alert_active", False)
     state.setdefault("pending_orders", [])
+    state.setdefault("cash_pool_thb", 0.0)
+    state.setdefault("profit_reserved_thb", 0.0)
+    if state.get("dca_cycle"):
+        state["dca_cycle"].pop("budget_remaining_thb", None)
+        state["dca_cycle"].pop("skipped_budget", None)
 
     trading_enabled = bool(BITKUB_API_KEY and BITKUB_API_SECRET)
     today = today_str()
@@ -312,138 +449,27 @@ def main():
         print(f"ดึงราคาล่าสุดไม่สำเร็จ: {e}")
     ticker_ok = isinstance(ticker, dict) and len(ticker) > 0
 
+    # ---- ยอดเติมเงินที่ผู้ใช้แจ้งผ่าน Telegram ("เติม 300") -> เข้ากองเงินบอท ----
+    inbox = load_json(DEPOSIT_INBOX_FILE, [])
+    if inbox:
+        added = sum(float(d.get("amount_thb") or 0) for d in inbox)
+        state["cash_pool_thb"] = round(state["cash_pool_thb"] + added, 2)
+        save_json(DEPOSIT_INBOX_FILE, [])
+        print(f"เติมเงินเข้ากองบอท {added:,.2f} บาท -> คงเหลือ {state['cash_pool_thb']:,.2f} บาท")
+
     if not trading_enabled:
         print("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET — ข้าม DCA รอบนี้ (ยังไม่ซื้อจริง)")
     elif paused:
-        print("ระบบถูกสั่งหยุดทำงานผ่าน Telegram อยู่ — ข้ามการซื้อ DCA รอบนี้ทั้งหมด")
+        print("ระบบถูกสั่งหยุดทำงานผ่าน Telegram อยู่ — ข้ามการซื้อขาย DCA รอบนี้ทั้งหมด")
     else:
-        # งบรวม WEEKLY_BUDGET_THB บาท/รอบ (รอบละ DCA_INTERVAL_DAYS วัน) — เริ่มรอบใหม่เมื่อครบกำหนด
-        # แล้วล็อกลำดับเหรียญที่จะซื้อ (เรียงตามความเสี่ยงน้อย->มาก) ไว้ทั้งรอบ
         cycle = state.get("dca_cycle")
         if cycle is None or days_since(cycle["cycle_date"], today) >= DCA_INTERVAL_DAYS:
             cycle = build_new_cycle(today, active_coins, dashboard_so_far)
             state["dca_cycle"] = cycle
-            print(f"เริ่มรอบ DCA ใหม่ ({today}) งบ {WEEKLY_BUDGET_THB} บาท ลำดับเหรียญ: {', '.join(cycle['ranking']) or '-'}")
-
-        # เงินที่เติมเข้าบัญชีแต่ละรอบอาจไม่สม่ำเสมอ — เหรียญที่เงินไม่พอจะ "ยังไม่ถูกบันทึกว่าซื้อแล้ว"
-        # (ไม่หักงบ) จึงถูกลองซื้อใหม่ทุกชั่วโมงจนกว่าจะมีเงินพอ หรือจนกว่ารอบนี้จะหมดอายุ (ครบ 7 วัน)
-        bought_lines, failed_lines = [], []
-        for name in cycle["ranking"]:
-            if name in cycle["bought"] or name in cycle["skipped_budget"]:
-                continue
-            if cycle["budget_remaining_thb"] < DCA_UNIT_THB:
-                cycle["skipped_budget"][name] = True
-                continue
-            outcome = execute_buy(trade_symbol_of(name), DCA_UNIT_THB)
-            if outcome["ok"]:
-                h = state["holdings"].setdefault(
-                    name, {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None}
-                )
-                h["total_invested_thb"] = round(h["total_invested_thb"] + DCA_UNIT_THB, 4)
-                h["buy_count"] = h["buy_count"] + 1
-                h["last_bought_date"] = today
-                if outcome.get("pending"):
-                    # Bitkub รับคำสั่งแล้ว แต่ยังอ่านราคาจริงไม่ได้ — เก็บไว้ยืนยันรอบหน้า (ไม่ซื้อซ้ำ)
-                    state["pending_orders"].append({
-                        "name": name, "sym": outcome["sym"], "order_id": outcome["order_id"],
-                        "side": "buy", "amt_thb": DCA_UNIT_THB, "date": today,
-                    })
-                    bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท (รอยืนยันราคา)")
-                else:
-                    h["total_coin"] = h["total_coin"] + outcome["amount_coin"]
-                    state["log"].append({
-                        "date": today,
-                        "name": name,
-                        "invested_thb": DCA_UNIT_THB,
-                        "fill_price": outcome["fill_price"],
-                        "amount_coin": outcome["amount_coin"],
-                        "order_id": outcome["order_id"],
-                    })
-                    bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท @ {outcome['fill_price']:,.4f}")
-                cycle["bought"][name] = True
-                cycle["budget_remaining_thb"] = round(cycle["budget_remaining_thb"] - DCA_UNIT_THB, 2)
-                state.get("last_errors", {}).pop(name, None)
-            else:
-                failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")
-                state["last_errors"] = state.get("last_errors", {})
-                state["last_errors"][name] = {"error": outcome["error"], "at": datetime.now(timezone.utc).isoformat()}
-
-        state["log"] = state["log"][-500:]  # กันไฟล์โตไม่จำกัด เก็บแค่ 500 รายการล่าสุด
-
-        if bought_lines or failed_lines:
-            skipped_names = [n for n in cycle["ranking"] if n in cycle["skipped_budget"]]
-            msg = (
-                f"💰 DCA รอบสัปดาห์นี้ ({cycle['cycle_date']}) — งบคงเหลือ {cycle['budget_remaining_thb']} "
-                f"จาก {WEEKLY_BUDGET_THB} บาท\n"
-            )
-            if bought_lines:
-                msg += "ซื้อแล้ว:\n" + "\n".join(bought_lines) + "\n"
-            if failed_lines:
-                msg += (
-                    "⚠️ ล้มเหลว (อาจเพราะเงินในบัญชีไม่พอ — จะลองใหม่อัตโนมัติทุกชั่วโมงจนกว่าจะเติมเงินพอ):\n"
-                    + "\n".join(failed_lines) + "\n"
-                )
-            if skipped_names:
-                msg += f"⏭ งบหมดก่อนถึงคิว (รอบนี้): {', '.join(skipped_names)}"
-            send_telegram(msg)
-        elif not cycle["ranking"]:
-            print("ยังไม่มีเหรียญติดเทรนด์ให้เลือกซื้อในรอบนี้")
-        else:
-            print("รอบ DCA สัปดาห์นี้ซื้อ/ข้ามครบทุกเหรียญในคิวแล้ว รอรอบถัดไป")
-
-    # ----- เช็ค TP/SL: เหรียญไหนกำไรถึง TAKE_PROFIT_PCT หรือขาดทุนถึง STOP_LOSS_PCT ขายทั้งหมดกลับเป็นเงินบาท -----
-    # เช็คทุกเหรียญที่เคยถือสะสมไว้ (ไม่ใช่แค่เหรียญที่ยังติดเทรนด์) เพราะของเก่าที่หลุดเทรนด์ก็ยังต้องขายได้ตามแผน
-    if trading_enabled and not paused:
-        for name in list(state["holdings"].keys()):
-            h = state["holdings"][name]
-            if h["total_coin"] <= 0:
-                continue
-            if any(po["name"] == name for po in state["pending_orders"]):
-                continue  # ยังมีคำสั่งซื้อที่รอยืนยัน จำนวนเหรียญ/ทุนเฉลี่ยยังไม่ครบ อย่าเพิ่งขาย
-            tick = ticker.get(trade_symbol_of(name)) if isinstance(ticker, dict) else None
-            current_price = tick.get("last") if isinstance(tick, dict) else None
-            if not current_price:
-                continue
-            avg_cost = h["total_invested_thb"] / h["total_coin"] if h["total_coin"] else None
-            if not avg_cost:
-                continue
-            pnl_pct_now = (current_price - avg_cost) / avg_cost * 100
-            if -STOP_LOSS_PCT < pnl_pct_now < TAKE_PROFIT_PCT:
-                continue
-            is_stop_loss = pnl_pct_now <= -STOP_LOSS_PCT
-
-            outcome = execute_sell(trade_symbol_of(name), h["total_coin"], fallback_price=current_price)
-            if outcome["ok"]:
-                realized_pnl = outcome["proceeds_thb"] - h["total_invested_thb"]
-                state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
-                state["sell_log"].append({
-                    "date": today,
-                    "name": name,
-                    "sold_coin": h["total_coin"],
-                    "sell_price": outcome["sell_price"],
-                    "invested_thb": h["total_invested_thb"],
-                    "proceeds_thb": round(outcome["proceeds_thb"], 2),
-                    "realized_pnl_thb": round(realized_pnl, 2),
-                    "reason": "stop_loss" if is_stop_loss else "take_profit",
-                })
-                state["sell_log"] = state["sell_log"][-200:]
-                if is_stop_loss:
-                    head = f"🛑 ตัดขาดทุน {name} ทั้งหมด (ขาดทุนเฉลี่ยรวมถึง {pnl_pct_now:.1f}%)"
-                else:
-                    head = f"🎉 ขายทำกำไร {name} ทั้งหมด (กำไรเฉลี่ยรวมถึง +{pnl_pct_now:.1f}%)"
-                send_telegram(
-                    f"{head}\n"
-                    f"ทุนสะสม {h['total_invested_thb']:.2f} บาท → ได้คืน {outcome['proceeds_thb']:.2f} บาท "
-                    f"({realized_pnl:+.2f} บาท)\n"
-                    f"เริ่มสะสม DCA ของ {name} ใหม่จากศูนย์ตั้งแต่รอบถัดไป"
-                )
-                # เริ่มสะสมใหม่จากศูนย์สำหรับเหรียญนี้ (เหรียญอื่นไม่กระทบ)
-                h["total_invested_thb"] = 0.0
-                h["total_coin"] = 0.0
-                h["buy_count"] = 0
-                h["last_bought_date"] = None
-            else:
-                print(f"{name}: ถึงเกณฑ์ขาย ({pnl_pct_now:+.1f}%) แต่ขายไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
+            print(f"เริ่มรอบจัดลำดับใหม่ ({today}) ลำดับเหรียญ: {', '.join(cycle['ranking']) or '-'}")
+        # ขายก่อน (เงินทุนที่ได้คืนจะได้ใช้ซื้อเหรียญถัดไปได้ในรอบเดียวกัน) แล้วค่อยซื้อ
+        run_take_profit_stop_loss(state, ticker, today)
+        run_buys(state, cycle, today)
 
     # ----- คำนวณมูลค่าปัจจุบันของแต่ละเหรียญ (ใช้ได้ทั้งตอนเปิด/ปิดใช้งานจริง) -----
     cycle = state.get("dca_cycle") or {}
@@ -477,7 +503,6 @@ def main():
             "risk_pct": info.get("risk_pct"),
             "news_sentiment": info.get("news_sentiment"),
             "bought_this_cycle": bool(cycle.get("bought", {}).get(name)),
-            "skipped_budget_this_cycle": bool(cycle.get("skipped_budget", {}).get(name)),
         }
         if has_pending:
             per_coin[name]["pending_confirmation"] = True
@@ -542,14 +567,14 @@ def main():
         "enabled": trading_enabled,
         "paused": paused,
         "active_coins": active_coins,
-        "weekly_budget_thb": WEEKLY_BUDGET_THB,
+        "cash_pool_thb": state.get("cash_pool_thb", 0.0),
+        "profit_reserved_thb": state.get("profit_reserved_thb", 0.0),
         "unit_thb_per_buy": DCA_UNIT_THB,
         "interval_days": DCA_INTERVAL_DAYS,
         "take_profit_pct": TAKE_PROFIT_PCT,
         "stop_loss_pct": STOP_LOSS_PCT,
         "cycle_date": cycle.get("cycle_date"),
         "cycle_ranking": cycle.get("ranking", []),
-        "cycle_budget_remaining_thb": cycle.get("budget_remaining_thb"),
         "realized_pnl_total_thb": state.get("realized_pnl_total_thb", 0.0),
         "coins": per_coin,
         "total_invested_thb": round(total_invested, 2),
