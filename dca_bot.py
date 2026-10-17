@@ -507,6 +507,8 @@ def main():
         state["dca_cycle"].pop("budget_remaining_thb", None)
         state["dca_cycle"].pop("skipped_budget", None)
 
+    trade_journal.save(load_journal(state))  # สร้าง/บันทึกสมุดเทรดเสมอ (ครั้งแรกจะดึงไม้เดิมจากประวัติการซื้อ)
+
     trading_enabled = bool(BITKUB_API_KEY and BITKUB_API_SECRET)
     today = today_str()
 
