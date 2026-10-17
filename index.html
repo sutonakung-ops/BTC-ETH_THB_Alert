@@ -521,9 +521,14 @@
         }
       }
 
-      bodyHtml += `<div class="row"><span class="label">เช็คล่าสุด</span><span>${
+      bodyHtml += `<div class="row"><span class="label">บอทเช็คล่าสุด</span><span>${
         dca.checked_at ? new Date(dca.checked_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" }) : "-"
       }</span></div>`;
+      if (dca.live_at) {
+        bodyHtml += `<div class="row"><span class="label">🟢 มูลค่า/กำไรขาดทุนคำนวณด้วยราคาสด</span><span>${
+          new Date(dca.live_at).toLocaleTimeString("th-TH", { timeZone: "Asia/Bangkok" })
+        }</span></div>`;
+      }
 
       return statusHtml + bodyHtml;
     }
@@ -531,6 +536,37 @@
     // รายชื่อเหรียญที่กำลังแสดงอยู่ตอนนี้ (อัปเดตทุกครั้งที่ loadDashboard() เรนเดอร์ใหม่)
     // ใช้ไปต่อให้ refreshLivePrices() รู้ว่าต้องดึงราคาสดของเหรียญไหนบ้าง
     let liveCoinNames = [];
+    let lastDca = null; // ข้อมูล DCA จากรอบวิเคราะห์ล่าสุด ใช้คำนวณมูลค่า/กำไรขาดทุนใหม่ด้วยราคาสด
+
+    // คำนวณการ์ด DCA ใหม่ด้วยราคาสด: มูลค่า = จำนวนเหรียญที่ถือ x ราคาล่าสุด (ทุน/จำนวนเหรียญมาจาก state ของบอท)
+    function applyLivePricesToDca(dca, ticker) {
+      const live = JSON.parse(JSON.stringify(dca));
+      let invested = 0, value = 0, priced = true;
+      for (const name in live.coins || {}) {
+        const c = live.coins[name];
+        if (!c.total_coin || c.pending_confirmation) continue;
+        const t = ticker[`THB_${name}`];
+        const price = t && t.last != null ? Number(t.last) : null;
+        if (price) {
+          c.current_price = price;
+          c.current_value_thb = Math.round(c.total_coin * price * 100) / 100;
+          c.pnl_thb = Math.round((c.current_value_thb - c.total_invested_thb) * 100) / 100;
+          c.pnl_pct = c.total_invested_thb ? Math.round(c.pnl_thb / c.total_invested_thb * 10000) / 100 : null;
+        } else {
+          priced = false;
+        }
+        invested += c.total_invested_thb || 0;
+        value += c.current_value_thb || 0;
+      }
+      if (invested && priced) {
+        live.total_invested_thb = Math.round(invested * 100) / 100;
+        live.total_value_thb = Math.round(value * 100) / 100;
+        live.total_pnl_thb = Math.round((value - invested) * 100) / 100;
+        live.total_pnl_pct = Math.round((value - invested) / invested * 10000) / 100;
+      }
+      live.live_at = new Date().toISOString();
+      return live;
+    }
 
     function loadDashboard() {
       return fetch("latest.json?t=" + Date.now())
@@ -570,6 +606,7 @@
             row.addEventListener("click", () => row.classList.toggle("expanded"));
           });
           document.getElementById("botCard").innerHTML = renderBotCard(data.trading_bot);
+          lastDca = data.dca_bot || null;
           document.getElementById("dcaCard").innerHTML = renderDcaCard(data.dca_bot);
           refreshLivePrices(); // ดึงราคาสดทับทันทีหลังเรนเดอร์ใหม่ ไม่ต้องรอรอบถัดไป
         })
@@ -584,7 +621,7 @@
     // ที่รันทุก 1 ชม.) อัปเดตเฉพาะตัวเลขราคา/เปอร์เซ็นต์เปลี่ยนแปลงในหน้าเดิม ไม่แตะกราฟ/สัญญาณ/MA
     // ซึ่งต้องรอผลวิเคราะห์จากบอทเท่านั้น ถ้าดึงไม่สำเร็จ (เช่นโดนบล็อก CORS) จะเงียบๆ ไม่ขึ้น error รบกวน
     function refreshLivePrices() {
-      if (!liveCoinNames.length) return;
+      if (!liveCoinNames.length && !lastDca) return;
       fetch("https://api.bitkub.com/api/market/ticker?t=" + Date.now())
         .then((res) => {
           if (!res.ok) throw new Error("bad response");
@@ -613,13 +650,16 @@
               if (changeDetailEl) { changeDetailEl.textContent = changeText; changeDetailEl.className = `change-detail ${cls}`; }
             }
           });
+          if (lastDca) {
+            document.getElementById("dcaCard").innerHTML = renderDcaCard(applyLivePricesToDca(lastDca, ticker));
+          }
           const liveEl = document.getElementById("liveUpdated");
           liveEl.textContent = "🟢 ราคาสด: " + new Date().toLocaleTimeString("th-TH", { timeZone: "Asia/Bangkok" });
         })
         .catch(() => {
           // ดึงราคาสดไม่สำเร็จ (เช่นเบราว์เซอร์บล็อก cross-origin) — ใช้ราคาจากรอบวิเคราะห์ล่าสุดต่อไปเงียบๆ
           const liveEl = document.getElementById("liveUpdated");
-          if (liveEl) liveEl.textContent = "";
+          if (liveEl) liveEl.textContent = "⚪ ดึงราคาสดไม่ได้ — แสดงตัวเลขจากรอบวิเคราะห์ล่าสุด";
         });
     }
 
