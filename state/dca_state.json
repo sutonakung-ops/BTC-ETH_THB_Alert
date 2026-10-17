@@ -2,37 +2,37 @@
   "holdings": {
     "BTC": {
       "total_invested_thb": 50.0,
-      "total_coin": 0.0,
+      "total_coin": 1.8302539186060416e-05,
       "buy_count": 1,
       "last_bought_date": "2026-10-16"
     },
     "ETH": {
       "total_invested_thb": 50.0,
-      "total_coin": 0.0,
+      "total_coin": 0.0006141355581417487,
       "buy_count": 1,
       "last_bought_date": "2026-10-16"
     },
     "XRP": {
       "total_invested_thb": 50.0,
-      "total_coin": 0.0,
+      "total_coin": 1.1449507671170138,
       "buy_count": 1,
       "last_bought_date": "2026-10-16"
     },
     "ADA": {
       "total_invested_thb": 50.0,
-      "total_coin": 0.0,
+      "total_coin": 6.70331143584931,
       "buy_count": 1,
       "last_bought_date": "2026-10-16"
     },
     "DOGE": {
       "total_invested_thb": 50.0,
-      "total_coin": 0.0,
+      "total_coin": 18.62266751089426,
       "buy_count": 1,
       "last_bought_date": "2026-10-16"
     },
     "SOL": {
       "total_invested_thb": 50.0,
-      "total_coin": 0.0,
+      "total_coin": 0.01424314762167921,
       "buy_count": 1,
       "last_bought_date": "2026-10-16"
     },
@@ -62,7 +62,7 @@
     },
     "CRV": {
       "total_invested_thb": 50.0,
-      "total_coin": 0.0,
+      "total_coin": 4.3591979075850045,
       "buy_count": 1,
       "last_bought_date": "2026-10-16"
     },
@@ -74,7 +74,7 @@
     },
     "XLM": {
       "total_invested_thb": 50.0,
-      "total_coin": 0.0,
+      "total_coin": 8.3500334001336,
       "buy_count": 1,
       "last_bought_date": "2026-10-16"
     },
@@ -103,10 +103,75 @@
       "last_bought_date": null
     }
   },
-  "log": [],
+  "log": [
+    {
+      "date": "2026-10-16",
+      "name": "BTC",
+      "invested_thb": 50,
+      "fill_price": 2731315.0100000002,
+      "amount_coin": 1.8302539186060416e-05,
+      "order_id": "6ad33f5bdf98e484901f62c4m8a2qe"
+    },
+    {
+      "date": "2026-10-16",
+      "name": "SOL",
+      "invested_thb": 50,
+      "fill_price": 3510.46,
+      "amount_coin": 0.01424314762167921,
+      "order_id": "6ad33f5c98b3bc6f5abd136900es3u"
+    },
+    {
+      "date": "2026-10-16",
+      "name": "XRP",
+      "invested_thb": 50,
+      "fill_price": 43.67,
+      "amount_coin": 1.1449507671170138,
+      "order_id": "6ad33f5ecd5e1a487327a8e7s5oh6d"
+    },
+    {
+      "date": "2026-10-16",
+      "name": "XLM",
+      "invested_thb": 50,
+      "fill_price": 5.988,
+      "amount_coin": 8.3500334001336,
+      "order_id": "6ad33f60d5c8d71495889c087spahm"
+    },
+    {
+      "date": "2026-10-16",
+      "name": "ETH",
+      "invested_thb": 50,
+      "fill_price": 81415.25,
+      "amount_coin": 0.0006141355581417487,
+      "order_id": "6ad33f61bfdbb53de918307bj542k5"
+    },
+    {
+      "date": "2026-10-16",
+      "name": "DOGE",
+      "invested_thb": 50,
+      "fill_price": 2.6849000000000003,
+      "amount_coin": 18.62266751089426,
+      "order_id": "6ad33f63cd5e1a487327a9601o0oz7"
+    },
+    {
+      "date": "2026-10-16",
+      "name": "ADA",
+      "invested_thb": 50,
+      "fill_price": 7.459,
+      "amount_coin": 6.70331143584931,
+      "order_id": "6ad33f64e14a4bb9220b812bj8xy3w"
+    },
+    {
+      "date": "2026-10-16",
+      "name": "CRV",
+      "invested_thb": 50,
+      "fill_price": 11.47,
+      "amount_coin": 4.3591979075850045,
+      "order_id": "6ad33f6645d27757b374b78c7ma6x9"
+    }
+  ],
   "sell_log": [],
   "realized_pnl_total_thb": 0.0,
-  "last_summary_date": null,
+  "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
     "cycle_date": "2026-10-16",
@@ -148,70 +213,5 @@
       "at": "2026-10-17T09:27:06.668100+00:00"
     }
   },
-  "pending_orders": [
-    {
-      "name": "BTC",
-      "sym": "btc_thb",
-      "order_id": "6ad33f5bdf98e484901f62c4m8a2qe",
-      "side": "buy",
-      "amt_thb": 50,
-      "date": "2026-10-16"
-    },
-    {
-      "name": "SOL",
-      "sym": "sol_thb",
-      "order_id": "6ad33f5c98b3bc6f5abd136900es3u",
-      "side": "buy",
-      "amt_thb": 50,
-      "date": "2026-10-16"
-    },
-    {
-      "name": "XRP",
-      "sym": "xrp_thb",
-      "order_id": "6ad33f5ecd5e1a487327a8e7s5oh6d",
-      "side": "buy",
-      "amt_thb": 50,
-      "date": "2026-10-16"
-    },
-    {
-      "name": "XLM",
-      "sym": "xlm_thb",
-      "order_id": "6ad33f60d5c8d71495889c087spahm",
-      "side": "buy",
-      "amt_thb": 50,
-      "date": "2026-10-16"
-    },
-    {
-      "name": "ETH",
-      "sym": "eth_thb",
-      "order_id": "6ad33f61bfdbb53de918307bj542k5",
-      "side": "buy",
-      "amt_thb": 50,
-      "date": "2026-10-16"
-    },
-    {
-      "name": "DOGE",
-      "sym": "doge_thb",
-      "order_id": "6ad33f63cd5e1a487327a9601o0oz7",
-      "side": "buy",
-      "amt_thb": 50,
-      "date": "2026-10-16"
-    },
-    {
-      "name": "ADA",
-      "sym": "ada_thb",
-      "order_id": "6ad33f64e14a4bb9220b812bj8xy3w",
-      "side": "buy",
-      "amt_thb": 50,
-      "date": "2026-10-16"
-    },
-    {
-      "name": "CRV",
-      "sym": "crv_thb",
-      "order_id": "6ad33f6645d27757b374b78c7ma6x9",
-      "side": "buy",
-      "amt_thb": 50,
-      "date": "2026-10-16"
-    }
-  ]
+  "pending_orders": []
 }
