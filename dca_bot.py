@@ -54,9 +54,11 @@ DCA_UNIT_THB = 50  # ซื้อเหรียญละเท่านี้�
 DCA_INTERVAL_DAYS = 7
 NEWS_SENTIMENT_WEIGHT = 5.0  # ข่าวบวก/ลบเต็มสเกล (+-1) ขยับคะแนนความเสี่ยงได้สูงสุด 5 แต้ม
 
-# ขายทำกำไรอัตโนมัติ: เหรียญไหนกำไรเฉลี่ยรวมเกิน % นี้ ขายทั้งหมดกลับเป็นเงินบาททันที
-# แล้วเริ่มสะสม DCA ใหม่จากศูนย์สำหรับเหรียญนั้น (เหรียญอื่นไม่กระทบ)
-TAKE_PROFIT_PCT = 10.0
+# ขายอัตโนมัติ (ผู้ใช้เลือกให้ใช้ TP/SL ชุดเดียวกับบอทเทรดกับเหรียญ DCA แทนการเปิดไม้ใหม่ด้วยเงินบาท)
+# เทียบราคาปัจจุบันกับทุนเฉลี่ยของแต่ละเหรียญ: กำไรถึง TAKE_PROFIT_PCT หรือขาดทุนถึง STOP_LOSS_PCT
+# ขายเหรียญนั้นทั้งหมดกลับเป็นเงินบาท แล้วเริ่มสะสม DCA ใหม่จากศูนย์ (เหรียญอื่นไม่กระทบ)
+TAKE_PROFIT_PCT = 4.0
+STOP_LOSS_PCT = 5.0
 
 # ส่งสรุปพอร์ตรวมทาง Telegram ทุกๆ กี่วัน (รายสัปดาห์)
 SUMMARY_INTERVAL_DAYS = 7
@@ -68,7 +70,7 @@ CRASH_RECOVERY_THRESHOLD_PCT = -5.0
 
 # รายชื่อเหรียญตั้งต้น (ใช้ตอนยังไม่เคยมี state มาก่อน) — หลังจากนั้นรายชื่อเหรียญ "ที่กำลังซื้ออยู่" จะถูกปรับ
 # อัตโนมัติทุกรอบตามเหรียญติดเทรนด์ล่าสุด (ดู active_coins ที่ crypto_alert.py คำนวณไว้ใน latest.json)
-# เหรียญที่เคยซื้อสะสมไว้แล้วแต่หลุดเทรนด์จะ "ไม่ซื้อเพิ่ม" แต่ยังถือของเดิมรอ take-profit ตามปกติ ไม่ขายทิ้ง
+# เหรียญที่เคยซื้อสะสมไว้แล้วแต่หลุดเทรนด์จะ "ไม่ซื้อเพิ่ม" แต่ยังถือของเดิมรอ TP/SL ตามปกติ
 DEFAULT_SEED_COINS = ["BTC", "ETH", "XRP", "ADA", "DOGE", "SOL", "KUB"]
 
 
@@ -389,7 +391,7 @@ def main():
         else:
             print("รอบ DCA สัปดาห์นี้ซื้อ/ข้ามครบทุกเหรียญในคิวแล้ว รอรอบถัดไป")
 
-    # ----- เช็ค take-profit: เหรียญไหนกำไรเฉลี่ยรวมเกิน TAKE_PROFIT_PCT ขายทั้งหมดกลับเป็นเงินบาท -----
+    # ----- เช็ค TP/SL: เหรียญไหนกำไรถึง TAKE_PROFIT_PCT หรือขาดทุนถึง STOP_LOSS_PCT ขายทั้งหมดกลับเป็นเงินบาท -----
     # เช็คทุกเหรียญที่เคยถือสะสมไว้ (ไม่ใช่แค่เหรียญที่ยังติดเทรนด์) เพราะของเก่าที่หลุดเทรนด์ก็ยังต้องขายได้ตามแผน
     if trading_enabled and not paused:
         for name in list(state["holdings"].keys()):
@@ -406,8 +408,9 @@ def main():
             if not avg_cost:
                 continue
             pnl_pct_now = (current_price - avg_cost) / avg_cost * 100
-            if pnl_pct_now < TAKE_PROFIT_PCT:
+            if -STOP_LOSS_PCT < pnl_pct_now < TAKE_PROFIT_PCT:
                 continue
+            is_stop_loss = pnl_pct_now <= -STOP_LOSS_PCT
 
             outcome = execute_sell(trade_symbol_of(name), h["total_coin"], fallback_price=current_price)
             if outcome["ok"]:
@@ -421,12 +424,17 @@ def main():
                     "invested_thb": h["total_invested_thb"],
                     "proceeds_thb": round(outcome["proceeds_thb"], 2),
                     "realized_pnl_thb": round(realized_pnl, 2),
+                    "reason": "stop_loss" if is_stop_loss else "take_profit",
                 })
                 state["sell_log"] = state["sell_log"][-200:]
+                if is_stop_loss:
+                    head = f"🛑 ตัดขาดทุน {name} ทั้งหมด (ขาดทุนเฉลี่ยรวมถึง {pnl_pct_now:.1f}%)"
+                else:
+                    head = f"🎉 ขายทำกำไร {name} ทั้งหมด (กำไรเฉลี่ยรวมถึง +{pnl_pct_now:.1f}%)"
                 send_telegram(
-                    f"🎉 ขายทำกำไร {name} ทั้งหมด (กำไรเฉลี่ยรวมถึง +{pnl_pct_now:.1f}%)\n"
+                    f"{head}\n"
                     f"ทุนสะสม {h['total_invested_thb']:.2f} บาท → ได้คืน {outcome['proceeds_thb']:.2f} บาท "
-                    f"(กำไร {realized_pnl:+.2f} บาท)\n"
+                    f"({realized_pnl:+.2f} บาท)\n"
                     f"เริ่มสะสม DCA ของ {name} ใหม่จากศูนย์ตั้งแต่รอบถัดไป"
                 )
                 # เริ่มสะสมใหม่จากศูนย์สำหรับเหรียญนี้ (เหรียญอื่นไม่กระทบ)
@@ -435,7 +443,7 @@ def main():
                 h["buy_count"] = 0
                 h["last_bought_date"] = None
             else:
-                print(f"{name}: ถึงเกณฑ์ take-profit (+{pnl_pct_now:.1f}%) แต่ขายไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
+                print(f"{name}: ถึงเกณฑ์ขาย ({pnl_pct_now:+.1f}%) แต่ขายไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
 
     # ----- คำนวณมูลค่าปัจจุบันของแต่ละเหรียญ (ใช้ได้ทั้งตอนเปิด/ปิดใช้งานจริง) -----
     cycle = state.get("dca_cycle") or {}
@@ -538,6 +546,7 @@ def main():
         "unit_thb_per_buy": DCA_UNIT_THB,
         "interval_days": DCA_INTERVAL_DAYS,
         "take_profit_pct": TAKE_PROFIT_PCT,
+        "stop_loss_pct": STOP_LOSS_PCT,
         "cycle_date": cycle.get("cycle_date"),
         "cycle_ranking": cycle.get("ranking", []),
         "cycle_budget_remaining_thb": cycle.get("budget_remaining_thb"),

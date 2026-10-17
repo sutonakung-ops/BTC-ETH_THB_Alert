@@ -45,6 +45,9 @@ SIGNAL_EXPIRE_MINUTES = 90     # สัญญาณที่ส่งไปร�
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70            # ถ้า RSI สูงกว่านี้ ถือว่าซื้อแพงเกินไป ไม่เข้าไม้ใหม่
 MA_GAP_THRESHOLD = 0.3         # ส่วนต่าง MA12/MA24 ต้องมากกว่านี้ถึงจะถือเป็นสัญญาณจริง
+# ปิดการหาสัญญาณเปิดไม้ใหม่ (ผู้ใช้ไม่ต้องการให้บอทเทรดใช้เงินบาทในบัญชี — ใช้ TP/SL กับเหรียญ DCA แทน)
+# ไม้ที่เปิดค้างอยู่ (ถ้ามี) ยังถูกดูแล TP/SL จนปิดตามปกติ
+NEW_ENTRIES_ENABLED = False
 
 COINS = [
     # trade_symbol สำหรับ place-bid/place-ask: รูปแบบ เหรียญ_thb ตาม /api/v3/market/symbols และเอกสาร v3
@@ -300,7 +303,7 @@ def main():
     # ----- 6. ถ้าว่างไม้ ไม่มีสัญญาณค้าง (ตั้งแต่ต้นรอบนี้) และไม่โดนพัก ให้หาโอกาสเข้าไม้ใหม่ -----
     # ใช้ had_pending_at_start แทน pending เฉยๆ เพื่อไม่ให้ยกเลิก/หมดอายุสัญญาณแล้วเกิดสัญญาณใหม่ซ้ำในรอบเดียวกัน
     # (รอรอบถัดไปก่อน ให้เวลาผู้ใช้คิดจริงๆ)
-    if not position and not pending and not had_pending_at_start and not risk.get("halted"):
+    if NEW_ENTRIES_ENABLED and not position and not pending and not had_pending_at_start and not risk.get("halted"):
         for coin in COINS:
             name = coin["name"]
             info = market[name]
@@ -329,6 +332,7 @@ def main():
     dashboard = load_json(DASHBOARD_FILE, {})
     dashboard["trading_bot"] = {
         "enabled": trading_enabled,
+        "new_entries_enabled": NEW_ENTRIES_ENABLED,
         "paused": False,
         "position": position,
         "pending_signal": pending,
