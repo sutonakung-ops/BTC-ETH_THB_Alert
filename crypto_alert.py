@@ -66,13 +66,31 @@ def moving_average(prices, period):
     return sum(prices[-period:]) / period
 
 
-def check_change_alert(name, change):
-    if change <= -5:
-        send_telegram(f"⚠️ เตือน: {name} ร่วงเกิน 5% ใน 24 ชม. ({change}%)")
-    elif change >= 5:
-        send_telegram(f"🚀 เตือน: {name} พุ่งเกิน 5% ใน 24 ชม. ({change}%)")
-    else:
+ALERT_STEP_PCT = 5  # แจ้งเตือนเฉพาะเหรียญที่ขยับเกิน 5% ใน 24 ชม.
+ALERT_STATE_FILE = "state/alert_state.json"
+
+
+def check_change_alert(name, change, alert_state):
+    """
+    แจ้งเตือนเมื่อเหรียญขยับเกิน 5% ใน 24 ชม. — แจ้งครั้งเดียวตอนเพิ่งข้ามเกณฑ์ ไม่แจ้งซ้ำทุกชั่วโมง
+    จะแจ้งอีกครั้งเมื่อขยับแรงขึ้นอีกขั้นละ 5% (เช่น 10%, 15%) หรือกลับทิศ
+    และเริ่มนับใหม่เมื่อกลับมาอยู่ในช่วง ±5%
+    """
+    level = int(change / ALERT_STEP_PCT)  # 7% -> 1, 12% -> 2, -6% -> -1, 3% -> 0
+    last = alert_state.get(name, 0)
+    if level == 0:
+        alert_state[name] = 0
         print(f"{name} ยังอยู่ในช่วงปกติ ({change}%) — ไม่ส่งแจ้งเตือน")
+        return
+    if (level > 0) != (last > 0) or abs(level) > abs(last):
+        threshold = abs(level) * ALERT_STEP_PCT
+        if level < 0:
+            send_telegram(f"⚠️ เตือน: {name} ร่วงเกิน {threshold}% ใน 24 ชม. ({change}%)")
+        else:
+            send_telegram(f"🚀 เตือน: {name} พุ่งเกิน {threshold}% ใน 24 ชม. ({change}%)")
+        alert_state[name] = level
+    else:
+        print(f"{name} ขยับ {change}% — แจ้งเตือนระดับนี้ไปแล้ว ไม่ส่งซ้ำ")
 
 
 def compute_risk_pct(closes):
@@ -126,11 +144,9 @@ def analyze_trend(name, symbol, market_sentiment):
     print("ข่าว/เซนติเมนต์:", round(news_sentiment, 3))
 
     if gap_percent > 0.3:
-        signal = "Golden Cross (ขาขึ้น)"
-        send_telegram(f"📈 {name}: Golden Cross ชัดเจน (แนวโน้มขาขึ้น) ส่วนต่าง {round(gap_percent,2)}%")
+        signal = "Golden Cross (ขาขึ้น)"  # แสดงบน Dashboard เท่านั้น ไม่ส่ง Telegram (ผู้ใช้ขอให้แจ้งเฉพาะขยับเกิน 5%)
     elif gap_percent < -0.3:
         signal = "Death Cross (ขาลง)"
-        send_telegram(f"📉 {name}: Death Cross ชัดเจน (แนวโน้มขาลง) ส่วนต่าง {round(gap_percent,2)}%")
     else:
         signal = "ยังสรุปแนวโน้มไม่ได้"
         print(f"{name}: เส้นยังชิดกันเกินไป ยังสรุปแนวโน้มไม่ได้")
@@ -251,19 +267,22 @@ def main():
         "market_sentiment": round(market_sentiment, 3),
     }
 
+    alert_state = load_json(ALERT_STATE_FILE, {})
     for coin in trending:
         name = coin["name"]
         change = ticker.get(coin["ticker_symbol"], {}).get("percentChange")
         if change is None:
             print(f"ข้าม {name}: ไม่พบข้อมูล ticker")
             continue
-        check_change_alert(name, change)
+        check_change_alert(name, change, alert_state)
         try:
             trend = analyze_trend(name, coin["candle_symbol"], market_sentiment)
         except (requests.RequestException, ValueError, KeyError, TypeError) as e:
             print(f"ข้าม {name}: วิเคราะห์เทรนด์ไม่สำเร็จ — {e}")
             continue
         result[name] = {"change_24h": change, "quote_volume_thb": round(coin["quote_volume_thb"], 2), **trend}
+
+    save_json(ALERT_STATE_FILE, alert_state)
 
     # ---- บันทึกผลล่าสุดไว้ให้หน้าเว็บ Dashboard อ่าน ----
     with open("latest.json", "w", encoding="utf-8") as f:
