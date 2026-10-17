@@ -185,31 +185,7 @@
   "realized_pnl_total_thb": 0.0,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
-  "dca_cycle": {
-    "cycle_date": "2026-10-16",
-    "ranking": [
-      "BTC",
-      "SOL",
-      "XRP",
-      "XLM",
-      "ETH",
-      "DOGE",
-      "ADA",
-      "CRV",
-      "NEAR",
-      "OP"
-    ],
-    "bought": {
-      "BTC": true,
-      "SOL": true,
-      "XRP": true,
-      "XLM": true,
-      "ETH": true,
-      "DOGE": true,
-      "ADA": true,
-      "CRV": true
-    }
-  },
+  "dca_cycle": null,
   "last_errors": {
     "NEAR": {
       "error": "Bitkub error code 18: {'error': 18}",
