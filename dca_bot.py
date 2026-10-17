@@ -341,7 +341,7 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
             cycle = state.get("dca_cycle")
             if cycle:
                 cycle["bought"].pop(name, None)  # ปลดล็อกให้ซื้อกลับได้ ถ้าผ่าน rebuy_check
-                cycle.setdefault("sold", {})[name] = reason
+                cycle.setdefault("sold", {})[name] = {"reason": reason, "at": datetime.now(timezone.utc).isoformat()}
             state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
             state["sell_log"].append({
                 "date": today,
@@ -377,9 +377,13 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
             print(f"{name}: ถึงเกณฑ์ขาย ({pnl_pct_now:+.1f}%) แต่ขายไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
 
 
-def rebuy_check(name, dashboard_so_far):
+def rebuy_check(name, dashboard_so_far, sold_at=None):
     """ประเมินว่าเหรียญที่เพิ่งขายไป ควรซื้อกลับตอนนี้ไหม คืน (ok, เหตุผล)"""
     info = dashboard_so_far.get(name, {}) if isinstance(dashboard_so_far, dict) else {}
+    analysed_at = dashboard_so_far.get("updated_at") if isinstance(dashboard_so_far, dict) else None
+    if sold_at and (not analysed_at or analysed_at <= sold_at):
+        # ข้อมูลความเสี่ยง/แนวโน้มยังเป็นของก่อนขาย (เช่นขายกลางชั่วโมงตอนราคาร่วง) — รอผลวิเคราะห์รอบใหม่
+        return False, "รอผลวิเคราะห์รอบใหม่หลังขาย"
     risk_pct = info.get("risk_pct")
     if risk_pct is None:
         return False, "ไม่มีข้อมูลความเสี่ยงล่าสุด"
@@ -399,7 +403,9 @@ def run_buys(state, cycle, today, dashboard_so_far):
         if state["cash_pool_thb"] < DCA_UNIT_THB:
             break
         if name in cycle.get("sold", {}):
-            ok, why = rebuy_check(name, dashboard_so_far)
+            sold_info = cycle["sold"][name]
+            sold_at = sold_info.get("at") if isinstance(sold_info, dict) else None
+            ok, why = rebuy_check(name, dashboard_so_far, sold_at)
             if not ok:
                 print(f"{name}: ขายไปแล้วรอบนี้ ยังไม่ซื้อกลับ — {why}")
                 continue

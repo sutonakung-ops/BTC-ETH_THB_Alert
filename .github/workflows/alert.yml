@@ -8,9 +8,15 @@ on:
 permissions:
   contents: write
 
+# รอบรายชั่วโมงจะเฝ้าราคาต่อ ~50 นาที — ห้ามรันซ้อนกัน (รอบถัดไปรอคิวจนรอบก่อนจบ)
+concurrency:
+  group: crypto-bot
+  cancel-in-progress: false
+
 jobs:
   check-price:
     runs-on: ubuntu-latest
+    timeout-minutes: 75
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,3 +59,12 @@ jobs:
           git diff --staged --quiet || git commit -m "Update latest.json and bot state [skip ci]"
           git pull --rebase
           git push
+
+      - name: Watch prices every minute until the next hourly run
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
+          BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
+          WATCH_MINUTES: ${{ github.event_name == 'workflow_dispatch' && '3' || '50' }}
+        run: python price_watch.py
