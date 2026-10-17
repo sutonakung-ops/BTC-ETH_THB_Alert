@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-17T10:38:47.440583+00:00",
+  "updated_at": "2026-10-17T10:57:27.766804+00:00",
   "active_coins": [
     "BTC",
     "NEAR",
@@ -19,14 +19,14 @@
   },
   "market_sentiment": 0.1,
   "BTC": {
-    "change_24h": -0.41,
-    "quote_volume_thb": 59402582.67,
-    "price": 2727865.44,
-    "ma12": 2728039.77,
-    "ma24": 2729314.89,
-    "gap_percent": -0.0467,
+    "change_24h": -0.58,
+    "quote_volume_thb": 59540989.09,
+    "price": 2727268.57,
+    "ma12": 2727990.03,
+    "ma24": 2729290.02,
+    "gap_percent": -0.0476,
     "signal": "ยังสรุปแนวโน้มไม่ได้",
-    "risk_pct": 0.6473,
+    "risk_pct": 0.6476,
     "news_sentiment": 0.1,
     "closes": [
       2715787.87,
@@ -76,18 +76,21 @@
       2729829.89,
       2730911,
       2727188.88,
-      2727865.44
-    ]
+      2727268.57
+    ],
+    "premium_pct": 0.011,
+    "depth_imbalance": 0.118,
+    "buy_flow_pct": 46.9
   },
   "NEAR": {
-    "change_24h": -2.81,
-    "quote_volume_thb": 56978611.6,
-    "price": 171.8,
-    "ma12": 170.12,
-    "ma24": 170.43,
-    "gap_percent": -0.1804,
+    "change_24h": -2.32,
+    "quote_volume_thb": 56961266.41,
+    "price": 172.46,
+    "ma12": 170.17,
+    "ma24": 170.45,
+    "gap_percent": -0.1643,
     "signal": "ยังสรุปแนวโน้มไม่ได้",
-    "risk_pct": 3.5197,
+    "risk_pct": 3.5199,
     "news_sentiment": 0.1,
     "closes": [
       154.29,
@@ -137,18 +140,21 @@
       170.69,
       172.29,
       172.71,
-      171.8
-    ]
+      172.46
+    ],
+    "premium_pct": 0.078,
+    "depth_imbalance": 0.563,
+    "buy_flow_pct": 60.0
   },
   "ETH": {
-    "change_24h": -0.62,
-    "quote_volume_thb": 40321135.64,
-    "price": 81480.66,
-    "ma12": 81209.23,
-    "ma24": 81273.26,
-    "gap_percent": -0.0788,
+    "change_24h": -0.87,
+    "quote_volume_thb": 39849339.7,
+    "price": 81562.46,
+    "ma12": 81216.05,
+    "ma24": 81276.67,
+    "gap_percent": -0.0746,
     "signal": "ยังสรุปแนวโน้มไม่ได้",
-    "risk_pct": 1.0868,
+    "risk_pct": 1.0871,
     "news_sentiment": 0.1,
     "closes": [
       79259.66,
@@ -198,18 +204,21 @@
       81267.31,
       81400.05,
       81448.14,
-      81480.66
-    ]
+      81562.46
+    ],
+    "premium_pct": 0.05,
+    "depth_imbalance": -0.006,
+    "buy_flow_pct": 45.1
   },
   "XRP": {
-    "change_24h": -2.24,
-    "quote_volume_thb": 19549852.56,
-    "price": 43.7,
-    "ma12": 43.72,
+    "change_24h": -2.39,
+    "quote_volume_thb": 19498740.68,
+    "price": 43.72,
+    "ma12": 43.73,
     "ma24": 43.83,
-    "gap_percent": -0.2339,
+    "gap_percent": -0.232,
     "signal": "ยังสรุปแนวโน้มไม่ได้",
-    "risk_pct": 1.3468,
+    "risk_pct": 1.3459,
     "news_sentiment": 0.1,
     "closes": [
       43.9,
@@ -259,18 +268,21 @@
       43.67,
       43.68,
       43.67,
-      43.7
-    ]
+      43.72
+    ],
+    "premium_pct": 0.036,
+    "depth_imbalance": -0.016,
+    "buy_flow_pct": 49.5
   },
   "BR": {
-    "change_24h": 18.98,
-    "quote_volume_thb": 13916346.75,
-    "price": 13.28,
+    "change_24h": 17.3,
+    "quote_volume_thb": 13899329.54,
+    "price": 13.31,
     "ma12": 12.92,
     "ma24": 13.18,
-    "gap_percent": -1.9642,
+    "gap_percent": -1.9559,
     "signal": "Death Cross (ขาลง)",
-    "risk_pct": 8.2219,
+    "risk_pct": 8.2239,
     "news_sentiment": 0.1,
     "closes": [
       12.88434,
@@ -320,18 +332,21 @@
       12.77523,
       12.83349,
       13.1565,
-      13.28044
-    ]
+      13.30632
+    ],
+    "premium_pct": null,
+    "depth_imbalance": -0.594,
+    "buy_flow_pct": 57.6
   },
   "DOGE": {
-    "change_24h": -2.17,
-    "quote_volume_thb": 10655512.09,
+    "change_24h": -2.1,
+    "quote_volume_thb": 10595725.74,
     "price": 2.69,
     "ma12": 2.69,
     "ma24": 2.7,
-    "gap_percent": -0.1869,
+    "gap_percent": -0.1841,
     "signal": "ยังสรุปแนวโน้มไม่ได้",
-    "risk_pct": 1.0728,
+    "risk_pct": 1.0717,
     "news_sentiment": 0.1,
     "closes": [
       2.693,
@@ -381,18 +396,21 @@
       2.6956,
       2.6885,
       2.688,
-      2.6861
-    ]
+      2.6879
+    ],
+    "premium_pct": 0.05,
+    "depth_imbalance": -0.143,
+    "buy_flow_pct": 59.8
   },
   "WLD": {
-    "change_24h": -3.85,
-    "quote_volume_thb": 9582016.36,
-    "price": 17.24,
-    "ma12": 17.46,
-    "ma24": 17.32,
-    "gap_percent": 0.7961,
+    "change_24h": -2.46,
+    "quote_volume_thb": 9256116.37,
+    "price": 17.44,
+    "ma12": 17.48,
+    "ma24": 17.33,
+    "gap_percent": 0.8438,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 3.1893,
+    "risk_pct": 3.1998,
     "news_sentiment": 0.1,
     "closes": [
       15.68,
@@ -442,18 +460,21 @@
       17.56,
       17.42,
       17.42,
-      17.24
-    ]
+      17.44
+    ],
+    "premium_pct": -0.074,
+    "depth_imbalance": 0.273,
+    "buy_flow_pct": 54.8
   },
   "XLM": {
-    "change_24h": -2.2,
-    "quote_volume_thb": 9139125.7,
+    "change_24h": -1.91,
+    "quote_volume_thb": 9130145.91,
     "price": 6.01,
     "ma12": 6.02,
     "ma24": 6.04,
-    "gap_percent": -0.4048,
+    "gap_percent": -0.4035,
     "signal": "Death Cross (ขาลง)",
-    "risk_pct": 1.2063,
+    "risk_pct": 1.2056,
     "news_sentiment": 0.1,
     "closes": [
       6.04,
@@ -503,18 +524,21 @@
       6,
       5.994,
       5.996,
-      6.013
-    ]
+      6.015
+    ],
+    "premium_pct": 0.08,
+    "depth_imbalance": 0.191,
+    "buy_flow_pct": 70.0
   },
   "EPIC": {
-    "change_24h": 27.07,
-    "quote_volume_thb": 8839787.92,
-    "price": 9.34,
-    "ma12": 8.68,
-    "ma24": 8.28,
-    "gap_percent": 4.7653,
+    "change_24h": 31.54,
+    "quote_volume_thb": 8866320.5,
+    "price": 9.55,
+    "ma12": 8.69,
+    "ma24": 8.29,
+    "gap_percent": 4.8658,
     "signal": "Golden Cross (ขาขึ้น)",
-    "risk_pct": 8.7266,
+    "risk_pct": 8.7945,
     "news_sentiment": 0.1,
     "closes": [
       8.2,
@@ -564,18 +588,21 @@
       9.85,
       8.76,
       9,
-      9.34
-    ]
+      9.55
+    ],
+    "premium_pct": -0.793,
+    "depth_imbalance": -0.526,
+    "buy_flow_pct": 49.5
   },
   "SOL": {
-    "change_24h": -1.24,
-    "quote_volume_thb": 8496198.51,
-    "price": 3502.39,
-    "ma12": 3502.47,
-    "ma24": 3500.06,
-    "gap_percent": 0.0688,
+    "change_24h": -1.6,
+    "quote_volume_thb": 8483171.65,
+    "price": 3507.16,
+    "ma12": 3502.87,
+    "ma24": 3500.26,
+    "gap_percent": 0.0745,
     "signal": "ยังสรุปแนวโน้มไม่ได้",
-    "risk_pct": 1.1234,
+    "risk_pct": 1.1226,
     "news_sentiment": 0.1,
     "closes": [
       3431.48,
@@ -625,18 +652,21 @@
       3507.58,
       3510.96,
       3506,
-      3502.39
-    ]
+      3507.16
+    ],
+    "premium_pct": 0.035,
+    "depth_imbalance": -0.073,
+    "buy_flow_pct": 57.2
   },
   "ADA": {
-    "change_24h": -3.58,
-    "quote_volume_thb": 5073665.63,
-    "price": 7.46,
+    "change_24h": -3.24,
+    "quote_volume_thb": 5025942.84,
+    "price": 7.47,
     "ma12": 7.5,
     "ma24": 7.53,
-    "gap_percent": -0.3931,
+    "gap_percent": -0.3875,
     "signal": "Death Cross (ขาลง)",
-    "risk_pct": 1.6139,
+    "risk_pct": 1.6108,
     "news_sentiment": 0.1,
     "closes": [
       7.42,
@@ -686,18 +716,21 @@
       7.477,
       7.48,
       7.47,
-      7.458
-    ]
+      7.468
+    ],
+    "premium_pct": 0.027,
+    "depth_imbalance": -0.025,
+    "buy_flow_pct": 25.2
   },
   "CRV": {
-    "change_24h": -2.48,
-    "quote_volume_thb": 3926178.34,
-    "price": 11.42,
-    "ma12": 11.58,
+    "change_24h": -1.8,
+    "quote_volume_thb": 3875581.63,
+    "price": 11.46,
+    "ma12": 11.59,
     "ma24": 11.6,
-    "gap_percent": -0.1006,
+    "gap_percent": -0.0862,
     "signal": "ยังสรุปแนวโน้มไม่ได้",
-    "risk_pct": 1.7352,
+    "risk_pct": 1.7254,
     "news_sentiment": 0.1,
     "closes": [
       11.57,
@@ -747,8 +780,11 @@
       11.55,
       11.49,
       11.41,
-      11.42
-    ]
+      11.46
+    ],
+    "premium_pct": 0.092,
+    "depth_imbalance": 0.527,
+    "buy_flow_pct": 49.5
   },
   "trading_bot": {
     "enabled": true,
@@ -762,7 +798,7 @@
       "halted": false
     },
     "trade_count_today": 0,
-    "checked_at": "2026-10-17T10:38:57.800870+00:00"
+    "checked_at": "2026-10-17T10:57:53.735332+00:00"
   },
   "dca_bot": {
     "enabled": true,
@@ -785,6 +821,19 @@
     "interval_days": 7,
     "take_profit_pct": 4.0,
     "stop_loss_pct": 5.0,
+    "cut_zone_pct": 3.0,
+    "journal": {
+      "open_lots": 14,
+      "closed_lots": 0,
+      "wins": 0,
+      "winrate_pct": null,
+      "avg_win_pct": null,
+      "avg_loss_pct": null,
+      "expectancy_pct": null,
+      "total_pnl_thb": 0.0,
+      "by_exit_reason": {}
+    },
+    "market_sentiment": 0.1,
     "cycle_date": "2026-10-17",
     "cycle_ranking": [
       "BTC",
@@ -807,13 +856,14 @@
         "buy_count": 2,
         "last_bought_date": "2026-10-17",
         "avg_cost": 2729783.143,
-        "current_price": 2727865.44,
-        "current_value_thb": 99.93,
-        "pnl_thb": -0.07,
-        "pnl_pct": -0.07,
-        "risk_pct": 0.6473,
+        "current_price": 2727268.57,
+        "current_value_thb": 99.91,
+        "pnl_thb": -0.09,
+        "pnl_pct": -0.09,
+        "risk_pct": 0.6476,
         "news_sentiment": 0.1,
-        "bought_this_cycle": true
+        "bought_this_cycle": true,
+        "signal": "ยังสรุปแนวโน้มไม่ได้"
       },
       "ETH": {
         "active": true,
@@ -822,13 +872,14 @@
         "buy_count": 2,
         "last_bought_date": "2026-10-17",
         "avg_cost": 81399.7671,
-        "current_price": 81480.66,
-        "current_value_thb": 100.1,
-        "pnl_thb": 0.1,
-        "pnl_pct": 0.1,
-        "risk_pct": 1.0868,
+        "current_price": 81562.46,
+        "current_value_thb": 100.2,
+        "pnl_thb": 0.2,
+        "pnl_pct": 0.2,
+        "risk_pct": 1.0871,
         "news_sentiment": 0.1,
-        "bought_this_cycle": true
+        "bought_this_cycle": true,
+        "signal": "ยังสรุปแนวโน้มไม่ได้"
       },
       "XRP": {
         "active": true,
@@ -837,13 +888,14 @@
         "buy_count": 2,
         "last_bought_date": "2026-10-17",
         "avg_cost": 43.65,
-        "current_price": 43.7,
-        "current_value_thb": 100.11,
-        "pnl_thb": 0.11,
-        "pnl_pct": 0.11,
-        "risk_pct": 1.3468,
+        "current_price": 43.72,
+        "current_value_thb": 100.16,
+        "pnl_thb": 0.16,
+        "pnl_pct": 0.16,
+        "risk_pct": 1.3459,
         "news_sentiment": 0.1,
-        "bought_this_cycle": true
+        "bought_this_cycle": true,
+        "signal": "ยังสรุปแนวโน้มไม่ได้"
       },
       "ADA": {
         "active": false,
@@ -852,13 +904,14 @@
         "buy_count": 1,
         "last_bought_date": "2026-10-16",
         "avg_cost": 7.459,
-        "current_price": 7.458,
-        "current_value_thb": 49.99,
-        "pnl_thb": -0.01,
-        "pnl_pct": -0.01,
-        "risk_pct": 1.6139,
+        "current_price": 7.468,
+        "current_value_thb": 50.06,
+        "pnl_thb": 0.06,
+        "pnl_pct": 0.12,
+        "risk_pct": 1.6108,
         "news_sentiment": 0.1,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": "Death Cross (ขาลง)"
       },
       "DOGE": {
         "active": true,
@@ -867,13 +920,14 @@
         "buy_count": 2,
         "last_bought_date": "2026-10-17",
         "avg_cost": 2.6827,
-        "current_price": 2.6861,
-        "current_value_thb": 100.13,
-        "pnl_thb": 0.13,
-        "pnl_pct": 0.13,
-        "risk_pct": 1.0728,
+        "current_price": 2.6879,
+        "current_value_thb": 100.19,
+        "pnl_thb": 0.19,
+        "pnl_pct": 0.19,
+        "risk_pct": 1.0717,
         "news_sentiment": 0.1,
-        "bought_this_cycle": true
+        "bought_this_cycle": true,
+        "signal": "ยังสรุปแนวโน้มไม่ได้"
       },
       "SOL": {
         "active": true,
@@ -882,13 +936,14 @@
         "buy_count": 2,
         "last_bought_date": "2026-10-17",
         "avg_cost": 3505.172,
-        "current_price": 3502.39,
-        "current_value_thb": 99.92,
-        "pnl_thb": -0.08,
-        "pnl_pct": -0.08,
-        "risk_pct": 1.1234,
+        "current_price": 3507.16,
+        "current_value_thb": 100.06,
+        "pnl_thb": 0.06,
+        "pnl_pct": 0.06,
+        "risk_pct": 1.1226,
         "news_sentiment": 0.1,
-        "bought_this_cycle": true
+        "bought_this_cycle": true,
+        "signal": "ยังสรุปแนวโน้มไม่ได้"
       },
       "KUB": {
         "active": false,
@@ -897,13 +952,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 18.81,
+        "current_price": 18.73,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
         "risk_pct": null,
         "news_sentiment": null,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": null
       },
       "USDT": {
         "active": false,
@@ -918,7 +974,8 @@
         "pnl_pct": null,
         "risk_pct": null,
         "news_sentiment": null,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": null
       },
       "NEAR": {
         "active": true,
@@ -927,13 +984,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 171.8,
+        "current_price": 172.43,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 3.5197,
+        "risk_pct": 3.5199,
         "news_sentiment": 0.1,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": "ยังสรุปแนวโน้มไม่ได้"
       },
       "USDC": {
         "active": false,
@@ -942,13 +1000,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 33.47,
+        "current_price": 33.46,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
         "risk_pct": null,
         "news_sentiment": null,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": null
       },
       "CRV": {
         "active": false,
@@ -957,13 +1016,14 @@
         "buy_count": 1,
         "last_bought_date": "2026-10-16",
         "avg_cost": 11.47,
-        "current_price": 11.42,
-        "current_value_thb": 49.78,
-        "pnl_thb": -0.22,
-        "pnl_pct": -0.44,
-        "risk_pct": 1.7352,
+        "current_price": 11.46,
+        "current_value_thb": 49.96,
+        "pnl_thb": -0.04,
+        "pnl_pct": -0.09,
+        "risk_pct": 1.7254,
         "news_sentiment": 0.1,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": "ยังสรุปแนวโน้มไม่ได้"
       },
       "OP": {
         "active": false,
@@ -972,13 +1032,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 4.522,
+        "current_price": 4.518,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
         "risk_pct": null,
         "news_sentiment": null,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": null
       },
       "XLM": {
         "active": true,
@@ -987,13 +1048,14 @@
         "buy_count": 2,
         "last_bought_date": "2026-10-17",
         "avg_cost": 5.992,
-        "current_price": 6.013,
-        "current_value_thb": 100.35,
-        "pnl_thb": 0.35,
-        "pnl_pct": 0.35,
-        "risk_pct": 1.2063,
+        "current_price": 6.015,
+        "current_value_thb": 100.38,
+        "pnl_thb": 0.38,
+        "pnl_pct": 0.38,
+        "risk_pct": 1.2056,
         "news_sentiment": 0.1,
-        "bought_this_cycle": true
+        "bought_this_cycle": true,
+        "signal": "Death Cross (ขาลง)"
       },
       "STRK": {
         "active": false,
@@ -1002,13 +1064,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 2.4066,
+        "current_price": 2.4042,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
         "risk_pct": null,
         "news_sentiment": null,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": null
       },
       "WLD": {
         "active": true,
@@ -1017,13 +1080,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 17.24,
+        "current_price": 17.44,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 3.1893,
+        "risk_pct": 3.1998,
         "news_sentiment": 0.1,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": "Golden Cross (ขาขึ้น)"
       },
       "ZEREBRO": {
         "active": false,
@@ -1032,13 +1096,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 1.03243,
+        "current_price": 1.02671,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
         "risk_pct": null,
         "news_sentiment": null,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": null
       },
       "BR": {
         "active": true,
@@ -1047,13 +1112,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 13.28044,
+        "current_price": 13.50637,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 8.2219,
+        "risk_pct": 8.2239,
         "news_sentiment": 0.1,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": "Death Cross (ขาลง)"
       },
       "EPIC": {
         "active": true,
@@ -1062,13 +1128,14 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 9.34,
+        "current_price": 9.55,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
-        "risk_pct": 8.7266,
+        "risk_pct": 8.7945,
         "news_sentiment": 0.1,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": "Golden Cross (ขาขึ้น)"
       },
       "ICNT": {
         "active": false,
@@ -1077,19 +1144,20 @@
         "buy_count": 0,
         "last_bought_date": null,
         "avg_cost": null,
-        "current_price": 6.324,
+        "current_price": 6.4152,
         "current_value_thb": 0.0,
         "pnl_thb": 0.0,
         "pnl_pct": null,
         "risk_pct": null,
         "news_sentiment": null,
-        "bought_this_cycle": false
+        "bought_this_cycle": false,
+        "signal": null
       }
     },
     "total_invested_thb": 700.0,
-    "total_value_thb": 700.32,
-    "total_pnl_thb": 0.32,
-    "total_pnl_pct": 0.05,
-    "checked_at": "2026-10-17T10:38:58.938165+00:00"
+    "total_value_thb": 700.92,
+    "total_pnl_thb": 0.92,
+    "total_pnl_pct": 0.13,
+    "checked_at": "2026-10-17T10:57:54.742492+00:00"
   }
 }
