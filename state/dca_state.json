@@ -1,22 +1,22 @@
 {
   "holdings": {
     "BTC": {
-      "total_invested_thb": 50.0,
-      "total_coin": 1.8302539186060416e-05,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-16"
+      "total_invested_thb": 100.0,
+      "total_coin": 3.663294656143002e-05,
+      "buy_count": 2,
+      "last_bought_date": "2026-10-17"
     },
     "ETH": {
-      "total_invested_thb": 50.0,
-      "total_coin": 0.0006141355581417487,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-16"
+      "total_invested_thb": 100.0,
+      "total_coin": 0.001228504744135753,
+      "buy_count": 2,
+      "last_bought_date": "2026-10-17"
     },
     "XRP": {
-      "total_invested_thb": 50.0,
-      "total_coin": 1.1449507671170138,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-16"
+      "total_invested_thb": 100.0,
+      "total_coin": 2.290951225517197,
+      "buy_count": 2,
+      "last_bought_date": "2026-10-17"
     },
     "ADA": {
       "total_invested_thb": 50.0,
@@ -25,16 +25,16 @@
       "last_bought_date": "2026-10-16"
     },
     "DOGE": {
-      "total_invested_thb": 50.0,
-      "total_coin": 18.62266751089426,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-16"
+      "total_invested_thb": 100.0,
+      "total_coin": 37.27590384739864,
+      "buy_count": 2,
+      "last_bought_date": "2026-10-17"
     },
     "SOL": {
-      "total_invested_thb": 50.0,
-      "total_coin": 0.01424314762167921,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-16"
+      "total_invested_thb": 100.0,
+      "total_coin": 0.02852927008232094,
+      "buy_count": 2,
+      "last_bought_date": "2026-10-17"
     },
     "KUB": {
       "total_invested_thb": 0.0,
@@ -73,10 +73,10 @@
       "last_bought_date": null
     },
     "XLM": {
-      "total_invested_thb": 50.0,
-      "total_coin": 8.3500334001336,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-16"
+      "total_invested_thb": 100.0,
+      "total_coin": 16.688925995196975,
+      "buy_count": 2,
+      "last_bought_date": "2026-10-17"
     },
     "STRK": {
       "total_invested_thb": 0.0,
@@ -179,13 +179,83 @@
       "fill_price": 11.47,
       "amount_coin": 4.3591979075850045,
       "order_id": "6ad33f6645d27757b374b78c7ma6x9"
+    },
+    {
+      "date": "2026-10-17",
+      "name": "BTC",
+      "invested_thb": 50,
+      "fill_price": 2726616.9800000004,
+      "amount_coin": 1.8330407375369602e-05,
+      "order_id": "6ad34d26d5c8d714958a1f1am8a2qe"
+    },
+    {
+      "date": "2026-10-17",
+      "name": "DOGE",
+      "invested_thb": 50,
+      "fill_price": 2.6805000000000003,
+      "amount_coin": 18.65323633650438,
+      "order_id": "6ad34d31cd5e1a48732938071o0oz7"
+    },
+    {
+      "date": "2026-10-17",
+      "name": "ETH",
+      "invested_thb": 50,
+      "fill_price": 81384.29,
+      "amount_coin": 0.0006143691859940045,
+      "order_id": "6ad34d3445d27757b3763905j542k5"
+    },
+    {
+      "date": "2026-10-17",
+      "name": "SOL",
+      "invested_thb": 50,
+      "fill_price": 3499.9,
+      "amount_coin": 0.014286122460641731,
+      "order_id": "6ad34d3698b3bc6f5abdc51700es3u"
+    },
+    {
+      "date": "2026-10-17",
+      "name": "XLM",
+      "invested_thb": 50,
+      "fill_price": 5.996,
+      "amount_coin": 8.338892595063374,
+      "order_id": "6ad34d396cad0adf8543050b7spahm"
+    },
+    {
+      "date": "2026-10-17",
+      "name": "XRP",
+      "invested_thb": 50,
+      "fill_price": 43.63,
+      "amount_coin": 1.1460004584001833,
+      "order_id": "6ad34d3ccd5e1a48732938dds5oh6d"
     }
   ],
   "sell_log": [],
   "realized_pnl_total_thb": 0.0,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
-  "dca_cycle": null,
+  "dca_cycle": {
+    "cycle_date": "2026-10-17",
+    "ranking": [
+      "BTC",
+      "DOGE",
+      "ETH",
+      "SOL",
+      "XLM",
+      "XRP",
+      "WLD",
+      "NEAR",
+      "BR",
+      "EPIC"
+    ],
+    "bought": {
+      "BTC": true,
+      "DOGE": true,
+      "ETH": true,
+      "SOL": true,
+      "XLM": true,
+      "XRP": true
+    }
+  },
   "last_errors": {
     "NEAR": {
       "error": "Bitkub error code 18: {'error': 18}",
