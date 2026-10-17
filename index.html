@@ -515,7 +515,7 @@
           bodyHtml += `
             <div class="row">
               <span class="label">${name} (${c.buy_count} ครั้ง, ล่าสุด ${c.last_bought_date || "-"}, ทุนเฉลี่ย ${c.avg_cost != null ? fmtNum(c.avg_cost) : "-"}${inactiveTag})</span>
-              <span class="${pnlCls}">${c.pnl_thb != null ? (c.pnl_thb > 0 ? "+" : "") + fmtNum(c.pnl_thb) + " บาท" + pctStr : "-"}</span><span class="label">${trendStr}${pendingStr}</span>
+              <span><span class="${pnlCls}">${c.pnl_thb != null ? (c.pnl_thb > 0 ? "+" : "") + fmtNum(c.pnl_thb) + " บาท" + pctStr : "-"}</span><span class="label">${trendStr}${pendingStr}</span></span>
             </div>
           `;
         }
