@@ -17,7 +17,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
-from bitkub_trade import BitkubAPIError, place_ask, place_bid
+from bitkub_trade import BitkubAPIError, fetch_fill, place_ask, place_bid
 from strategy import check_exit, compute_indicators, is_entry_signal
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
@@ -94,87 +94,74 @@ def today_str():
 # ---------------- ฟังก์ชันสั่งซื้อ/ขายจริง ----------------
 
 def execute_entry(coin_name, trade_symbol, signal_price):
-    """สั่งซื้อจริงด้วยเงิน TRADE_CAPITAL_THB บาท (market order)"""
+    """
+    สั่งซื้อจริงด้วยเงิน TRADE_CAPITAL_THB บาท (market order)
+    market order ตอบกลับ rat/rec = 0 จึงถาม order-info ต่อเพื่อเอาราคาและจำนวนเหรียญที่ได้จริง
+    """
     if not BITKUB_API_KEY or not BITKUB_API_SECRET:
         return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
     try:
         result = place_bid(
             BITKUB_API_KEY, BITKUB_API_SECRET, trade_symbol, TRADE_CAPITAL_THB, rat=0, typ="market"
         )
-    except BitkubAPIError as e:
+    except (BitkubAPIError, requests.RequestException) as e:
         return {"ok": False, "error": str(e)}
 
     res = result.get("result", result)
-    if result.get("error", 0) not in (0, None):
+    if result.get("error", 0) not in (0, None) or not isinstance(res, dict) or not res.get("id"):
         return {"ok": False, "error": f"Bitkub error code {result.get('error')}: {res}"}
 
-    # พยายามอ่านราคาที่ได้จริงจากผลลัพธ์ API, ถ้าไม่เจอ field ที่คาดไว้ ใช้ราคาตอนส่งสัญญาณแทน (ประมาณการ)
-    fill_price = None
-    for key in ("rat", "last", "avg"):
-        val = res.get(key) if isinstance(res, dict) else None
-        if val:
-            fill_price = float(val)
-            break
-    if not fill_price:
+    fill, raw = fetch_fill(BITKUB_API_KEY, BITKUB_API_SECRET, trade_symbol, str(res["id"]), "buy")
+    if fill:
+        fill_price, amount_coin, estimated = fill["rate"], fill["coin"], False
+    else:
+        # ซื้อสำเร็จแล้วแต่ยังอ่านผลไม่ได้ — ประมาณจากราคาตอนส่งสัญญาณ (หักค่าธรรมเนียม 0.25% เผื่อไว้)
         fill_price = signal_price
-
-    amount_coin = None
-    for key in ("rec", "amt"):
-        val = res.get(key) if isinstance(res, dict) else None
-        if val:
-            amount_coin = float(val)
-            break
-    if not amount_coin:
-        amount_coin = TRADE_CAPITAL_THB / fill_price  # ประมาณการ ยังไม่หักค่าธรรมเนียม
+        amount_coin = TRADE_CAPITAL_THB * 0.9975 / signal_price
+        estimated = True
 
     position = {
         "name": coin_name,
         "trade_symbol": trade_symbol,
+        "order_id": str(res["id"]),
         "entry_price": fill_price,
         "amount_coin": amount_coin,
+        "amount_estimated": estimated,
         "capital_thb": TRADE_CAPITAL_THB,
         "opened_at": datetime.now(timezone.utc).isoformat(),
-        "raw_api_response": res,
+        "raw_api_response": raw if raw is not None else res,
     }
     return {"ok": True, "position": position}
 
 
 def execute_exit(position, current_price):
-    """สั่งขายจริงทั้งหมดที่ถืออยู่ (market order)"""
+    """สั่งขายจริงทั้งหมดที่ถืออยู่ (market order) ถ้าเหรียญไม่พอเล็กน้อย (error 18) ลองใหม่ที่ 99.5%"""
     if not BITKUB_API_KEY or not BITKUB_API_SECRET:
         return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
-    try:
-        result = place_ask(
-            BITKUB_API_KEY, BITKUB_API_SECRET, position["trade_symbol"],
-            position["amount_coin"], rat=0, typ="market",
-        )
-    except BitkubAPIError as e:
-        return {"ok": False, "error": str(e)}
+    result, res, amt = None, None, position["amount_coin"]
+    for factor in (1.0, 0.995):
+        amt = float(f"{position['amount_coin'] * factor:.8f}")
+        try:
+            result = place_ask(BITKUB_API_KEY, BITKUB_API_SECRET, position["trade_symbol"], amt, rat=0, typ="market")
+        except (BitkubAPIError, requests.RequestException) as e:
+            return {"ok": False, "error": str(e)}
+        res = result.get("result", result)
+        if result.get("error") == 18 and factor == 1.0:
+            continue
+        break
 
-    res = result.get("result", result)
-    if result.get("error", 0) not in (0, None):
+    if result.get("error", 0) not in (0, None) or not isinstance(res, dict) or not res.get("id"):
         return {"ok": False, "error": f"Bitkub error code {result.get('error')}: {res}"}
 
-    sell_price = None
-    for key in ("rat", "last", "avg"):
-        val = res.get(key) if isinstance(res, dict) else None
-        if val:
-            sell_price = float(val)
-            break
-    if not sell_price:
-        sell_price = current_price
-
-    proceeds_thb = None
-    for key in ("rec",):
-        val = res.get(key) if isinstance(res, dict) else None
-        if val:
-            proceeds_thb = float(val)
-            break
-    if not proceeds_thb:
-        proceeds_thb = position["amount_coin"] * sell_price
+    fill, raw = fetch_fill(BITKUB_API_KEY, BITKUB_API_SECRET, position["trade_symbol"], str(res["id"]), "sell")
+    if fill:
+        sell_price, proceeds_thb = fill["rate"], fill["thb"]
+    else:
+        sell_price, proceeds_thb = current_price, amt * current_price
 
     pnl_thb = proceeds_thb - position["capital_thb"]
-    return {"ok": True, "sell_price": sell_price, "proceeds_thb": proceeds_thb, "pnl_thb": pnl_thb, "raw_api_response": res}
+    return {"ok": True, "sell_price": sell_price, "proceeds_thb": proceeds_thb, "pnl_thb": pnl_thb,
+            "raw_api_response": raw if raw is not None else res}
 
 
 # ---------------- โปรแกรมหลัก ----------------

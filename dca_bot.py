@@ -24,7 +24,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
-from bitkub_trade import BitkubAPIError, place_ask, place_bid
+from bitkub_trade import BitkubAPIError, fetch_fill, place_ask, place_bid
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
@@ -180,73 +180,96 @@ def build_new_cycle(today, active_coins, dashboard_so_far):
 # ---------------- ฟังก์ชันสั่งซื้อจริง ----------------
 
 def execute_buy(trade_symbol, amount_thb):
-    """สั่งซื้อจริงด้วยเงิน amount_thb บาท (market order)"""
+    """
+    สั่งซื้อจริงด้วยเงิน amount_thb บาท (market order)
+    ผลตอบกลับของ market order มี rat/rec = 0 เสมอ (ยังไม่รู้ราคาจริงตอนตอบ) จึงถือว่าสำเร็จเมื่อได้ order id
+    แล้วถาม order-info ต่อเพื่อเอาราคา/จำนวนเหรียญที่ได้จริง ถ้ายังไม่ได้ข้อมูล คืน pending=True ให้ไปเช็ครอบหน้า
+    """
     if not BITKUB_API_KEY or not BITKUB_API_SECRET:
         return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
+    sym = order_symbol_of(trade_symbol)
     try:
-        result = place_bid(BITKUB_API_KEY, BITKUB_API_SECRET, order_symbol_of(trade_symbol), amount_thb, rat=0, typ="market")
-    except BitkubAPIError as e:
+        result = place_bid(BITKUB_API_KEY, BITKUB_API_SECRET, sym, amount_thb, rat=0, typ="market")
+    except (BitkubAPIError, requests.RequestException) as e:
         return {"ok": False, "error": str(e)}
 
     res = result.get("result", result)
-    if result.get("error", 0) not in (0, None):
+    if result.get("error", 0) not in (0, None) or not isinstance(res, dict) or not res.get("id"):
         return {"ok": False, "error": f"Bitkub error code {result.get('error')}: {res}"}
 
-    fill_price = None
-    for key in ("rat", "last", "avg"):
-        val = res.get(key) if isinstance(res, dict) else None
-        if val:
-            fill_price = float(val)
-            break
-
-    amount_coin = None
-    for key in ("rec", "amt"):
-        val = res.get(key) if isinstance(res, dict) else None
-        if val:
-            amount_coin = float(val)
-            break
-    if not amount_coin and fill_price:
-        amount_coin = amount_thb / fill_price  # ประมาณการ ยังไม่หักค่าธรรมเนียม
-
-    if not fill_price or not amount_coin:
-        return {"ok": False, "error": f"อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {res}"}
-
-    return {"ok": True, "fill_price": fill_price, "amount_coin": amount_coin}
+    order_id = str(res["id"])
+    fill, raw = fetch_fill(BITKUB_API_KEY, BITKUB_API_SECRET, sym, order_id, "buy")
+    if not fill:
+        return {"ok": True, "pending": True, "order_id": order_id, "sym": sym, "raw": raw}
+    return {"ok": True, "pending": False, "order_id": order_id, "sym": sym,
+            "fill_price": fill["rate"], "amount_coin": fill["coin"]}
 
 
-def execute_sell(trade_symbol, amount_coin):
-    """สั่งขายจริงทั้งหมดที่ถืออยู่ของเหรียญนี้ (market order) กลับเป็นเงินบาท"""
+def execute_sell(trade_symbol, amount_coin, fallback_price=None):
+    """
+    สั่งขายจริงทั้งหมดที่ถืออยู่ของเหรียญนี้ (market order) กลับเป็นเงินบาท
+    ถ้าเงินไม่พอเพราะจำนวนเหรียญจริงน้อยกว่าที่บันทึกไว้เล็กน้อย (ค่าธรรมเนียม/ปัดเศษ) ลองใหม่ที่ 99.5%
+    """
     if not BITKUB_API_KEY or not BITKUB_API_SECRET:
         return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
-    try:
-        result = place_ask(BITKUB_API_KEY, BITKUB_API_SECRET, order_symbol_of(trade_symbol), amount_coin, rat=0, typ="market")
-    except BitkubAPIError as e:
-        return {"ok": False, "error": str(e)}
+    sym = order_symbol_of(trade_symbol)
+    result, res = None, None
+    for factor in (1.0, 0.995):
+        amt = float(f"{amount_coin * factor:.8f}")
+        try:
+            result = place_ask(BITKUB_API_KEY, BITKUB_API_SECRET, sym, amt, rat=0, typ="market")
+        except (BitkubAPIError, requests.RequestException) as e:
+            return {"ok": False, "error": str(e)}
+        res = result.get("result", result)
+        if result.get("error") == 18 and factor == 1.0:
+            continue
+        break
 
-    res = result.get("result", result)
-    if result.get("error", 0) not in (0, None):
+    if result.get("error", 0) not in (0, None) or not isinstance(res, dict) or not res.get("id"):
         return {"ok": False, "error": f"Bitkub error code {result.get('error')}: {res}"}
 
-    sell_price = None
-    for key in ("rat", "last", "avg"):
-        val = res.get(key) if isinstance(res, dict) else None
-        if val:
-            sell_price = float(val)
-            break
+    order_id = str(res["id"])
+    fill, _raw = fetch_fill(BITKUB_API_KEY, BITKUB_API_SECRET, sym, order_id, "sell")
+    if fill:
+        return {"ok": True, "order_id": order_id, "sell_price": fill["rate"], "proceeds_thb": fill["thb"]}
+    if fallback_price:
+        # ขายไปแล้วจริงแต่ยังอ่านผลไม่ได้ — ประมาณจากราคาตลาดล่าสุด (ไม่หักค่าธรรมเนียม)
+        return {"ok": True, "order_id": order_id, "sell_price": fallback_price,
+                "proceeds_thb": amount_coin * fallback_price, "estimated": True}
+    return {"ok": True, "order_id": order_id, "sell_price": 0.0, "proceeds_thb": 0.0, "estimated": True}
 
-    proceeds_thb = None
-    for key in ("rec",):
-        val = res.get(key) if isinstance(res, dict) else None
-        if val:
-            proceeds_thb = float(val)
-            break
-    if proceeds_thb is None and sell_price:
-        proceeds_thb = amount_coin * sell_price  # ประมาณการ ยังไม่หักค่าธรรมเนียม
 
-    if not sell_price or proceeds_thb is None:
-        return {"ok": False, "error": f"อ่านผลลัพธ์คำสั่งขายไม่ได้: {res}"}
-
-    return {"ok": True, "sell_price": sell_price, "proceeds_thb": proceeds_thb}
+def reconcile_pending_orders(state, today):
+    """
+    เช็คคำสั่งซื้อที่ส่งไปแล้วแต่ยังไม่รู้ผลจริง (pending_orders) ผ่าน order-info
+    ถ้าจับคู่แล้ว: เพิ่มจำนวนเหรียญเข้า holdings + บันทึก log แล้วเอาออกจาก pending
+    (ทุนที่ลงไป total_invested_thb ถูกบันทึกไว้แล้วตั้งแต่ตอนส่งคำสั่ง)
+    """
+    pending = state.get("pending_orders") or []
+    still = []
+    for po in pending:
+        fill, raw = fetch_fill(BITKUB_API_KEY, BITKUB_API_SECRET, po["sym"], po["order_id"], po.get("side", "buy"), tries=2)
+        if not fill:
+            po["checks"] = po.get("checks", 0) + 1
+            po["last_raw"] = raw
+            still.append(po)
+            continue
+        name = po["name"]
+        h = state["holdings"].setdefault(
+            name, {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None}
+        )
+        h["total_coin"] = h["total_coin"] + fill["coin"]
+        state["log"].append({
+            "date": po.get("date", today),
+            "name": name,
+            "invested_thb": po.get("amt_thb"),
+            "fill_price": fill["rate"],
+            "amount_coin": fill["coin"],
+            "order_id": po["order_id"],
+        })
+        print(f"ยืนยันคำสั่งซื้อ {name} ({po['order_id']}): {fill['coin']:.8f} เหรียญ @ {fill['rate']}")
+    state["pending_orders"] = still
+    return [po["name"] for po in pending if po not in still]
 
 
 # ---------------- โปรแกรมหลัก ----------------
@@ -271,9 +294,14 @@ def main():
     state.setdefault("realized_pnl_total_thb", 0.0)
     state.setdefault("last_summary_date", None)
     state.setdefault("crash_alert_active", False)
+    state.setdefault("pending_orders", [])
 
     trading_enabled = bool(BITKUB_API_KEY and BITKUB_API_SECRET)
     today = today_str()
+
+    # ยืนยันผลคำสั่งซื้อที่ส่งไปรอบก่อนๆ แต่ยังไม่รู้ราคา/จำนวนเหรียญจริง
+    if trading_enabled and state["pending_orders"]:
+        reconcile_pending_orders(state, today)
 
     ticker = {}
     try:
@@ -310,19 +338,29 @@ def main():
                     name, {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None}
                 )
                 h["total_invested_thb"] = round(h["total_invested_thb"] + DCA_UNIT_THB, 4)
-                h["total_coin"] = h["total_coin"] + outcome["amount_coin"]
                 h["buy_count"] = h["buy_count"] + 1
                 h["last_bought_date"] = today
-                state["log"].append({
-                    "date": today,
-                    "name": name,
-                    "invested_thb": DCA_UNIT_THB,
-                    "fill_price": outcome["fill_price"],
-                    "amount_coin": outcome["amount_coin"],
-                })
+                if outcome.get("pending"):
+                    # Bitkub รับคำสั่งแล้ว แต่ยังอ่านราคาจริงไม่ได้ — เก็บไว้ยืนยันรอบหน้า (ไม่ซื้อซ้ำ)
+                    state["pending_orders"].append({
+                        "name": name, "sym": outcome["sym"], "order_id": outcome["order_id"],
+                        "side": "buy", "amt_thb": DCA_UNIT_THB, "date": today,
+                    })
+                    bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท (รอยืนยันราคา)")
+                else:
+                    h["total_coin"] = h["total_coin"] + outcome["amount_coin"]
+                    state["log"].append({
+                        "date": today,
+                        "name": name,
+                        "invested_thb": DCA_UNIT_THB,
+                        "fill_price": outcome["fill_price"],
+                        "amount_coin": outcome["amount_coin"],
+                        "order_id": outcome["order_id"],
+                    })
+                    bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท @ {outcome['fill_price']:,.4f}")
                 cycle["bought"][name] = True
                 cycle["budget_remaining_thb"] = round(cycle["budget_remaining_thb"] - DCA_UNIT_THB, 2)
-                bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท @ {outcome['fill_price']:.4f}")
+                state.get("last_errors", {}).pop(name, None)
             else:
                 failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")
                 state["last_errors"] = state.get("last_errors", {})
@@ -358,6 +396,8 @@ def main():
             h = state["holdings"][name]
             if h["total_coin"] <= 0:
                 continue
+            if any(po["name"] == name for po in state["pending_orders"]):
+                continue  # ยังมีคำสั่งซื้อที่รอยืนยัน จำนวนเหรียญ/ทุนเฉลี่ยยังไม่ครบ อย่าเพิ่งขาย
             tick = ticker.get(trade_symbol_of(name)) if isinstance(ticker, dict) else None
             current_price = tick.get("last") if isinstance(tick, dict) else None
             if not current_price:
@@ -369,7 +409,7 @@ def main():
             if pnl_pct_now < TAKE_PROFIT_PCT:
                 continue
 
-            outcome = execute_sell(trade_symbol_of(name), h["total_coin"])
+            outcome = execute_sell(trade_symbol_of(name), h["total_coin"], fallback_price=current_price)
             if outcome["ok"]:
                 realized_pnl = outcome["proceeds_thb"] - h["total_invested_thb"]
                 state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
@@ -408,7 +448,8 @@ def main():
         tick = ticker.get(trade_symbol_of(name)) if isinstance(ticker, dict) else None
         if isinstance(tick, dict):
             current_price = tick.get("last")
-        current_value = (h["total_coin"] * current_price) if current_price else None
+        has_pending = any(po["name"] == name for po in state.get("pending_orders", []))
+        current_value = (h["total_coin"] * current_price) if current_price and not has_pending else None
         avg_cost = (h["total_invested_thb"] / h["total_coin"]) if h["total_coin"] else None
         pnl_thb = (current_value - h["total_invested_thb"]) if current_value is not None else None
         pnl_pct = (pnl_thb / h["total_invested_thb"] * 100) if pnl_thb is not None and h["total_invested_thb"] else None
@@ -430,6 +471,9 @@ def main():
             "bought_this_cycle": bool(cycle.get("bought", {}).get(name)),
             "skipped_budget_this_cycle": bool(cycle.get("skipped_budget", {}).get(name)),
         }
+        if has_pending:
+            per_coin[name]["pending_confirmation"] = True
+            continue  # ยังไม่รู้จำนวนเหรียญจริง ไม่นับรวมในพอร์ต กันตัวเลขขาดทุนหลอก
         total_invested += h["total_invested_thb"]
         if current_value is not None:
             total_value += current_value

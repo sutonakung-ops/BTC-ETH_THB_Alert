@@ -41,16 +41,16 @@ def _sign(api_secret, timestamp, method, path, body=""):
     ).hexdigest()
 
 
-def _private_request(api_key, api_secret, method, path, body_dict=None):
+def _private_request(api_key, api_secret, method, path, body_dict=None, query=""):
     if not api_key or not api_secret:
         raise BitkubAPIError("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET")
 
     timestamp = _timestamp_ms()
     body = json.dumps(body_dict, separators=(",", ":")) if body_dict is not None else ""
-    # ยืนยันแล้วจากตัวอย่างโค้ด v3 ที่ทำงานจริง (2024, paohue.medium.com) ว่า signature ต้องใช้ path
-    # แบบมี /v3/ ตรงกับ path จริงที่ยิง request — ตัวอย่างใน docs/authentication ที่ตัด /v3 ออก
-    # (ใช้ /api/market/place-bid) เป็นตัวอย่างเก่า/ไม่ตรงกับ endpoint list จริง อย่าตัดออก
-    signature = _sign(api_secret, timestamp, method.upper(), path, body)
+    # signature = {timestamp}{METHOD}{/api/v3/path}{?query หรือ body} ตาม rest-v3.md (path มี /v3/ ด้วย)
+    query_part = f"?{query}" if query else ""
+    tail = query_part if method.upper() == "GET" else body
+    signature = _sign(api_secret, timestamp, method.upper(), path, tail)
 
     headers = {
         "Accept": "application/json",
@@ -60,7 +60,7 @@ def _private_request(api_key, api_secret, method, path, body_dict=None):
         "X-BTK-SIGN": signature,
     }
 
-    url = f"{API_BASE}{path}"
+    url = f"{API_BASE}{path}{query_part}"
     if method.upper() == "GET":
         response = requests.get(url, headers=headers, timeout=20)
     else:
@@ -98,3 +98,64 @@ def place_ask(api_key, api_secret, sym, amt_coin, rat=0, typ="market", client_id
 
 def get_balances(api_key, api_secret):
     return _private_request(api_key, api_secret, "GET", "/api/v4/wallet/balances")
+
+
+def get_order_info(api_key, api_secret, sym, order_id, side):
+    """side = 'buy' หรือ 'sell', sym เช่น 'btc_thb'"""
+    query = f"sym={sym}&id={order_id}&sd={side}"
+    return _private_request(api_key, api_secret, "GET", "/api/v3/market/order-info", query=query)
+
+
+def summarize_fill(info_result, side):
+    """
+    แปลงผล order-info เป็นตัวเลขที่บอทใช้ คืน None ถ้ายังไม่มีการจับคู่ (filled = 0)
+    buy : filled = เงินบาทที่ใช้ไป, ได้เหรียญ = (filled - ค่าธรรมเนียมที่จ่ายเป็นเงินบาท) / rate
+    sell: filled = จำนวนเหรียญที่ขายได้, ได้เงิน = filled * rate - ค่าธรรมเนียมที่จ่ายเป็นเงินบาท
+    ค่าธรรมเนียมที่ใช้ trading credit จ่ายไป (credit) ไม่ได้หักจากเงิน/เหรียญ
+    ถ้า rate หลักเป็น 0 ใช้ราคาเฉลี่ยถ่วงน้ำหนักจาก history แทน
+    """
+    if not isinstance(info_result, dict):
+        return None
+    try:
+        filled = float(info_result.get("filled") or 0)
+        fee = float(info_result.get("fee") or 0)
+        credit = float(info_result.get("credit") or 0)
+        rate = float(info_result.get("rate") or 0)
+    except (TypeError, ValueError):
+        return None
+    if filled <= 0:
+        return None
+    if rate <= 0:
+        hist = [h for h in info_result.get("history") or [] if float(h.get("rate") or 0) > 0]
+        weight = sum(float(h.get("amount") or 0) for h in hist)
+        if weight > 0:
+            rate = sum(float(h["rate"]) * float(h.get("amount") or 0) for h in hist) / weight
+    if rate <= 0:
+        return None
+    cash_fee = max(fee - credit, 0.0)
+    if side == "buy":
+        return {"rate": rate, "thb": filled, "coin": (filled - cash_fee) / rate,
+                "status": info_result.get("status")}
+    return {"rate": rate, "coin": filled, "thb": filled * rate - cash_fee,
+            "status": info_result.get("status")}
+
+
+def fetch_fill(api_key, api_secret, sym, order_id, side, tries=4, delay=1.5):
+    """ถาม order-info ซ้ำสั้นๆ จนกว่า market order จะจับคู่เสร็จ คืน (fill หรือ None, raw result)"""
+    raw = None
+    for i in range(tries):
+        try:
+            resp = get_order_info(api_key, api_secret, sym, order_id, side)
+        except (BitkubAPIError, requests.RequestException) as e:
+            raw = {"exception": str(e)}
+            resp = None
+        if isinstance(resp, dict) and resp.get("error", 0) in (0, None):
+            raw = resp.get("result")
+            fill = summarize_fill(raw, side)
+            if fill and (fill.get("status") == "filled" or i == tries - 1):
+                return fill, raw
+        elif resp is not None:
+            raw = resp
+        if i < tries - 1:
+            time.sleep(delay)
+    return None, raw
