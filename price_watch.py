@@ -23,6 +23,7 @@ import requests
 
 import crypto_alert
 import dca_bot
+import trade_journal
 
 WATCH_MINUTES = float(os.environ.get("WATCH_MINUTES", "50"))
 INTERVAL_SECONDS = 60
@@ -30,7 +31,7 @@ INTERVAL_SECONDS = 60
 
 def git_commit_push(message):
     files = [dca_bot.DCA_STATE_FILE, crypto_alert.CONTROL_FILE, dca_bot.DEPOSIT_INBOX_FILE,
-             crypto_alert.TG_OFFSET_FILE, crypto_alert.COMMANDS_FILE]
+             crypto_alert.TG_OFFSET_FILE, crypto_alert.COMMANDS_FILE, trade_journal.JOURNAL_FILE]
     existing = [f for f in files if os.path.exists(f)]
     subprocess.run(["git", "add", *existing], check=False)
     if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:

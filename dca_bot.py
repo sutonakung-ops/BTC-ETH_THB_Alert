@@ -24,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+import trade_journal
 from bitkub_trade import BitkubAPIError, fetch_fill, place_ask, place_bid
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
@@ -258,6 +259,12 @@ def execute_sell(trade_symbol, amount_coin, fallback_price=None):
     return {"ok": True, "order_id": order_id, "sell_price": 0.0, "proceeds_thb": 0.0, "estimated": True}
 
 
+def load_journal(state):
+    journal = trade_journal.load()
+    trade_journal.backfill_from_state(journal, state)
+    return journal
+
+
 def reconcile_pending_orders(state, today):
     """
     เช็คคำสั่งซื้อที่ส่งไปแล้วแต่ยังไม่รู้ผลจริง (pending_orders) ผ่าน order-info
@@ -278,6 +285,9 @@ def reconcile_pending_orders(state, today):
             name, {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None}
         )
         h["total_coin"] = h["total_coin"] + fill["coin"]
+        journal = load_journal(state)
+        trade_journal.record_fill(journal, po["order_id"], fill["rate"], fill["coin"])
+        trade_journal.save(journal)
         state["log"].append({
             "date": po.get("date", today),
             "name": name,
@@ -343,6 +353,9 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
                 cycle["bought"].pop(name, None)  # ปลดล็อกให้ซื้อกลับได้ ถ้าผ่าน rebuy_check
                 cycle.setdefault("sold", {})[name] = {"reason": reason, "at": datetime.now(timezone.utc).isoformat()}
             state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
+            journal = load_journal(state)
+            trade_journal.record_close(journal, name, outcome["sell_price"], outcome["proceeds_thb"], reason, pnl_pct_now)
+            trade_journal.save(journal)
             state["sell_log"].append({
                 "date": today,
                 "name": name,
@@ -411,6 +424,13 @@ def run_buys(state, cycle, today, dashboard_so_far):
                 continue
         outcome = execute_buy(trade_symbol_of(name), DCA_UNIT_THB)
         if outcome["ok"]:
+            journal = load_journal(state)
+            trade_journal.record_buy(
+                journal, name, outcome["order_id"], DCA_UNIT_THB,
+                outcome.get("fill_price"), outcome.get("amount_coin"), dashboard_so_far,
+                rebuy=name in cycle.get("sold", {}),
+            )
+            trade_journal.save(journal)
             h = state["holdings"].setdefault(
                 name, {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None}
             )
@@ -627,6 +647,7 @@ def main():
         "take_profit_pct": TAKE_PROFIT_PCT,
         "stop_loss_pct": STOP_LOSS_PCT,
         "cut_zone_pct": CUT_ZONE_PCT,
+        "journal": trade_journal.summary(load_journal(state)),
         "market_sentiment": dashboard_so_far.get("market_sentiment") if isinstance(dashboard_so_far, dict) else None,
         "cycle_date": cycle.get("cycle_date"),
         "cycle_ranking": cycle.get("ranking", []),

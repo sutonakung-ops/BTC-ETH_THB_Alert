@@ -374,10 +374,20 @@
               <span class="label">ความเสี่ยง (ผันผวน 48 ชม.)</span>
               <span>${d.risk_pct}%</span>
             </div>` : ""}
-            ${d.news_sentiment != null ? `
+            ${d.premium_pct != null ? `
             <div class="row">
-              <span class="label">ข่าว/เซนติเมนต์</span>
-              <span class="${d.news_sentiment > 0 ? "up" : d.news_sentiment < 0 ? "down" : "neutral"}">${d.news_sentiment > 0 ? "+" : ""}${d.news_sentiment}</span>
+              <span class="label">Premium Bitkub เทียบตลาดโลก</span>
+              <span class="${d.premium_pct > 1 ? "down" : d.premium_pct < -1 ? "up" : "neutral"}">${d.premium_pct > 0 ? "+" : ""}${d.premium_pct}%</span>
+            </div>` : ""}
+            ${d.depth_imbalance != null ? `
+            <div class="row">
+              <span class="label">กระดาน ±1% (ฝั่งซื้อ vs ขาย)</span>
+              <span class="${d.depth_imbalance > 0 ? "up" : d.depth_imbalance < 0 ? "down" : "neutral"}">${d.depth_imbalance > 0 ? "+" : ""}${d.depth_imbalance} ${d.depth_imbalance > 0.2 ? "(ซื้อหนา)" : d.depth_imbalance < -0.2 ? "(ขายหนา)" : "(สมดุล)"}</span>
+            </div>` : ""}
+            ${d.buy_flow_pct != null ? `
+            <div class="row">
+              <span class="label">แรงไล่ซื้อ (200 รายการล่าสุด)</span>
+              <span class="${d.buy_flow_pct > 55 ? "up" : d.buy_flow_pct < 45 ? "down" : "neutral"}">${d.buy_flow_pct}%</span>
             </div>` : ""}
             <div class="signal-badge ${signalClass(d.signal)}">${d.signal}</div>
           </div>
@@ -499,6 +509,16 @@
             <span class="${realizedCls}">${dca.realized_pnl_total_thb > 0 ? "+" : ""}${fmtNum(dca.realized_pnl_total_thb || 0)} บาท</span>
           </div>
         `;
+      }
+
+      if (dca.journal) {
+        const j = dca.journal;
+        const wr = j.winrate_pct != null ? `${j.winrate_pct}% (${j.wins}/${j.closed_lots} ไม้)` : `ยังไม่มีไม้ที่ปิด (เปิดอยู่ ${j.open_lots} ไม้)`;
+        bodyHtml += `<div class="row"><span class="label"><strong>สถิติการเทรด (winrate)</strong></span><span>${wr}</span></div>`;
+        if (j.closed_lots) {
+          bodyHtml += `<div class="row"><span class="label">กำไรเฉลี่ยไม้ชนะ / ขาดทุนเฉลี่ยไม้แพ้</span><span><span class="up">${j.avg_win_pct != null ? "+" + j.avg_win_pct + "%" : "-"}</span> / <span class="down">${j.avg_loss_pct != null ? j.avg_loss_pct + "%" : "-"}</span></span></div>`;
+          bodyHtml += `<div class="row"><span class="label">ผลเฉลี่ยต่อไม้ (expectancy)</span><span class="${changeClass(j.expectancy_pct || 0)}">${j.expectancy_pct > 0 ? "+" : ""}${j.expectancy_pct}%</span></div>`;
+        }
       }
 
       if (dca.coins) {

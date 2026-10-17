@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 
 import requests
 
+import bitkub_market
+
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 
@@ -287,7 +289,8 @@ def main():
         if (h or {}).get("total_coin", 0) > 0 and name not in active_names and f"THB_{name}" in ticker:
             trending.append({"name": name, "ticker_symbol": f"THB_{name}", "candle_symbol": f"{name}_THB",
                              "quote_volume_thb": float(ticker[f"THB_{name}"].get("quoteVolume") or 0)})
-    market_sentiment = fetch_market_sentiment()  # ดึงครั้งเดียวต่อรอบ ใช้ร่วมกันทุกเหรียญ (ดู fetch_market_sentiment)
+    market_sentiment = fetch_market_sentiment()
+    global_prices = bitkub_market.fetch_global_usdt_prices()  # ใช้คำนวณ premium ของ Bitkub เทียบตลาดโลก  # ดึงครั้งเดียวต่อรอบ ใช้ร่วมกันทุกเหรียญ (ดู fetch_market_sentiment)
 
     result = {
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -310,6 +313,8 @@ def main():
             print(f"ข้าม {name}: วิเคราะห์เทรนด์ไม่สำเร็จ — {e}")
             continue
         result[name] = {"change_24h": change, "quote_volume_thb": round(coin["quote_volume_thb"], 2), **trend}
+        # ข้อมูลเฉพาะของ Bitkub (premium, ความหนากระดาน, แรงไล่ซื้อ) — เก็บไว้วัดผลก่อน ยังไม่ใช้ตัดสินใจ
+        result[name].update(bitkub_market.market_features(name, ticker, global_prices))
 
     save_json(ALERT_STATE_FILE, alert_state)
 
