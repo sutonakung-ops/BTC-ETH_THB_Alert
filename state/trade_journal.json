@@ -75,7 +75,15 @@
       "amount_coin": 6.70331143584931,
       "features": null,
       "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-17T21:37:58.880583+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 7.206,
+      "proceeds_thb": 48.0625,
+      "pnl_thb": -1.9375,
+      "pnl_pct": -3.875,
+      "position_pnl_pct_at_trigger": -3.338,
+      "win": false
     },
     {
       "lot_id": "6ad33f6645d27757b374b78c7ma6x9",

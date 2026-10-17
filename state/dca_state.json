@@ -19,10 +19,10 @@
       "last_bought_date": "2026-10-17"
     },
     "ADA": {
-      "total_invested_thb": 50.0,
-      "total_coin": 6.70331143584931,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-16"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "DOGE": {
       "total_invested_thb": 100.0,
@@ -229,8 +229,19 @@
       "order_id": "6ad34d3ccd5e1a48732938dds5oh6d"
     }
   ],
-  "sell_log": [],
-  "realized_pnl_total_thb": 0.0,
+  "sell_log": [
+    {
+      "date": "2026-10-18",
+      "name": "ADA",
+      "sold_coin": 6.70331143584931,
+      "sell_price": 7.206,
+      "invested_thb": 50.0,
+      "proceeds_thb": 48.06,
+      "realized_pnl_thb": -1.94,
+      "reason": "signal_cut"
+    }
+  ],
+  "realized_pnl_total_thb": -1.94,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -254,6 +265,12 @@
       "SOL": true,
       "XLM": true,
       "XRP": true
+    },
+    "sold": {
+      "ADA": {
+        "reason": "signal_cut",
+        "at": "2026-10-17T21:37:58.880436+00:00"
+      }
     }
   },
   "last_errors": {
@@ -267,6 +284,6 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 0.0,
+  "cash_pool_thb": 48.06,
   "profit_reserved_thb": 0.0
 }
