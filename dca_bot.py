@@ -72,6 +72,9 @@ NEWS_SENTIMENT_WEIGHT = 5.0  # ข่าวบวก/ลบเต็มสเก
 # ขายเหรียญนั้นทั้งหมดกลับเป็นเงินบาท แล้วเริ่มสะสม DCA ใหม่จากศูนย์ (เหรียญอื่นไม่กระทบ)
 TAKE_PROFIT_PCT = 4.0
 STOP_LOSS_PCT = 5.0
+# ตัดขาดทุนตามสัญญาณ (ผู้ใช้เลือกทางเลือกที่ 4): ขาดทุนตั้งแต่ CUT_ZONE_PCT ขึ้นไป และแนวโน้ม MA เป็นขาลง
+# (Death Cross) -> ขายเลยไม่ต้องรอถึง STOP_LOSS_PCT / ถ้าแนวโน้มยังไม่ลง ถือรอ (-5% ยังเป็นเพดานเสมอ)
+CUT_ZONE_PCT = 3.0
 
 # ส่งสรุปพอร์ตรวมทาง Telegram ทุกๆ กี่วัน (รายสัปดาห์)
 SUMMARY_INTERVAL_DAYS = 7
@@ -288,11 +291,15 @@ def reconcile_pending_orders(state, today):
     return [po["name"] for po in pending if po not in still]
 
 
-def run_take_profit_stop_loss(state, ticker, today):
+def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
     """
-    เช็คทุกเหรียญที่ถืออยู่ (รวมเหรียญที่หลุดเทรนด์): กำไรถึง TAKE_PROFIT_PCT หรือขาดทุนถึง STOP_LOSS_PCT
-    เทียบกับทุนเฉลี่ย -> ขายทั้งหมด แล้วคืนเงินเข้ากองตามกติกา (ดูหัวไฟล์)
+    เช็คทุกเหรียญที่ถืออยู่ (รวมเหรียญที่หลุดเทรนด์) เทียบกับทุนเฉลี่ย แล้วขายทั้งหมดเมื่อ:
+    - กำไรถึง TAKE_PROFIT_PCT (take_profit)
+    - ขาดทุนถึง STOP_LOSS_PCT (stop_loss — เพดาน)
+    - ขาดทุนตั้งแต่ CUT_ZONE_PCT และแนวโน้มเป็น Death Cross (signal_cut)
+    แล้วคืนเงินเข้ากองตามกติกา (ดูหัวไฟล์)
     """
+    dashboard_so_far = dashboard_so_far or {}
     for name in list(state["holdings"].keys()):
         h = state["holdings"][name]
         if h["total_coin"] <= 0:
@@ -307,9 +314,18 @@ def run_take_profit_stop_loss(state, ticker, today):
         if not avg_cost:
             continue
         pnl_pct_now = (current_price - avg_cost) / avg_cost * 100
-        if -STOP_LOSS_PCT < pnl_pct_now < TAKE_PROFIT_PCT:
+        signal = str((dashboard_so_far.get(name) or {}).get("signal", "")) if isinstance(dashboard_so_far, dict) else ""
+        if pnl_pct_now >= TAKE_PROFIT_PCT:
+            reason = "take_profit"
+        elif pnl_pct_now <= -STOP_LOSS_PCT:
+            reason = "stop_loss"
+        elif pnl_pct_now <= -CUT_ZONE_PCT and "Death Cross" in signal:
+            reason = "signal_cut"
+        else:
+            if pnl_pct_now <= -CUT_ZONE_PCT:
+                print(f"{name}: ขาดทุน {pnl_pct_now:.1f}% แต่แนวโน้มยังไม่ใช่ขาลง ({signal or 'ไม่มีข้อมูล'}) — ถือรอ")
             continue
-        is_stop_loss = pnl_pct_now <= -STOP_LOSS_PCT
+        is_stop_loss = reason != "take_profit"
 
         outcome = execute_sell(trade_symbol_of(name), h["total_coin"], fallback_price=current_price)
         if outcome["ok"]:
@@ -325,7 +341,7 @@ def run_take_profit_stop_loss(state, ticker, today):
             cycle = state.get("dca_cycle")
             if cycle:
                 cycle["bought"].pop(name, None)  # ปลดล็อกให้ซื้อกลับได้ ถ้าผ่าน rebuy_check
-                cycle.setdefault("sold", {})[name] = "stop_loss" if is_stop_loss else "take_profit"
+                cycle.setdefault("sold", {})[name] = reason
             state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
             state["sell_log"].append({
                 "date": today,
@@ -335,10 +351,12 @@ def run_take_profit_stop_loss(state, ticker, today):
                 "invested_thb": h["total_invested_thb"],
                 "proceeds_thb": round(outcome["proceeds_thb"], 2),
                 "realized_pnl_thb": round(realized_pnl, 2),
-                "reason": "stop_loss" if is_stop_loss else "take_profit",
+                "reason": reason,
             })
             state["sell_log"] = state["sell_log"][-200:]
-            if is_stop_loss:
+            if reason == "signal_cut":
+                head = f"📉 ตัดขาดทุน {name} ทั้งหมดตามสัญญาณขาลง (Death Cross) ที่ {pnl_pct_now:.1f}%"
+            elif is_stop_loss:
                 head = f"🛑 ตัดขาดทุน {name} ทั้งหมด (ขาดทุนเฉลี่ยรวมถึง {pnl_pct_now:.1f}%)"
             else:
                 head = f"🎉 ขายทำกำไร {name} ทั้งหมด (กำไรเฉลี่ยรวมถึง +{pnl_pct_now:.1f}%)"
@@ -496,7 +514,7 @@ def main():
             state["dca_cycle"] = cycle
             print(f"เริ่มรอบจัดลำดับใหม่ ({today}) ลำดับเหรียญ: {', '.join(cycle['ranking']) or '-'}")
         # ขายก่อน (เงินทุนที่ได้คืนจะได้ใช้ซื้อเหรียญถัดไปได้ในรอบเดียวกัน) แล้วค่อยซื้อ
-        run_take_profit_stop_loss(state, ticker, today)
+        run_take_profit_stop_loss(state, ticker, today, dashboard_so_far)
         run_buys(state, cycle, today, dashboard_so_far)
 
     # ----- คำนวณมูลค่าปัจจุบันของแต่ละเหรียญ (ใช้ได้ทั้งตอนเปิด/ปิดใช้งานจริง) -----

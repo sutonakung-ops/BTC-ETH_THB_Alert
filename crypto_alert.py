@@ -21,6 +21,7 @@ TOP_N_TRENDING = 10
 ALWAYS_INCLUDE = ["BTC", "ETH"]
 MAX_DEPOSIT_THB = 10000  # กันพิมพ์ผิดหลัก
 DEPOSIT_INBOX_FILE = "state/deposit_inbox.json"  # dca_bot.py อ่านแล้วเติมเข้ากองเงินบอท
+DCA_STATE_FILE = "state/dca_state.json"  # อ่านรายการเหรียญที่ถืออยู่ เพื่อวิเคราะห์สัญญาณให้ครบ
 
 # Stablecoin ผูกค่ากับ USD 1:1 ราคาแทบไม่ขยับ แม้ปริมาณซื้อขายจะสูงก็ไม่มีความหมายสำหรับ DCA
 # (เป้าหมายคือสะสมเหรียญที่มีโอกาสโต ไม่ใช่ถือเงินตรารูปแบบหนึ่งไปอีกรูปแบบหนึ่ง) ตัดออกจากการจัดอันดับเทรนด์เสมอ
@@ -279,6 +280,13 @@ def main():
 
     trending = pick_trending_coins(ticker, TOP_N_TRENDING)
     active_names = [c["name"] for c in trending]
+    # วิเคราะห์เหรียญที่ DCA ถืออยู่ด้วยเสมอ (แม้หลุดเทรนด์) เพื่อให้ตัดขาดทุนตามสัญญาณได้
+    # (ไม่นับเป็น active_coins — ไม่ได้เพิ่มเข้าตัวเลือกซื้อ)
+    held = load_json(DCA_STATE_FILE, {}).get("holdings", {})
+    for name, h in held.items():
+        if (h or {}).get("total_coin", 0) > 0 and name not in active_names and f"THB_{name}" in ticker:
+            trending.append({"name": name, "ticker_symbol": f"THB_{name}", "candle_symbol": f"{name}_THB",
+                             "quote_volume_thb": float(ticker[f"THB_{name}"].get("quoteVolume") or 0)})
     market_sentiment = fetch_market_sentiment()  # ดึงครั้งเดียวต่อรอบ ใช้ร่วมกันทุกเหรียญ (ดู fetch_market_sentiment)
 
     result = {
