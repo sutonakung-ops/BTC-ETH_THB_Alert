@@ -1,40 +1,40 @@
 {
   "holdings": {
     "BTC": {
-      "total_invested_thb": 0.0,
+      "total_invested_thb": 50.0,
       "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "buy_count": 1,
+      "last_bought_date": "2026-10-16"
     },
     "ETH": {
-      "total_invested_thb": 0.0,
+      "total_invested_thb": 50.0,
       "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "buy_count": 1,
+      "last_bought_date": "2026-10-16"
     },
     "XRP": {
-      "total_invested_thb": 0.0,
+      "total_invested_thb": 50.0,
       "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "buy_count": 1,
+      "last_bought_date": "2026-10-16"
     },
     "ADA": {
-      "total_invested_thb": 0.0,
+      "total_invested_thb": 50.0,
       "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "buy_count": 1,
+      "last_bought_date": "2026-10-16"
     },
     "DOGE": {
-      "total_invested_thb": 0.0,
+      "total_invested_thb": 50.0,
       "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "buy_count": 1,
+      "last_bought_date": "2026-10-16"
     },
     "SOL": {
-      "total_invested_thb": 0.0,
+      "total_invested_thb": 50.0,
       "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "buy_count": 1,
+      "last_bought_date": "2026-10-16"
     },
     "KUB": {
       "total_invested_thb": 0.0,
@@ -61,10 +61,10 @@
       "last_bought_date": null
     },
     "CRV": {
-      "total_invested_thb": 0.0,
+      "total_invested_thb": 50.0,
       "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "buy_count": 1,
+      "last_bought_date": "2026-10-16"
     },
     "OP": {
       "total_invested_thb": 0.0,
@@ -73,10 +73,10 @@
       "last_bought_date": null
     },
     "XLM": {
-      "total_invested_thb": 0.0,
+      "total_invested_thb": 50.0,
       "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "buy_count": 1,
+      "last_bought_date": "2026-10-16"
     },
     "STRK": {
       "total_invested_thb": 0.0,
@@ -122,43 +122,23 @@
       "NEAR",
       "OP"
     ],
-    "budget_remaining_thb": 300,
-    "bought": {},
-    "skipped_budget": {}
+    "budget_remaining_thb": 0,
+    "bought": {
+      "BTC": true,
+      "SOL": true,
+      "XRP": true,
+      "XLM": true,
+      "ETH": true,
+      "DOGE": true,
+      "ADA": true,
+      "CRV": true
+    },
+    "skipped_budget": {
+      "NEAR": true,
+      "OP": true
+    }
   },
   "last_errors": {
-    "BTC": {
-      "error": "อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {'amt': 50, 'ci': '', 'cre': 0, 'fee': 0, 'id': '6ad33f5bdf98e484901f62c4m8a2qe', 'rat': 0, 'rec': 0, 'ts': '1792229211', 'typ': 'market'}",
-      "at": "2026-10-17T09:26:51.705273+00:00"
-    },
-    "SOL": {
-      "error": "อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {'amt': 50, 'ci': '', 'cre': 0, 'fee': 0, 'id': '6ad33f5c98b3bc6f5abd136900es3u', 'rat': 0, 'rec': 0, 'ts': '1792229212', 'typ': 'market'}",
-      "at": "2026-10-17T09:26:53.199759+00:00"
-    },
-    "XRP": {
-      "error": "อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {'amt': 50, 'ci': '', 'cre': 0, 'fee': 0, 'id': '6ad33f5ecd5e1a487327a8e7s5oh6d', 'rat': 0, 'rec': 0, 'ts': '1792229214', 'typ': 'market'}",
-      "at": "2026-10-17T09:26:54.789067+00:00"
-    },
-    "XLM": {
-      "error": "อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {'amt': 50, 'ci': '', 'cre': 0, 'fee': 0, 'id': '6ad33f60d5c8d71495889c087spahm', 'rat': 0, 'rec': 0, 'ts': '1792229216', 'typ': 'market'}",
-      "at": "2026-10-17T09:26:56.591025+00:00"
-    },
-    "ETH": {
-      "error": "อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {'amt': 50, 'ci': '', 'cre': 0, 'fee': 0, 'id': '6ad33f61bfdbb53de918307bj542k5', 'rat': 0, 'rec': 0, 'ts': '1792229217', 'typ': 'market'}",
-      "at": "2026-10-17T09:26:57.765185+00:00"
-    },
-    "DOGE": {
-      "error": "อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {'amt': 50, 'ci': '', 'cre': 0, 'fee': 0, 'id': '6ad33f63cd5e1a487327a9601o0oz7', 'rat': 0, 'rec': 0, 'ts': '1792229219', 'typ': 'market'}",
-      "at": "2026-10-17T09:26:59.267559+00:00"
-    },
-    "ADA": {
-      "error": "อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {'amt': 50, 'ci': '', 'cre': 0, 'fee': 0, 'id': '6ad33f64e14a4bb9220b812bj8xy3w', 'rat': 0, 'rec': 0, 'ts': '1792229220', 'typ': 'market'}",
-      "at": "2026-10-17T09:27:00.955703+00:00"
-    },
-    "CRV": {
-      "error": "อ่านผลลัพธ์คำสั่งซื้อไม่ได้: {'amt': 50, 'ci': '', 'cre': 0, 'fee': 0, 'id': '6ad33f6645d27757b374b78c7ma6x9', 'rat': 0, 'rec': 0, 'ts': '1792229222', 'typ': 'market'}",
-      "at": "2026-10-17T09:27:03.190347+00:00"
-    },
     "NEAR": {
       "error": "Bitkub error code 18: {'error': 18}",
       "at": "2026-10-17T09:27:05.186825+00:00"
@@ -167,5 +147,71 @@
       "error": "Bitkub error code 18: {'error': 18}",
       "at": "2026-10-17T09:27:06.668100+00:00"
     }
-  }
+  },
+  "pending_orders": [
+    {
+      "name": "BTC",
+      "sym": "btc_thb",
+      "order_id": "6ad33f5bdf98e484901f62c4m8a2qe",
+      "side": "buy",
+      "amt_thb": 50,
+      "date": "2026-10-16"
+    },
+    {
+      "name": "SOL",
+      "sym": "sol_thb",
+      "order_id": "6ad33f5c98b3bc6f5abd136900es3u",
+      "side": "buy",
+      "amt_thb": 50,
+      "date": "2026-10-16"
+    },
+    {
+      "name": "XRP",
+      "sym": "xrp_thb",
+      "order_id": "6ad33f5ecd5e1a487327a8e7s5oh6d",
+      "side": "buy",
+      "amt_thb": 50,
+      "date": "2026-10-16"
+    },
+    {
+      "name": "XLM",
+      "sym": "xlm_thb",
+      "order_id": "6ad33f60d5c8d71495889c087spahm",
+      "side": "buy",
+      "amt_thb": 50,
+      "date": "2026-10-16"
+    },
+    {
+      "name": "ETH",
+      "sym": "eth_thb",
+      "order_id": "6ad33f61bfdbb53de918307bj542k5",
+      "side": "buy",
+      "amt_thb": 50,
+      "date": "2026-10-16"
+    },
+    {
+      "name": "DOGE",
+      "sym": "doge_thb",
+      "order_id": "6ad33f63cd5e1a487327a9601o0oz7",
+      "side": "buy",
+      "amt_thb": 50,
+      "date": "2026-10-16"
+    },
+    {
+      "name": "ADA",
+      "sym": "ada_thb",
+      "order_id": "6ad33f64e14a4bb9220b812bj8xy3w",
+      "side": "buy",
+      "amt_thb": 50,
+      "date": "2026-10-16"
+    },
+    {
+      "name": "CRV",
+      "sym": "crv_thb",
+      "order_id": "6ad33f6645d27757b374b78c7ma6x9",
+      "side": "buy",
+      "amt_thb": 50,
+      "date": "2026-10-16"
+    }
+  ]
 }
