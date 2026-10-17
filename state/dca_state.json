@@ -199,7 +199,6 @@
       "NEAR",
       "OP"
     ],
-    "budget_remaining_thb": 0,
     "bought": {
       "BTC": true,
       "SOL": true,
@@ -209,10 +208,6 @@
       "DOGE": true,
       "ADA": true,
       "CRV": true
-    },
-    "skipped_budget": {
-      "NEAR": true,
-      "OP": true
     }
   },
   "last_errors": {
@@ -225,5 +220,7 @@
       "at": "2026-10-17T09:27:06.668100+00:00"
     }
   },
-  "pending_orders": []
+  "pending_orders": [],
+  "cash_pool_thb": 0.0,
+  "profit_reserved_thb": 0.0
 }
