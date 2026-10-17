@@ -555,6 +555,7 @@ def main():
             "risk_pct": info.get("risk_pct"),
             "news_sentiment": info.get("news_sentiment"),
             "bought_this_cycle": bool(cycle.get("bought", {}).get(name)),
+            "signal": info.get("signal"),
         }
         if has_pending:
             per_coin[name]["pending_confirmation"] = True
@@ -625,6 +626,8 @@ def main():
         "interval_days": DCA_INTERVAL_DAYS,
         "take_profit_pct": TAKE_PROFIT_PCT,
         "stop_loss_pct": STOP_LOSS_PCT,
+        "cut_zone_pct": CUT_ZONE_PCT,
+        "market_sentiment": dashboard_so_far.get("market_sentiment") if isinstance(dashboard_so_far, dict) else None,
         "cycle_date": cycle.get("cycle_date"),
         "cycle_ranking": cycle.get("ranking", []),
         "realized_pnl_total_thb": state.get("realized_pnl_total_thb", 0.0),

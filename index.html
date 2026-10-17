@@ -451,7 +451,7 @@
       if (dca.paused) {
         statusHtml = `<span class="bot-status status-halted">หยุดทำงานชั่วคราว (สั่งผ่าน Telegram)</span>`;
       } else if (dca.enabled) {
-        statusHtml = `<span class="bot-status status-on">ทำงานปกติ — ซื้อจากกองเงินบอท ครั้งละ ${fmtNum(dca.unit_thb_per_buy)} บาท (เสี่ยงต่ำสุดก่อน) | ขายทำกำไร +${dca.take_profit_pct}% / ตัดขาดทุน -${dca.stop_loss_pct ?? '-'}%</span>`;
+        statusHtml = `<span class="bot-status status-on">ทำงานปกติ — ซื้อจากกองเงินบอท ครั้งละ ${fmtNum(dca.unit_thb_per_buy)} บาท (เสี่ยงต่ำสุดก่อน) | ขายทำกำไร +${dca.take_profit_pct}% / ตัดขาดทุน -${dca.stop_loss_pct ?? '-'}% (ขาลงตัดตั้งแต่ -${dca.cut_zone_pct ?? 3}%) · เฝ้าราคาทุก 1 นาที</span>`;
       } else {
         statusHtml = `<span class="bot-status status-off">ยังไม่ตั้งค่า API key — ยังไม่ซื้อจริง</span>`;
       }
@@ -479,39 +479,43 @@
       if (dca.cycle_ranking && dca.cycle_ranking.length) {
         bodyHtml += `<div class="row"><span class="label">กองเงินบอท (พร้อมซื้อ)</span><span>${dca.cash_pool_thb != null ? fmtNum(dca.cash_pool_thb) : "-"} บาท</span></div>`;
         bodyHtml += `<div class="row"><span class="label">กำไรที่แยกเก็บไว้</span><span class="up">${dca.profit_reserved_thb != null ? fmtNum(dca.profit_reserved_thb) : "-"} บาท</span></div>`;
-        bodyHtml += `<div class="row"><span class="label">ลำดับซื้อรอบนี้ (${dca.cycle_date || "-"})</span><span></span></div>`;
+        const ms = dca.market_sentiment;
+        const msStr = ms != null ? `อารมณ์ตลาด (Fear & Greed) ${ms > 0 ? "+" : ""}${ms} ใช้กับทุกเหรียญ` : "";
+        bodyHtml += `<div class="row"><span class="label">ลำดับซื้อรอบนี้ (${dca.cycle_date || "-"}) — เสี่ยงน้อยซื้อก่อน</span><span class="label">${msStr}</span></div>`;
         bodyHtml += `<div class="queue-list">`;
         dca.cycle_ranking.forEach((name) => {
           const c = (dca.coins && dca.coins[name]) || {};
           let tag = `<span class="queue-tag tag-pending">รอคิว</span>`;
           if (c.bought_this_cycle) tag = `<span class="queue-tag tag-bought">✓ ซื้อแล้ว</span>`;
           const riskStr = c.risk_pct != null ? `เสี่ยง ${c.risk_pct}%` : "";
-          const newsStr = c.news_sentiment != null ? ` · ข่าว ${c.news_sentiment > 0 ? "+" : ""}${c.news_sentiment}` : "";
-          bodyHtml += `<div class="queue-item"><span>${name} <span class="label">${riskStr}${newsStr}</span></span>${tag}</div>`;
+          bodyHtml += `<div class="queue-item"><span>${name} <span class="label">${riskStr}</span></span>${tag}</div>`;
         });
         bodyHtml += `</div>`;
       }
-      if (dca.realized_pnl_total_thb) {
+      {
         const realizedCls = changeClass(dca.realized_pnl_total_thb);
         bodyHtml += `
           <div class="row"><span class="label">กำไรที่ขายทำแล้ว (realized, สะสม)</span>
-            <span class="${realizedCls}">${dca.realized_pnl_total_thb > 0 ? "+" : ""}${fmtNum(dca.realized_pnl_total_thb)} บาท</span>
+            <span class="${realizedCls}">${dca.realized_pnl_total_thb > 0 ? "+" : ""}${fmtNum(dca.realized_pnl_total_thb || 0)} บาท</span>
           </div>
         `;
-      } else {
-        bodyHtml += `<div class="row"><span class="label">ลงทุนสะสมรวม</span><span>ยังไม่มีการซื้อ</span></div>`;
       }
 
       if (dca.coins) {
+        bodyHtml += `<div class="row"><span class="label"><strong>เหรียญที่ถืออยู่</strong></span><span class="label">กำไร/ขาดทุน · แนวโน้ม</span></div>`;
         for (const name in dca.coins) {
           const c = dca.coins[name];
           if (!c.buy_count) continue;
           const pnlCls = changeClass(c.pnl_thb || 0);
-          const inactiveTag = c.active === false ? " · หลุด Top 10 (ถือรอขาย ไม่ซื้อเพิ่ม)" : "";
+          const inactiveTag = c.active === false ? " · หลุด Top 10 (ไม่ซื้อเพิ่ม แต่ยังใช้กฎขาย)" : "";
+          const pctStr = c.pnl_pct != null ? ` (${c.pnl_pct > 0 ? "+" : ""}${c.pnl_pct}%)` : "";
+          const sig = c.signal || "";
+          const trendStr = sig.includes("Death") ? " 📉 ขาลง" : sig.includes("Golden") ? " 📈 ขาขึ้น" : sig ? " ➖ ยังไม่ชัด" : "";
+          const pendingStr = c.pending_confirmation ? " · รอยืนยันราคา" : "";
           bodyHtml += `
             <div class="row">
               <span class="label">${name} (${c.buy_count} ครั้ง, ล่าสุด ${c.last_bought_date || "-"}, ทุนเฉลี่ย ${c.avg_cost != null ? fmtNum(c.avg_cost) : "-"}${inactiveTag})</span>
-              <span class="${pnlCls}">${c.pnl_thb != null ? (c.pnl_thb > 0 ? "+" : "") + fmtNum(c.pnl_thb) + " บาท" : "-"}</span>
+              <span class="${pnlCls}">${c.pnl_thb != null ? (c.pnl_thb > 0 ? "+" : "") + fmtNum(c.pnl_thb) + " บาท" + pctStr : "-"}</span><span class="label">${trendStr}${pendingStr}</span>
             </div>
           `;
         }
