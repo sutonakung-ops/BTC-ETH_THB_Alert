@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crypto Alert Dashboard</title>
+<title>Steady Stack</title>
 <style>
   :root {
     /* โทนสีอิงจากภาพ: ท้องฟ้ายามฝนตกสีน้ำเงินเข้มเกือบดำ, ผมสีเงิน/เขียวมินต์,
@@ -50,6 +50,12 @@
     margin: 0 0 6px;
     font-size: 1.4rem;
     letter-spacing: 0.02em;
+  }
+  .page-header h1.brand {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--teal);
     text-shadow: 0 2px 14px rgba(0,0,0,0.9);
   }
   .page-header .tagline {
@@ -257,8 +263,8 @@
 <body>
   <div class="pause-banner" id="pauseBanner" style="display:none;"></div>
   <div class="page-header">
-    <h1>📊 Crypto Price Alert Dashboard</h1>
-    <p class="tagline">ตรวจราคา · วิเคราะห์เทรนด์ · สะสม DCA อัตโนมัติ</p>
+    <h1 class="brand">Steady Stack</h1>
+    <p class="tagline">บอทสะสมคริปโตบน Bitkub · เสี่ยงต่ำซื้อก่อน · ขายตามกฎ · เฝ้าราคาทุกนาที</p>
   </div>
   <div class="updated" id="updated">กำลังโหลดข้อมูล...</div>
   <div class="updated" id="liveUpdated" style="margin-top:-18px; font-size:0.74rem;"></div>
