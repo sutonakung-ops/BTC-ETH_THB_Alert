@@ -56,10 +56,14 @@ DASHBOARD_FILE = "latest.json"
 # - ขายทำกำไร (TP): ทุนเดิมกลับเข้ากองเพื่อซื้อเหรียญถัดไปทันที ส่วนกำไรแยกเก็บ (profit_reserved_thb) ไม่เอาไปซื้อต่อ
 # - ตัดขาดทุน (SL): เงินที่ขายได้ทั้งหมดกลับเข้ากอง (ไม่มีกำไรให้แยก)
 # - ซื้อไล่ตามลำดับความเสี่ยงน้อย -> มาก ครั้งละ DCA_UNIT_THB บาท จนเงินในกองไม่พอแล้วหยุด
-# - จัดลำดับใหม่ทุก DCA_INTERVAL_DAYS วัน ในรอบเดียวกันเหรียญหนึ่งซื้อได้ครั้งเดียว (กันซื้อกลับเหรียญที่เพิ่งขาย)
+# - จัดลำดับใหม่ทุก DCA_INTERVAL_DAYS วัน ในรอบเดียวกันเหรียญหนึ่งซื้อได้ครั้งเดียว
+#   ยกเว้นเหรียญที่ขายไปแล้วในรอบนี้ ซื้อกลับได้ถ้าผ่านการประเมินความเสี่ยงตอนนั้น (ดู rebuy_check)
 DCA_UNIT_THB = 50  # ซื้อเหรียญละเท่านี้ต่อครั้ง
 DCA_INTERVAL_DAYS = 7
-MUST_INCLUDE_COINS = ["BTC", "ETH"]  # อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย
+MUST_INCLUDE_COINS = ["BTC", "ETH"]
+# เหรียญที่ขาย (TP/SL) ไปแล้วในรอบนี้ ซื้อกลับได้ในรอบเดียวกันถ้าประเมินความเสี่ยงตอนนั้นแล้วผ่าน:
+# ความผันผวน 48 ชม. (risk_pct) ไม่เกินค่านี้ และแนวโน้ม MA ไม่ใช่ขาลง (Death Cross)
+REBUY_MAX_RISK_PCT = 3.0  # อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย
 DEPOSIT_INBOX_FILE = "state/deposit_inbox.json"  # crypto_alert.py เขียนยอดเติมเงินจาก Telegram ไว้ที่นี่
 NEWS_SENTIMENT_WEIGHT = 5.0  # ข่าวบวก/ลบเต็มสเกล (+-1) ขยับคะแนนความเสี่ยงได้สูงสุด 5 แต้ม
 
@@ -318,6 +322,10 @@ def run_take_profit_stop_loss(state, ticker, today):
             else:
                 back_to_pool = outcome["proceeds_thb"]
             state["cash_pool_thb"] = round(state.get("cash_pool_thb", 0.0) + back_to_pool, 2)
+            cycle = state.get("dca_cycle")
+            if cycle:
+                cycle["bought"].pop(name, None)  # ปลดล็อกให้ซื้อกลับได้ ถ้าผ่าน rebuy_check
+                cycle.setdefault("sold", {})[name] = "stop_loss" if is_stop_loss else "take_profit"
             state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
             state["sell_log"].append({
                 "date": today,
@@ -351,7 +359,20 @@ def run_take_profit_stop_loss(state, ticker, today):
             print(f"{name}: ถึงเกณฑ์ขาย ({pnl_pct_now:+.1f}%) แต่ขายไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
 
 
-def run_buys(state, cycle, today):
+def rebuy_check(name, dashboard_so_far):
+    """ประเมินว่าเหรียญที่เพิ่งขายไป ควรซื้อกลับตอนนี้ไหม คืน (ok, เหตุผล)"""
+    info = dashboard_so_far.get(name, {}) if isinstance(dashboard_so_far, dict) else {}
+    risk_pct = info.get("risk_pct")
+    if risk_pct is None:
+        return False, "ไม่มีข้อมูลความเสี่ยงล่าสุด"
+    if risk_pct > REBUY_MAX_RISK_PCT:
+        return False, f"ผันผวน {risk_pct:.2f}% เกิน {REBUY_MAX_RISK_PCT}%"
+    if "Death Cross" in str(info.get("signal", "")):
+        return False, "แนวโน้มขาลง (Death Cross)"
+    return True, f"ผันผวน {risk_pct:.2f}% แนวโน้มไม่ใช่ขาลง"
+
+
+def run_buys(state, cycle, today, dashboard_so_far):
     """ซื้อไล่ตามลำดับความเสี่ยงด้วยเงินในกอง ครั้งละ DCA_UNIT_THB จนเงินในกองไม่พอ"""
     bought_lines, failed_lines = [], []
     for name in cycle["ranking"]:
@@ -359,6 +380,11 @@ def run_buys(state, cycle, today):
             continue
         if state["cash_pool_thb"] < DCA_UNIT_THB:
             break
+        if name in cycle.get("sold", {}):
+            ok, why = rebuy_check(name, dashboard_so_far)
+            if not ok:
+                print(f"{name}: ขายไปแล้วรอบนี้ ยังไม่ซื้อกลับ — {why}")
+                continue
         outcome = execute_buy(trade_symbol_of(name), DCA_UNIT_THB)
         if outcome["ok"]:
             h = state["holdings"].setdefault(
@@ -385,6 +411,8 @@ def run_buys(state, cycle, today):
                     "order_id": outcome["order_id"],
                 })
                 bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท @ {outcome['fill_price']:,.4f}")
+            if cycle.get("sold", {}).pop(name, None):
+                bought_lines[-1] += " (ซื้อกลับ — ผ่านการประเมินความเสี่ยง)"
             cycle["bought"][name] = True
             state["cash_pool_thb"] = round(state["cash_pool_thb"] - DCA_UNIT_THB, 2)
             state.get("last_errors", {}).pop(name, None)
@@ -469,7 +497,7 @@ def main():
             print(f"เริ่มรอบจัดลำดับใหม่ ({today}) ลำดับเหรียญ: {', '.join(cycle['ranking']) or '-'}")
         # ขายก่อน (เงินทุนที่ได้คืนจะได้ใช้ซื้อเหรียญถัดไปได้ในรอบเดียวกัน) แล้วค่อยซื้อ
         run_take_profit_stop_loss(state, ticker, today)
-        run_buys(state, cycle, today)
+        run_buys(state, cycle, today, dashboard_so_far)
 
     # ----- คำนวณมูลค่าปัจจุบันของแต่ละเหรียญ (ใช้ได้ทั้งตอนเปิด/ปิดใช้งานจริง) -----
     cycle = state.get("dca_cycle") or {}
