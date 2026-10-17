@@ -1,0 +1,136 @@
+{
+  "key_len": 64,
+  "secret_len": 92,
+  "key_equals_secret": false,
+  "checks": {
+    "wallet_balances_v4": {
+      "http_status": 200,
+      "response": {
+        "code": "0",
+        "message": "success",
+        "data": []
+      }
+    },
+    "user_limits": {
+      "http_status": 200,
+      "response": {
+        "error": 0,
+        "result": {
+          "limits": {
+            "crypto": {
+              "deposit": 1.45712589,
+              "withdraw": 1.45712589
+            },
+            "fiat": {
+              "deposit": 4000000,
+              "withdraw": 4000000
+            }
+          },
+          "usage": {
+            "crypto": {
+              "deposit": 0,
+              "withdraw": 0,
+              "deposit_percentage": 0,
+              "withdraw_percentage": 0,
+              "deposit_thb_equivalent": 0,
+              "withdraw_thb_equivalent": 0
+            },
+            "fiat": {
+              "deposit": 0,
+              "withdraw": 0,
+              "deposit_percentage": 0,
+              "withdraw_percentage": 0
+            }
+          },
+          "rate": 2745130
+        }
+      }
+    },
+    "trading_credits": {
+      "http_status": 200,
+      "response": {
+        "error": 0,
+        "result": 127.58
+      }
+    },
+    "open_orders_btc_thb": {
+      "http_status": 200,
+      "response": {
+        "error": 0,
+        "result": [
+          {
+            "id": "6ac7fd386b4a0e8a022bc235m8a2qe",
+            "side": "buy",
+            "type": "limit",
+            "rate": "2600000",
+            "fee": "0.35",
+            "credit": "0.35",
+            "amount": "140",
+            "receive": "0.00005384",
+            "parent_id": "6ac7fd386b4a0e8a022bc235m8a2qe",
+            "super_id": "6ac7fd386b4a0e8a022bc235m8a2qe",
+            "client_id": "",
+            "ts": 1791491384938
+          },
+          {
+            "id": "6ac7fd2f3db7c5caff423a5em8a2qe",
+            "side": "buy",
+            "type": "limit",
+            "rate": "2650000",
+            "fee": "0.38",
+            "credit": "0.38",
+            "amount": "150",
+            "receive": "0.0000566",
+            "parent_id": "6ac7fd2f3db7c5caff423a5em8a2qe",
+            "super_id": "6ac7fd2f3db7c5caff423a5em8a2qe",
+            "client_id": "",
+            "ts": 1791491375956
+          }
+        ]
+      }
+    },
+    "open_orders_thb_btc": {
+      "http_status": 200,
+      "response": {
+        "error": 90,
+        "result": null
+      }
+    },
+    "open_orders_BTC_THB": {
+      "http_status": 200,
+      "response": {
+        "error": 0,
+        "result": [
+          {
+            "id": "6ac7fd386b4a0e8a022bc235m8a2qe",
+            "side": "buy",
+            "type": "limit",
+            "rate": "2600000",
+            "fee": "0.35",
+            "credit": "0.35",
+            "amount": "140",
+            "receive": "0.00005384",
+            "parent_id": "6ac7fd386b4a0e8a022bc235m8a2qe",
+            "super_id": "6ac7fd386b4a0e8a022bc235m8a2qe",
+            "client_id": "",
+            "ts": 1791491384938
+          },
+          {
+            "id": "6ac7fd2f3db7c5caff423a5em8a2qe",
+            "side": "buy",
+            "type": "limit",
+            "rate": "2650000",
+            "fee": "0.38",
+            "credit": "0.38",
+            "amount": "150",
+            "receive": "0.0000566",
+            "parent_id": "6ac7fd2f3db7c5caff423a5em8a2qe",
+            "super_id": "6ac7fd2f3db7c5caff423a5em8a2qe",
+            "client_id": "",
+            "ts": 1791491375956
+          }
+        ]
+      }
+    }
+  }
+}
