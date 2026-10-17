@@ -64,7 +64,10 @@ DCA_INTERVAL_DAYS = 7
 MUST_INCLUDE_COINS = ["BTC", "ETH"]
 # เหรียญที่ขาย (TP/SL) ไปแล้วในรอบนี้ ซื้อกลับได้ในรอบเดียวกันถ้าประเมินความเสี่ยงตอนนั้นแล้วผ่าน:
 # ความผันผวน 48 ชม. (risk_pct) ไม่เกินค่านี้ และแนวโน้ม MA ไม่ใช่ขาลง (Death Cross)
-REBUY_MAX_RISK_PCT = 3.0  # อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย
+REBUY_MAX_RISK_PCT = 3.0
+# error ที่แปลว่าเหรียญนี้ซื้อผ่าน API ไม่ได้ (ลองใหม่กี่ครั้งก็ไม่ผ่าน): 11 = symbol ไม่ถูกต้อง,
+# 61 = เหรียญแบบ broker (source = broker) ที่ endpoint ซื้อขายไม่รองรับ
+PERMANENT_BUY_ERRORS = (11, 61)  # อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย
 DEPOSIT_INBOX_FILE = "state/deposit_inbox.json"  # crypto_alert.py เขียนยอดเติมเงินจาก Telegram ไว้ที่นี่
 NEWS_SENTIMENT_WEIGHT = 5.0  # ข่าวบวก/ลบเต็มสเกล (+-1) ขยับคะแนนความเสี่ยงได้สูงสุด 5 แต้ม
 
@@ -415,7 +418,7 @@ def run_buys(state, cycle, today, dashboard_so_far):
     """ซื้อไล่ตามลำดับความเสี่ยงด้วยเงินในกอง ครั้งละ DCA_UNIT_THB จนเงินในกองไม่พอ"""
     bought_lines, failed_lines = [], []
     for name in cycle["ranking"]:
-        if name in cycle["bought"]:
+        if name in cycle["bought"] or name in state.get("unbuyable", {}):
             continue
         if state["cash_pool_thb"] < DCA_UNIT_THB:
             break
@@ -465,9 +468,15 @@ def run_buys(state, cycle, today, dashboard_so_far):
             state["cash_pool_thb"] = round(state["cash_pool_thb"] - DCA_UNIT_THB, 2)
             state.get("last_errors", {}).pop(name, None)
         else:
-            failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")
             state["last_errors"] = state.get("last_errors", {})
+            prev = (state["last_errors"].get(name) or {}).get("error")
+            if prev != outcome["error"]:
+                failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")  # แจ้งเฉพาะ error ใหม่ ไม่แจ้งซ้ำทุกนาที
             state["last_errors"][name] = {"error": outcome["error"], "at": datetime.now(timezone.utc).isoformat()}
+            if any(f"error code {c}:" in outcome["error"] for c in PERMANENT_BUY_ERRORS):
+                # ซื้อผ่าน API ไม่ได้ถาวร (เช่นเหรียญแบบ broker) — ข้ามเหรียญนี้ไปเลย ไปซื้อเหรียญถัดไปแทน
+                state.setdefault("unbuyable", {})[name] = outcome["error"]
+                continue
             if "error code 18" in outcome["error"]:
                 break  # เงินบาทในบัญชีจริงไม่พอ ลองใหม่รอบหน้า
 
@@ -475,10 +484,13 @@ def run_buys(state, cycle, today, dashboard_so_far):
 
     if bought_lines or failed_lines:
         msg = f"💰 DCA ซื้อตามลำดับความเสี่ยง — กองเงินบอทคงเหลือ {state['cash_pool_thb']:,.2f} บาท\n"
+        skipped = [n for n in state.get("unbuyable", {}) if any(f"  {n}:" in l for l in failed_lines)]
         if bought_lines:
             msg += "ซื้อแล้ว:\n" + "\n".join(bought_lines) + "\n"
         if failed_lines:
-            msg += "⚠️ ล้มเหลว (จะลองใหม่อัตโนมัติรอบหน้า):\n" + "\n".join(failed_lines)
+            msg += "⚠️ ล้มเหลว:\n" + "\n".join(failed_lines)
+            if skipped:
+                msg += f"\n(ข้าม {', '.join(skipped)} ถาวร — ซื้อผ่าน API ไม่ได้ ไปซื้อเหรียญถัดไปแทน)"
         send_telegram(msg)
 
 

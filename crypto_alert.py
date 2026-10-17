@@ -174,6 +174,25 @@ def analyze_trend(name, symbol, market_sentiment):
     }
 
 
+def fetch_api_tradable_coins():
+    """
+    รายชื่อเหรียญที่ซื้อขายผ่าน API ได้จริง จาก /api/v3/market/symbols:
+    source = exchange, status = active และไม่ถูกระงับการซื้อ
+    (เหรียญแบบ broker เช่น BR ซื้อผ่าน API ไม่ได้ -> error 61) คืน None ถ้าดึงไม่ได้ (ไม่กรอง)
+    """
+    try:
+        rows = requests.get("https://api.bitkub.com/api/v3/market/symbols", timeout=15).json().get("result") or []
+    except (requests.RequestException, ValueError, AttributeError) as e:
+        print(f"ดึงรายชื่อคู่เทรด v3 ไม่สำเร็จ: {e}")
+        return None
+    ok = set()
+    for r in rows:
+        if (r.get("quote_asset") == "THB" and r.get("source", "exchange") == "exchange"
+                and r.get("status", "active") == "active" and not r.get("freeze_buy")):
+            ok.add(r.get("base_asset"))
+    return ok or None
+
+
 def pick_trending_coins(ticker, top_n):
     """
     เรียงทุกคู่เทรด THB_* บน Bitkub ตามปริมาณซื้อขาย 24 ชม. (quoteVolume, หน่วยบาท) มากไปน้อย
@@ -197,6 +216,9 @@ def pick_trending_coins(ticker, top_n):
         except (TypeError, ValueError):
             volume = 0.0
         rows.append({"name": name, "ticker_symbol": ticker_symbol, "candle_symbol": f"{name}_THB", "quote_volume_thb": volume})
+    tradable = fetch_api_tradable_coins()
+    if tradable:
+        rows = [r for r in rows if r["name"] in tradable]  # ตัดเหรียญที่ซื้อผ่าน API ไม่ได้ออกจากตัวเลือก
     rows.sort(key=lambda r: r["quote_volume_thb"], reverse=True)
     top = rows[:top_n]
     # BTC และ ETH อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย (ผู้ใช้ขอ "ไม่เว้น BTC และ ETH")
