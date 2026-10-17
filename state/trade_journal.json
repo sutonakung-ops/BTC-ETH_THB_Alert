@@ -1,0 +1,158 @@
+{
+  "lots": [
+    {
+      "lot_id": "6ad33f5bdf98e484901f62c4m8a2qe",
+      "coin": "BTC",
+      "opened_at": "2026-10-16",
+      "invested_thb": 50,
+      "fill_price": 2731315.0100000002,
+      "amount_coin": 1.8302539186060416e-05,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad33f5c98b3bc6f5abd136900es3u",
+      "coin": "SOL",
+      "opened_at": "2026-10-16",
+      "invested_thb": 50,
+      "fill_price": 3510.46,
+      "amount_coin": 0.01424314762167921,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad33f5ecd5e1a487327a8e7s5oh6d",
+      "coin": "XRP",
+      "opened_at": "2026-10-16",
+      "invested_thb": 50,
+      "fill_price": 43.67,
+      "amount_coin": 1.1449507671170138,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad33f60d5c8d71495889c087spahm",
+      "coin": "XLM",
+      "opened_at": "2026-10-16",
+      "invested_thb": 50,
+      "fill_price": 5.988,
+      "amount_coin": 8.3500334001336,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad33f61bfdbb53de918307bj542k5",
+      "coin": "ETH",
+      "opened_at": "2026-10-16",
+      "invested_thb": 50,
+      "fill_price": 81415.25,
+      "amount_coin": 0.0006141355581417487,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad33f63cd5e1a487327a9601o0oz7",
+      "coin": "DOGE",
+      "opened_at": "2026-10-16",
+      "invested_thb": 50,
+      "fill_price": 2.6849000000000003,
+      "amount_coin": 18.62266751089426,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad33f64e14a4bb9220b812bj8xy3w",
+      "coin": "ADA",
+      "opened_at": "2026-10-16",
+      "invested_thb": 50,
+      "fill_price": 7.459,
+      "amount_coin": 6.70331143584931,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad33f6645d27757b374b78c7ma6x9",
+      "coin": "CRV",
+      "opened_at": "2026-10-16",
+      "invested_thb": 50,
+      "fill_price": 11.47,
+      "amount_coin": 4.3591979075850045,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad34d26d5c8d714958a1f1am8a2qe",
+      "coin": "BTC",
+      "opened_at": "2026-10-17",
+      "invested_thb": 50,
+      "fill_price": 2726616.9800000004,
+      "amount_coin": 1.8330407375369602e-05,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad34d31cd5e1a48732938071o0oz7",
+      "coin": "DOGE",
+      "opened_at": "2026-10-17",
+      "invested_thb": 50,
+      "fill_price": 2.6805000000000003,
+      "amount_coin": 18.65323633650438,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad34d3445d27757b3763905j542k5",
+      "coin": "ETH",
+      "opened_at": "2026-10-17",
+      "invested_thb": 50,
+      "fill_price": 81384.29,
+      "amount_coin": 0.0006143691859940045,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad34d3698b3bc6f5abdc51700es3u",
+      "coin": "SOL",
+      "opened_at": "2026-10-17",
+      "invested_thb": 50,
+      "fill_price": 3499.9,
+      "amount_coin": 0.014286122460641731,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad34d396cad0adf8543050b7spahm",
+      "coin": "XLM",
+      "opened_at": "2026-10-17",
+      "invested_thb": 50,
+      "fill_price": 5.996,
+      "amount_coin": 8.338892595063374,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad34d3ccd5e1a48732938dds5oh6d",
+      "coin": "XRP",
+      "opened_at": "2026-10-17",
+      "invested_thb": 50,
+      "fill_price": 43.63,
+      "amount_coin": 1.1460004584001833,
+      "features": null,
+      "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
+      "status": "open"
+    }
+  ]
+}
