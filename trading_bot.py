@@ -57,9 +57,13 @@ COINS = [
 
 # ---------------- ฟังก์ชันพื้นฐาน ----------------
 
+BOT_NAME = "Steady Stack"
+
+
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=15)
+    text = f"🧱 {BOT_NAME}\n{message}"  # ทุกข้อความขึ้นต้นด้วยชื่อบอท
+    requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": text}, timeout=15)
 
 
 def load_json(path, default):
