@@ -555,7 +555,15 @@
           "analysed_at": "2026-10-18T14:10:20.250802+00:00"
         }
       },
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-18T23:13:24.757120+00:00",
+      "exit_reason": "take_profit",
+      "exit_price": 165.77,
+      "proceeds_thb": 51.8972,
+      "pnl_thb": 1.8972,
+      "pnl_pct": 3.794,
+      "position_pnl_pct_at_trigger": 4.057,
+      "win": true
     }
   ]
 }
