@@ -31,10 +31,10 @@
       "last_bought_date": null
     },
     "SOL": {
-      "total_invested_thb": 50.0,
-      "total_coin": 0.014413957323155157,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-18"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "KUB": {
       "total_invested_thb": 0.0,
@@ -447,9 +447,19 @@
       "proceeds_thb": 48.44,
       "realized_pnl_thb": -1.56,
       "reason": "signal_cut"
+    },
+    {
+      "date": "2026-10-19",
+      "name": "SOL",
+      "sold_coin": 0.014413957323155157,
+      "sell_price": 3359.27,
+      "invested_thb": 50.0,
+      "proceeds_thb": 48.42,
+      "realized_pnl_thb": -1.58,
+      "reason": "signal_cut"
     }
   ],
-  "realized_pnl_total_thb": -23.66,
+  "realized_pnl_total_thb": -25.24,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -468,7 +478,6 @@
     ],
     "bought": {
       "BTC": true,
-      "SOL": true,
       "NEAR": true
     },
     "sold": {
@@ -503,6 +512,10 @@
       "WLD": {
         "reason": "signal_cut",
         "at": "2026-10-18T19:36:35.575816+00:00"
+      },
+      "SOL": {
+        "reason": "signal_cut",
+        "at": "2026-10-18T19:46:36.039218+00:00"
       }
     }
   },
@@ -517,7 +530,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 470.04,
+  "cash_pool_thb": 518.46,
   "profit_reserved_thb": 6.3,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
