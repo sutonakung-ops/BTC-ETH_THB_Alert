@@ -25,10 +25,10 @@
       "last_bought_date": null
     },
     "DOGE": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 50.0,
+      "total_coin": 18.826718879433688,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-18"
     },
     "SOL": {
       "total_invested_thb": 0.0,
@@ -257,6 +257,14 @@
       "fill_price": 9.0,
       "amount_coin": 5.555555555555555,
       "order_id": "6ad3eb0108271ad1ba7ad3d7hw5uk5"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "DOGE",
+      "invested_thb": 50,
+      "fill_price": 2.6558000000000006,
+      "amount_coin": 18.826718879433688,
+      "order_id": "6ad455b798b3bc6f5aca0b7e1o0oz7"
     }
   ],
   "sell_log": [
@@ -333,16 +341,13 @@
       "ETH": true,
       "XLM": true,
       "XRP": true,
-      "WLD": true
+      "WLD": true,
+      "DOGE": true
     },
     "sold": {
       "ADA": {
         "reason": "signal_cut",
         "at": "2026-10-17T21:37:58.880436+00:00"
-      },
-      "DOGE": {
-        "reason": "signal_cut",
-        "at": "2026-10-17T21:38:59.612068+00:00"
       },
       "SOL": {
         "reason": "signal_cut",
@@ -369,7 +374,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 190.6,
+  "cash_pool_thb": 140.6,
   "profit_reserved_thb": 4.4,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"

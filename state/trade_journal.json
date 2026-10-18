@@ -290,6 +290,33 @@
       "pnl_pct": 5.249,
       "position_pnl_pct_at_trigger": 5.222,
       "win": true
+    },
+    {
+      "lot_id": "6ad455b798b3bc6f5aca0b7e1o0oz7",
+      "coin": "DOGE",
+      "opened_at": "2026-10-18T05:14:33.196520+00:00",
+      "invested_thb": 50,
+      "fill_price": 2.6558000000000006,
+      "amount_coin": 18.826718879433688,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 1.2138,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.2767,
+          "change_24h": -1.41,
+          "premium_pct": 0.052,
+          "depth_imbalance": 0.237,
+          "buy_flow_pct": 54.5
+        },
+        "market": {
+          "market_sentiment": 0.06,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.15,
+          "analysed_at": "2026-10-18T05:13:52.911786+00:00"
+        }
+      },
+      "status": "open"
     }
   ]
 }
