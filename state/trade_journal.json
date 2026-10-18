@@ -352,6 +352,33 @@
         }
       },
       "status": "open"
+    },
+    {
+      "lot_id": "6ad49b65cd5e1a48734ef3d31pgosa",
+      "coin": "NEAR",
+      "opened_at": "2026-10-18T10:11:51.120597+00:00",
+      "invested_thb": 50,
+      "fill_price": 166.95,
+      "amount_coin": 0.2994908655286014,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 2.0138,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.0003,
+          "change_24h": -2.88,
+          "premium_pct": -0.006,
+          "depth_imbalance": 0.503,
+          "buy_flow_pct": 50.6
+        },
+        "market": {
+          "market_sentiment": 0.06,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.75,
+          "analysed_at": "2026-10-18T10:11:19.767918+00:00"
+        }
+      },
+      "status": "open"
     }
   ]
 }

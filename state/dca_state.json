@@ -49,10 +49,10 @@
       "last_bought_date": null
     },
     "NEAR": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 50.0,
+      "total_coin": 0.2994908655286014,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-18"
     },
     "USDC": {
       "total_invested_thb": 0.0,
@@ -273,6 +273,14 @@
       "fill_price": 3468.86,
       "amount_coin": 0.014413957323155157,
       "order_id": "6ad4633c7d9ff7c1ee68cdd900es3u"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "NEAR",
+      "invested_thb": 50,
+      "fill_price": 166.95,
+      "amount_coin": 0.2994908655286014,
+      "order_id": "6ad49b65cd5e1a48734ef3d31pgosa"
     }
   ],
   "sell_log": [
@@ -360,7 +368,8 @@
       "XLM": true,
       "XRP": true,
       "DOGE": true,
-      "SOL": true
+      "SOL": true,
+      "NEAR": true
     },
     "sold": {
       "ADA": {
@@ -370,10 +379,6 @@
       "EPIC": {
         "reason": "take_profit",
         "at": "2026-10-17T23:25:04.457937+00:00"
-      },
-      "NEAR": {
-        "reason": "take_profit",
-        "at": "2026-10-18T02:52:35.572624+00:00"
       },
       "WLD": {
         "reason": "take_profit",
@@ -392,7 +397,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 140.6,
+  "cash_pool_thb": 90.6,
   "profit_reserved_thb": 6.3,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
