@@ -317,6 +317,33 @@
         }
       },
       "status": "open"
+    },
+    {
+      "lot_id": "6ad4633c7d9ff7c1ee68cdd900es3u",
+      "coin": "SOL",
+      "opened_at": "2026-10-18T06:12:14.008488+00:00",
+      "invested_thb": 50,
+      "fill_price": 3468.86,
+      "amount_coin": 0.014413957323155157,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 0.9076,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.2863,
+          "change_24h": -1.21,
+          "premium_pct": -0.029,
+          "depth_imbalance": 0.031,
+          "buy_flow_pct": 38.1
+        },
+        "market": {
+          "market_sentiment": 0.06,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.18,
+          "analysed_at": "2026-10-18T06:11:41.452324+00:00"
+        }
+      },
+      "status": "open"
     }
   ]
 }

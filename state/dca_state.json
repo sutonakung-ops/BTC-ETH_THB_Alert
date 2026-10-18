@@ -31,10 +31,10 @@
       "last_bought_date": "2026-10-18"
     },
     "SOL": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 50.0,
+      "total_coin": 0.014413957323155157,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-18"
     },
     "KUB": {
       "total_invested_thb": 0.0,
@@ -265,6 +265,14 @@
       "fill_price": 2.6558000000000006,
       "amount_coin": 18.826718879433688,
       "order_id": "6ad455b798b3bc6f5aca0b7e1o0oz7"
+    },
+    {
+      "date": "2026-10-18",
+      "name": "SOL",
+      "invested_thb": 50,
+      "fill_price": 3468.86,
+      "amount_coin": 0.014413957323155157,
+      "order_id": "6ad4633c7d9ff7c1ee68cdd900es3u"
     }
   ],
   "sell_log": [
@@ -342,16 +350,13 @@
       "XLM": true,
       "XRP": true,
       "WLD": true,
-      "DOGE": true
+      "DOGE": true,
+      "SOL": true
     },
     "sold": {
       "ADA": {
         "reason": "signal_cut",
         "at": "2026-10-17T21:37:58.880436+00:00"
-      },
-      "SOL": {
-        "reason": "signal_cut",
-        "at": "2026-10-17T21:39:04.243123+00:00"
       },
       "EPIC": {
         "reason": "take_profit",
@@ -374,7 +379,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 140.6,
+  "cash_pool_thb": 90.6,
   "profit_reserved_thb": 4.4,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
