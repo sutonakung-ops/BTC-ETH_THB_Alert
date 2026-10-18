@@ -7,10 +7,10 @@
       "last_bought_date": "2026-10-17"
     },
     "ETH": {
-      "total_invested_thb": 100.0,
-      "total_coin": 0.001228504744135753,
-      "buy_count": 2,
-      "last_bought_date": "2026-10-17"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "XRP": {
       "total_invested_thb": 100.0,
@@ -61,10 +61,10 @@
       "last_bought_date": null
     },
     "CRV": {
-      "total_invested_thb": 50.0,
-      "total_coin": 4.3591979075850045,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-16"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "OP": {
       "total_invested_thb": 0.0,
@@ -397,9 +397,29 @@
       "proceeds_thb": 96.59,
       "realized_pnl_thb": -3.41,
       "reason": "signal_cut"
+    },
+    {
+      "date": "2026-10-19",
+      "name": "ETH",
+      "sold_coin": 0.001228504744135753,
+      "sell_price": 78854.84,
+      "invested_thb": 100.0,
+      "proceeds_thb": 96.87,
+      "realized_pnl_thb": -3.13,
+      "reason": "signal_cut"
+    },
+    {
+      "date": "2026-10-19",
+      "name": "CRV",
+      "sold_coin": 4.3591979075850045,
+      "sell_price": 11.11,
+      "invested_thb": 50.0,
+      "proceeds_thb": 48.19,
+      "realized_pnl_thb": -1.81,
+      "reason": "signal_cut"
     }
   ],
-  "realized_pnl_total_thb": -11.66,
+  "realized_pnl_total_thb": -16.6,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -418,7 +438,6 @@
     ],
     "bought": {
       "BTC": true,
-      "ETH": true,
       "XRP": true,
       "DOGE": true,
       "SOL": true,
@@ -437,6 +456,14 @@
       "XLM": {
         "reason": "signal_cut",
         "at": "2026-10-18T18:09:07.929137+00:00"
+      },
+      "ETH": {
+        "reason": "signal_cut",
+        "at": "2026-10-18T19:24:35.379110+00:00"
+      },
+      "CRV": {
+        "reason": "signal_cut",
+        "at": "2026-10-18T19:24:40.704374+00:00"
       }
     }
   },
@@ -451,7 +478,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 132.04,
+  "cash_pool_thb": 277.1,
   "profit_reserved_thb": 6.3,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
