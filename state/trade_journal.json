@@ -512,7 +512,15 @@
           "analysed_at": "2026-10-18T14:10:20.250802+00:00"
         }
       },
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-18T19:36:35.576185+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 15.52,
+      "proceeds_thb": 48.4395,
+      "pnl_thb": -1.5605,
+      "pnl_pct": -3.121,
+      "position_pnl_pct_at_trigger": -3.246,
+      "win": false
     },
     {
       "lot_id": "6ad4d37208271ad1ba8aead11pgosa",

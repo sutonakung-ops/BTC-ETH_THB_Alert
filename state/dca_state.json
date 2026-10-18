@@ -85,10 +85,10 @@
       "last_bought_date": null
     },
     "WLD": {
-      "total_invested_thb": 50.0,
-      "total_coin": 3.1210986267166043,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-18"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "ZEREBRO": {
       "total_invested_thb": 0.0,
@@ -437,9 +437,19 @@
       "proceeds_thb": 48.28,
       "realized_pnl_thb": -1.72,
       "reason": "signal_cut"
+    },
+    {
+      "date": "2026-10-19",
+      "name": "WLD",
+      "sold_coin": 3.1210986267166043,
+      "sell_price": 15.52,
+      "invested_thb": 50.0,
+      "proceeds_thb": 48.44,
+      "realized_pnl_thb": -1.56,
+      "reason": "signal_cut"
     }
   ],
-  "realized_pnl_total_thb": -22.1,
+  "realized_pnl_total_thb": -23.66,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -459,7 +469,6 @@
     "bought": {
       "BTC": true,
       "SOL": true,
-      "WLD": true,
       "NEAR": true
     },
     "sold": {
@@ -490,6 +499,10 @@
       "DOGE": {
         "reason": "signal_cut",
         "at": "2026-10-18T19:33:40.894060+00:00"
+      },
+      "WLD": {
+        "reason": "signal_cut",
+        "at": "2026-10-18T19:36:35.575816+00:00"
       }
     }
   },
@@ -504,7 +517,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 421.6,
+  "cash_pool_thb": 470.04,
   "profit_reserved_thb": 6.3,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
