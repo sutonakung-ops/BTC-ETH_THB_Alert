@@ -73,10 +73,10 @@
       "last_bought_date": null
     },
     "XLM": {
-      "total_invested_thb": 100.0,
-      "total_coin": 16.688925995196975,
-      "buy_count": 2,
-      "last_bought_date": "2026-10-17"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "STRK": {
       "total_invested_thb": 0.0,
@@ -387,9 +387,19 @@
       "proceeds_thb": 47.41,
       "realized_pnl_thb": -2.59,
       "reason": "stop_loss"
+    },
+    {
+      "date": "2026-10-19",
+      "name": "XLM",
+      "sold_coin": 16.688925995196975,
+      "sell_price": 5.817,
+      "invested_thb": 100.0,
+      "proceeds_thb": 96.59,
+      "realized_pnl_thb": -3.41,
+      "reason": "signal_cut"
     }
   ],
-  "realized_pnl_total_thb": -8.25,
+  "realized_pnl_total_thb": -11.66,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -409,7 +419,6 @@
     "bought": {
       "BTC": true,
       "ETH": true,
-      "XLM": true,
       "XRP": true,
       "DOGE": true,
       "SOL": true,
@@ -424,6 +433,10 @@
       "EPIC": {
         "reason": "take_profit",
         "at": "2026-10-17T23:25:04.457937+00:00"
+      },
+      "XLM": {
+        "reason": "signal_cut",
+        "at": "2026-10-18T18:09:07.929137+00:00"
       }
     }
   },
@@ -438,7 +451,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 35.45,
+  "cash_pool_thb": 132.04,
   "profit_reserved_thb": 6.3,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"

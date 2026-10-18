@@ -50,7 +50,15 @@
       "amount_coin": 8.3500334001336,
       "features": null,
       "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-18T18:09:07.929412+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 5.817,
+      "proceeds_thb": 48.3293,
+      "pnl_thb": -1.6707,
+      "pnl_pct": -3.341,
+      "position_pnl_pct_at_trigger": -3.037,
+      "win": false
     },
     {
       "lot_id": "6ad33f61bfdbb53de918307bj542k5",
@@ -181,7 +189,15 @@
       "amount_coin": 8.338892595063374,
       "features": null,
       "note": "ซื้อก่อนเริ่มบันทึกสภาพตลาด",
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-18T18:09:07.929423+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 5.817,
+      "proceeds_thb": 48.2648,
+      "pnl_thb": -1.7352,
+      "pnl_pct": -3.47,
+      "position_pnl_pct_at_trigger": -3.037,
+      "win": false
     },
     {
       "lot_id": "6ad34d3ccd5e1a48732938dds5oh6d",
