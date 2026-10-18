@@ -422,6 +422,60 @@
       "pnl_pct": -5.188,
       "position_pnl_pct_at_trigger": -5.069,
       "win": false
+    },
+    {
+      "lot_id": "6ad4d36fcd5e1a487354a436my81nv",
+      "coin": "WLD",
+      "opened_at": "2026-10-18T14:10:57.181834+00:00",
+      "invested_thb": 50,
+      "fill_price": 16.02,
+      "amount_coin": 3.1210986267166043,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 2.7856,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.053,
+          "change_24h": -4.49,
+          "premium_pct": -0.268,
+          "depth_imbalance": 0.293,
+          "buy_flow_pct": 40.1
+        },
+        "market": {
+          "market_sentiment": 0.06,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": -0.09,
+          "analysed_at": "2026-10-18T14:10:20.250802+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad4d37208271ad1ba8aead11pgosa",
+      "coin": "NEAR",
+      "opened_at": "2026-10-18T14:11:00.486986+00:00",
+      "invested_thb": 50,
+      "fill_price": 159.71,
+      "amount_coin": 0.31306743472543985,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 1.8048,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": 0.262,
+          "change_24h": -5.57,
+          "premium_pct": -0.001,
+          "depth_imbalance": 0.711,
+          "buy_flow_pct": 22.0
+        },
+        "market": {
+          "market_sentiment": 0.06,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": -0.09,
+          "analysed_at": "2026-10-18T14:10:20.250802+00:00"
+        }
+      },
+      "status": "open"
     }
   ]
 }
