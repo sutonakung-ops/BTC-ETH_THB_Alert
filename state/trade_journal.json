@@ -378,7 +378,15 @@
           "analysed_at": "2026-10-18T10:11:19.767918+00:00"
         }
       },
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-18T14:06:44.601543+00:00",
+      "exit_reason": "stop_loss",
+      "exit_price": 158.41,
+      "proceeds_thb": 47.4423,
+      "pnl_thb": -2.5577,
+      "pnl_pct": -5.115,
+      "position_pnl_pct_at_trigger": -5.115,
+      "win": false
     },
     {
       "lot_id": "6ad4a97045d27757b39d0d85my81nv",
@@ -405,7 +413,15 @@
           "analysed_at": "2026-10-18T11:11:09.515001+00:00"
         }
       },
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-18T14:06:48.046687+00:00",
+      "exit_reason": "stop_loss",
+      "exit_price": 15.900000000000002,
+      "proceeds_thb": 47.4061,
+      "pnl_thb": -2.5939,
+      "pnl_pct": -5.188,
+      "position_pnl_pct_at_trigger": -5.069,
+      "win": false
     }
   ]
 }
