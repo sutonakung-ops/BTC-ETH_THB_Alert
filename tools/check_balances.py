@@ -18,11 +18,21 @@ for label, path in (("balances", "/api/v4/wallet/balances"), ("assets", "/api/v4
         r = _private_request(KEY, SECRET, "GET", path)
     except Exception as e:  # noqa: BLE001
         out["raw_status"][label] = f"error {e}"; continue
-    out["raw_status"][label] = {"code": r.get("code"), "message": r.get("message"), "rows": len(r.get("data") or [])}
-    for row in r.get("data") or []:
-        cur = str(row.get("currency") or row.get("symbol") or "").upper()
-        if cur in coins:
-            out["coins"].setdefault(cur, {})[label] = {k: row.get(k) for k in row if k != "currency"}
+    try:
+        data = r.get("data") if isinstance(r, dict) else r
+        out["raw_status"][label] = {"code": r.get("code") if isinstance(r, dict) else None,
+                                    "message": r.get("message") if isinstance(r, dict) else None,
+                                    "type": type(data).__name__}
+        rows = data if isinstance(data, list) else ([{"currency": k, **v} for k, v in data.items() if isinstance(v, dict)]
+                                                    if isinstance(data, dict) else [])
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            cur = str(row.get("currency") or row.get("symbol") or "").upper()
+            if cur in coins:
+                out["coins"].setdefault(cur, {})[label] = {k: row.get(k) for k in row if k != "currency"}
+    except Exception as e:  # noqa: BLE001
+        out["raw_status"][label] = f"parse error {e}"
 for c in sorted(coins):
     rec = (state["holdings"].get(c) or {}).get("total_coin", 0.0)
     d = out["coins"].setdefault(c, {}); d["recorded_coin"] = rec
