@@ -13,10 +13,10 @@
       "last_bought_date": null
     },
     "XRP": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 50.0,
+      "total_coin": 1.1386927806877705,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-19"
     },
     "ADA": {
       "total_invested_thb": 0.0,
@@ -31,10 +31,10 @@
       "last_bought_date": null
     },
     "SOL": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 50.0,
+      "total_coin": 0.014178484433441942,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-19"
     },
     "KUB": {
       "total_invested_thb": 0.0,
@@ -305,6 +305,22 @@
       "fill_price": 159.71,
       "amount_coin": 0.31306743472543985,
       "order_id": "6ad4d37208271ad1ba8aead11pgosa"
+    },
+    {
+      "date": "2026-10-19",
+      "name": "SOL",
+      "invested_thb": 50,
+      "fill_price": 3526.47,
+      "amount_coin": 0.014178484433441942,
+      "order_id": "6ad58bf582e08ac98834c66b00es3u"
+    },
+    {
+      "date": "2026-10-19",
+      "name": "XRP",
+      "invested_thb": 50,
+      "fill_price": 43.91,
+      "amount_coin": 1.1386927806877705,
+      "order_id": "6ad58bf791ca2ff15db800c8s5oh6d"
     }
   ],
   "sell_log": [
@@ -487,7 +503,9 @@
       "EPIC"
     ],
     "bought": {
-      "BTC": true
+      "BTC": true,
+      "SOL": true,
+      "XRP": true
     },
     "sold": {
       "ADA": {
@@ -510,10 +528,6 @@
         "reason": "signal_cut",
         "at": "2026-10-18T19:24:40.704374+00:00"
       },
-      "XRP": {
-        "reason": "signal_cut",
-        "at": "2026-10-18T19:33:37.686315+00:00"
-      },
       "DOGE": {
         "reason": "signal_cut",
         "at": "2026-10-18T19:33:40.894060+00:00"
@@ -521,10 +535,6 @@
       "WLD": {
         "reason": "signal_cut",
         "at": "2026-10-18T19:36:35.575816+00:00"
-      },
-      "SOL": {
-        "reason": "signal_cut",
-        "at": "2026-10-18T19:46:36.039218+00:00"
       },
       "NEAR": {
         "reason": "take_profit",
@@ -543,7 +553,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 568.46,
+  "cash_pool_thb": 468.46,
   "profit_reserved_thb": 8.2,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"

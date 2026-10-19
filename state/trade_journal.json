@@ -564,6 +564,60 @@
       "pnl_pct": 3.794,
       "position_pnl_pct_at_trigger": 4.057,
       "win": true
+    },
+    {
+      "lot_id": "6ad58bf582e08ac98834c66b00es3u",
+      "coin": "SOL",
+      "opened_at": "2026-10-19T03:18:14.888489+00:00",
+      "invested_thb": 50,
+      "fill_price": 3526.47,
+      "amount_coin": 0.014178484433441942,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 1.0555,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.1125,
+          "change_24h": 1.53,
+          "premium_pct": 0.146,
+          "depth_imbalance": 0.001,
+          "buy_flow_pct": 72.8
+        },
+        "market": {
+          "market_sentiment": 0.18,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.92,
+          "analysed_at": "2026-10-19T03:17:45.186453+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad58bf791ca2ff15db800c8s5oh6d",
+      "coin": "XRP",
+      "opened_at": "2026-10-19T03:18:17.311928+00:00",
+      "invested_thb": 50,
+      "fill_price": 43.91,
+      "amount_coin": 1.1386927806877705,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 1.0268,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.1314,
+          "change_24h": 1.13,
+          "premium_pct": 0.001,
+          "depth_imbalance": -0.025,
+          "buy_flow_pct": 28.9
+        },
+        "market": {
+          "market_sentiment": 0.18,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.92,
+          "analysed_at": "2026-10-19T03:17:45.186453+00:00"
+        }
+      },
+      "status": "open"
     }
   ]
 }
