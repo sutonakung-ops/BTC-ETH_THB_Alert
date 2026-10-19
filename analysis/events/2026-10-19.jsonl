@@ -5,3 +5,10 @@
 {"at":"2026-10-19T22:16:48.549617+00:00","kind":"rebuy_skipped","coin":"XLM","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
 {"at":"2026-10-19T22:16:48.549639+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"รอผลวิเคราะห์รอบใหม่หลังขาย"}
 {"at":"2026-10-19T22:16:48.549667+00:00","kind":"rebuy_skipped","coin":"EPIC","reason":"ผันผวน 5.10% เกิน 3.0%"}
+{"at":"2026-10-19T23:16:02.599903+00:00","kind":"hold_in_loss","coin":"ETH","pnl_pct":-0.551,"signal":"Death Cross (ขาลง)"}
+{"at":"2026-10-19T23:16:02.599916+00:00","kind":"hold_in_loss","coin":"XRP","pnl_pct":-0.433,"signal":"ยังสรุปแนวโน้มไม่ได้"}
+{"at":"2026-10-19T23:16:02.599925+00:00","kind":"hold_in_loss","coin":"SOL","pnl_pct":-0.088,"signal":"Death Cross (ขาลง)"}
+{"at":"2026-10-19T23:16:02.599938+00:00","kind":"hold_in_loss","coin":"NEAR","pnl_pct":-2.072,"signal":"Death Cross (ขาลง)"}
+{"at":"2026-10-19T23:16:02.599960+00:00","kind":"rebuy_skipped","coin":"XLM","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
+{"at":"2026-10-19T23:16:02.599976+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"เพิ่งขายไป 1 ชม. (ต้องรอครบ 24 ชม.)"}
+{"at":"2026-10-19T23:16:02.599989+00:00","kind":"rebuy_skipped","coin":"EPIC","reason":"ผันผวน 5.12% เกิน 3.0%"}
