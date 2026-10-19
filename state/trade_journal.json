@@ -618,6 +618,87 @@
         }
       },
       "status": "open"
+    },
+    {
+      "lot_id": "6ad59ad3cd5e1a48735d495c1o0oz7",
+      "coin": "DOGE",
+      "opened_at": "2026-10-19T04:21:40.665962+00:00",
+      "invested_thb": 50,
+      "fill_price": 2.6659,
+      "amount_coin": 18.755392175250382,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 1.2783,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.1304,
+          "change_24h": 0.11,
+          "premium_pct": -0.03,
+          "depth_imbalance": -0.012,
+          "buy_flow_pct": 27.4
+        },
+        "market": {
+          "market_sentiment": 0.18,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.87,
+          "analysed_at": "2026-10-19T04:21:10.903250+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad59ad5f6c55e7a591eb030j542k5",
+      "coin": "ETH",
+      "opened_at": "2026-10-19T04:21:43.407426+00:00",
+      "invested_thb": 50,
+      "fill_price": 81119.47,
+      "amount_coin": 0.0006163748357823343,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 0.9822,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.2157,
+          "change_24h": 0.12,
+          "premium_pct": 0.002,
+          "depth_imbalance": -0.306,
+          "buy_flow_pct": 27.6
+        },
+        "market": {
+          "market_sentiment": 0.18,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.87,
+          "analysed_at": "2026-10-19T04:21:10.903250+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad59ad891ca2ff15db99a191pgosa",
+      "coin": "NEAR",
+      "opened_at": "2026-10-19T04:21:45.866051+00:00",
+      "invested_thb": 50,
+      "fill_price": 167.98,
+      "amount_coin": 0.2976544826765091,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 2.5649,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": -0.0265,
+          "change_24h": 0.25,
+          "premium_pct": 0.031,
+          "depth_imbalance": 0.074,
+          "buy_flow_pct": 42.0
+        },
+        "market": {
+          "market_sentiment": 0.18,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 0.87,
+          "analysed_at": "2026-10-19T04:21:10.903250+00:00"
+        }
+      },
+      "status": "open"
     }
   ]
 }
