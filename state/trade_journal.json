@@ -699,6 +699,33 @@
         }
       },
       "status": "open"
+    },
+    {
+      "lot_id": "6ad5c899740fbf4086de6e45my81nv",
+      "coin": "WLD",
+      "opened_at": "2026-10-19T07:36:59.038377+00:00",
+      "invested_thb": 50,
+      "fill_price": 16.94,
+      "amount_coin": 2.9515938606847696,
+      "rebuy": true,
+      "features": {
+        "coin": {
+          "risk_pct": 2.93,
+          "signal": "Golden Cross (ขาขึ้น)",
+          "gap_percent": 0.3561,
+          "change_24h": 3.67,
+          "premium_pct": 0.232,
+          "depth_imbalance": 0.164,
+          "buy_flow_pct": 52.7
+        },
+        "market": {
+          "market_sentiment": 0.18,
+          "btc_signal": "Golden Cross (ขาขึ้น)",
+          "btc_change_24h": 1.98,
+          "analysed_at": "2026-10-19T07:36:33.066945+00:00"
+        }
+      },
+      "status": "open"
     }
   ]
 }
