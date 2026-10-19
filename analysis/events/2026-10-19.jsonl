@@ -1,0 +1,7 @@
+{"at":"2026-10-19T22:16:44.924717+00:00","kind":"hold_in_loss","coin":"ETH","pnl_pct":-0.364,"signal":"Death Cross (ขาลง)"}
+{"at":"2026-10-19T22:16:44.924732+00:00","kind":"hold_in_loss","coin":"XRP","pnl_pct":-0.114,"signal":"ยังสรุปแนวโน้มไม่ได้"}
+{"at":"2026-10-19T22:16:44.924754+00:00","kind":"hold_in_loss","coin":"NEAR","pnl_pct":-0.822,"signal":"Death Cross (ขาลง)"}
+{"at":"2026-10-19T22:16:48.034462+00:00","kind":"sell","coin":"WLD","reason":"take_profit","pnl_pct":5.549,"proceeds_thb":52.9026,"invested_thb":50.0,"sell_price":17.83,"back_to_pool":50.0}
+{"at":"2026-10-19T22:16:48.549617+00:00","kind":"rebuy_skipped","coin":"XLM","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
+{"at":"2026-10-19T22:16:48.549639+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"รอผลวิเคราะห์รอบใหม่หลังขาย"}
+{"at":"2026-10-19T22:16:48.549667+00:00","kind":"rebuy_skipped","coin":"EPIC","reason":"ผันผวน 5.10% เกิน 3.0%"}
