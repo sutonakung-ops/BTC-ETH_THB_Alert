@@ -65,6 +65,9 @@ MUST_INCLUDE_COINS = ["BTC", "ETH"]
 # เหรียญที่ขาย (TP/SL) ไปแล้วในรอบนี้ ซื้อกลับได้ในรอบเดียวกันถ้าประเมินความเสี่ยงตอนนั้นแล้วผ่าน:
 # ความผันผวน 48 ชม. (risk_pct) ไม่เกินค่านี้ และแนวโน้ม MA ไม่ใช่ขาลง (Death Cross)
 REBUY_MAX_RISK_PCT = 3.0
+# เว้นระยะซื้อคืน (ผู้ใช้เลือกทาง ค): หลังขายต้องรออย่างน้อยเท่านี้ และแนวโน้มต้องเป็นขาขึ้น (Golden Cross)
+# กันการขายแล้วซื้อคืนวนซ้ำที่เสียค่าธรรมเนียมและโดนขายซ้ำ
+REBUY_COOLDOWN_HOURS = 24
 # error ที่แปลว่าเหรียญนี้ซื้อผ่าน API ไม่ได้ (ลองใหม่กี่ครั้งก็ไม่ผ่าน): 11 = symbol ไม่ถูกต้อง,
 # 61 = เหรียญแบบ broker (source = broker) ที่ endpoint ซื้อขายไม่รองรับ
 PERMANENT_BUY_ERRORS = (11, 61)  # อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย
@@ -74,11 +77,14 @@ NEWS_SENTIMENT_WEIGHT = 5.0  # ข่าวบวก/ลบเต็มสเก
 # ขายอัตโนมัติ (ผู้ใช้เลือกให้ใช้ TP/SL ชุดเดียวกับบอทเทรดกับเหรียญ DCA แทนการเปิดไม้ใหม่ด้วยเงินบาท)
 # เทียบราคาปัจจุบันกับทุนเฉลี่ยของแต่ละเหรียญ: กำไรถึง TAKE_PROFIT_PCT หรือขาดทุนถึง STOP_LOSS_PCT
 # ขายเหรียญนั้นทั้งหมดกลับเป็นเงินบาท แล้วเริ่มสะสม DCA ใหม่จากศูนย์ (เหรียญอื่นไม่กระทบ)
-TAKE_PROFIT_PCT = 4.0
+TAKE_PROFIT_PCT = 5.0  # ผู้ใช้ปรับจาก 4% (20 ต.ค. 2569: "TP 5-6%")
 STOP_LOSS_PCT = 15.0  # ผู้ใช้ปรับจาก 5% เป็น 15% (19 ต.ค. 2569)
 # ตัดขาดทุนตามสัญญาณ (ผู้ใช้เลือกทางเลือกที่ 4): ขาดทุนตั้งแต่ CUT_ZONE_PCT ขึ้นไป และแนวโน้ม MA เป็นขาลง
 # (Death Cross) -> ขายเลยไม่ต้องรอถึง STOP_LOSS_PCT / ถ้าแนวโน้มยังไม่ลง ถือรอ (STOP_LOSS_PCT ยังเป็นเพดานเสมอ)
 CUT_ZONE_PCT = 3.0
+# ปิดการตัดขาดทุนตามสัญญาณ (ผู้ใช้เลือกทาง ก, 20 ต.ค. 2569): ผลทบทวน 17-19 ต.ค. พบว่ากฎนี้ขายตรงก้น
+# ตอนตลาดลงทั้งกระดานแล้วเด้งกลับ (15 จาก 17 ไม้ที่แพ้) — เหลือแค่ TP 4% และเพดาน SL 15%
+SIGNAL_CUT_ENABLED = False
 
 # ส่งสรุปพอร์ตรวมทาง Telegram ทุกๆ กี่วัน (รายสัปดาห์)
 SUMMARY_INTERVAL_DAYS = 7
@@ -336,10 +342,10 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
             reason = "take_profit"
         elif pnl_pct_now <= -STOP_LOSS_PCT:
             reason = "stop_loss"
-        elif pnl_pct_now <= -CUT_ZONE_PCT and "Death Cross" in signal:
+        elif SIGNAL_CUT_ENABLED and pnl_pct_now <= -CUT_ZONE_PCT and "Death Cross" in signal:
             reason = "signal_cut"
         else:
-            if pnl_pct_now <= -CUT_ZONE_PCT:
+            if SIGNAL_CUT_ENABLED and pnl_pct_now <= -CUT_ZONE_PCT:
                 print(f"{name}: ขาดทุน {pnl_pct_now:.1f}% แต่แนวโน้มยังไม่ใช่ขาลง ({signal or 'ไม่มีข้อมูล'}) — ถือรอ")
             continue
         is_stop_loss = reason != "take_profit"
@@ -407,11 +413,15 @@ def rebuy_check(name, dashboard_so_far, sold_at=None):
     risk_pct = info.get("risk_pct")
     if risk_pct is None:
         return False, "ไม่มีข้อมูลความเสี่ยงล่าสุด"
+    if sold_at:
+        hours = (datetime.now(timezone.utc) - datetime.fromisoformat(sold_at)).total_seconds() / 3600
+        if hours < REBUY_COOLDOWN_HOURS:
+            return False, f"เพิ่งขายไป {hours:.0f} ชม. (ต้องรอครบ {REBUY_COOLDOWN_HOURS} ชม.)"
     if risk_pct > REBUY_MAX_RISK_PCT:
         return False, f"ผันผวน {risk_pct:.2f}% เกิน {REBUY_MAX_RISK_PCT}%"
-    if "Death Cross" in str(info.get("signal", "")):
-        return False, "แนวโน้มขาลง (Death Cross)"
-    return True, f"ผันผวน {risk_pct:.2f}% แนวโน้มไม่ใช่ขาลง"
+    if "Golden Cross" not in str(info.get("signal", "")):
+        return False, "แนวโน้มยังไม่เป็นขาขึ้น (ต้อง Golden Cross)"
+    return True, f"ผันผวน {risk_pct:.2f}% แนวโน้มขาขึ้น"
 
 
 def run_buys(state, cycle, today, dashboard_so_far):
@@ -665,6 +675,8 @@ def main():
         "take_profit_pct": TAKE_PROFIT_PCT,
         "stop_loss_pct": STOP_LOSS_PCT,
         "cut_zone_pct": CUT_ZONE_PCT,
+        "signal_cut_enabled": SIGNAL_CUT_ENABLED,
+        "rebuy_cooldown_hours": REBUY_COOLDOWN_HOURS,
         "journal": trade_journal.summary(load_journal(state)),
         "market_sentiment": dashboard_so_far.get("market_sentiment") if isinstance(dashboard_so_far, dict) else None,
         "cycle_date": cycle.get("cycle_date"),
