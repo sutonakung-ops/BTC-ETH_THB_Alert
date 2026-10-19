@@ -24,6 +24,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
+import analysis_log
 import trade_journal
 from bitkub_trade import BitkubAPIError, fetch_fill, floor_amount, place_ask, place_bid
 
@@ -349,6 +350,8 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
         else:
             if SIGNAL_CUT_ENABLED and pnl_pct_now <= -CUT_ZONE_PCT:
                 print(f"{name}: ขาดทุน {pnl_pct_now:.1f}% แต่แนวโน้มยังไม่ใช่ขาลง ({signal or 'ไม่มีข้อมูล'}) — ถือรอ")
+            if pnl_pct_now < 0:
+                analysis_log.event("hold_in_loss", name, pnl_pct=round(pnl_pct_now, 3), signal=signal)
             continue
         is_stop_loss = reason != "take_profit"
 
@@ -373,6 +376,9 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
                 cycle["bought"].pop(name, None)  # ปลดล็อกให้ซื้อกลับได้ ถ้าผ่าน rebuy_check
                 cycle.setdefault("sold", {})[name] = {"reason": reason, "at": datetime.now(timezone.utc).isoformat()}
             state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + realized_pnl, 2)
+            analysis_log.event("sell", name, reason=reason, pnl_pct=round(pnl_pct_now, 3),
+                               proceeds_thb=round(outcome["proceeds_thb"], 4), invested_thb=invested,
+                               sell_price=outcome["sell_price"], back_to_pool=round(back_to_pool, 4))
             journal = load_journal(state)
             trade_journal.record_close(journal, name, outcome["sell_price"], outcome["proceeds_thb"], reason, pnl_pct_now)
             trade_journal.save(journal)
@@ -386,7 +392,7 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
                 "realized_pnl_thb": round(realized_pnl, 2),
                 "reason": reason,
             })
-            state["sell_log"] = state["sell_log"][-200:]
+            state["sell_log"] = state["sell_log"][-20000:]
             if reason == "signal_cut":
                 head = f"📉 ตัดขาดทุน {name} ทั้งหมดตามสัญญาณขาลง (Death Cross) ที่ {pnl_pct_now:.1f}%"
             elif is_stop_loss:
@@ -445,9 +451,13 @@ def run_buys(state, cycle, today, dashboard_so_far):
             ok, why = rebuy_check(name, dashboard_so_far, sold_at)
             if not ok:
                 print(f"{name}: ขายไปแล้วรอบนี้ ยังไม่ซื้อกลับ — {why}")
+                analysis_log.event("rebuy_skipped", name, reason=why)
                 continue
         outcome = execute_buy(trade_symbol_of(name), DCA_UNIT_THB)
         if outcome["ok"]:
+            analysis_log.event("buy", name, thb=DCA_UNIT_THB, order_id=outcome["order_id"],
+                               fill_price=outcome.get("fill_price"), rebuy=name in cycle.get("sold", {}),
+                               pool_after=round(state["cash_pool_thb"] - DCA_UNIT_THB, 2))
             journal = load_journal(state)
             trade_journal.record_buy(
                 journal, name, outcome["order_id"], DCA_UNIT_THB,
@@ -490,6 +500,7 @@ def run_buys(state, cycle, today, dashboard_so_far):
             if prev != outcome["error"]:
                 failed_lines.append(f"  {name}: ล้มเหลว — {outcome['error']}")  # แจ้งเฉพาะ error ใหม่ ไม่แจ้งซ้ำทุกนาที
             state["last_errors"][name] = {"error": outcome["error"], "at": datetime.now(timezone.utc).isoformat()}
+            analysis_log.event("buy_failed", name, error=outcome["error"])
             if any(f"error code {c}:" in outcome["error"] for c in PERMANENT_BUY_ERRORS):
                 # ซื้อผ่าน API ไม่ได้ถาวร (เช่นเหรียญแบบ broker) — ข้ามเหรียญนี้ไปเลย ไปซื้อเหรียญถัดไปแทน
                 state.setdefault("unbuyable", {})[name] = outcome["error"]
@@ -497,7 +508,7 @@ def run_buys(state, cycle, today, dashboard_so_far):
             if "error code 18" in outcome["error"]:
                 break  # เงินบาทในบัญชีจริงไม่พอ ลองใหม่รอบหน้า
 
-    state["log"] = state["log"][-500:]  # กันไฟล์โตไม่จำกัด เก็บแค่ 500 รายการล่าสุด
+    state["log"] = state["log"][-20000:]  # เก็บไว้วิเคราะห์ (ตัดเฉพาะเมื่อยาวมากจริงๆ)
 
     if bought_lines or failed_lines:
         msg = f"💰 DCA ซื้อตามลำดับความเสี่ยง — กองเงินบอทคงเหลือ {state['cash_pool_thb']:,.2f} บาท\n"
@@ -697,6 +708,21 @@ def main():
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }
     save_json(DASHBOARD_FILE, dashboard)
+
+    # ---- บันทึกสะสมไว้วิเคราะห์ย้อนหลัง (ไม่เขียนทับ) ----
+    try:
+        analysis_log.record_snapshot(dashboard)
+        analysis_log.record_equity(state, dashboard.get("dca_bot"))
+        analysis_log.record_config({
+            "unit_thb": DCA_UNIT_THB, "interval_days": DCA_INTERVAL_DAYS,
+            "take_profit_pct": TAKE_PROFIT_PCT, "stop_loss_pct": STOP_LOSS_PCT,
+            "signal_cut_enabled": SIGNAL_CUT_ENABLED, "cut_zone_pct": CUT_ZONE_PCT,
+            "rebuy_max_risk_pct": REBUY_MAX_RISK_PCT, "rebuy_cooldown_hours": REBUY_COOLDOWN_HOURS,
+            "news_sentiment_weight": NEWS_SENTIMENT_WEIGHT, "must_include": MUST_INCLUDE_COINS,
+        })
+        analysis_log.flush_events()
+    except Exception as e:  # noqa: BLE001 — การบันทึกพังต้องไม่ทำให้บอทหยุด
+        print(f"บันทึกข้อมูลวิเคราะห์ไม่สำเร็จ: {e}")
 
     print("dca_bot: ทำงานเสร็จสิ้น")
 

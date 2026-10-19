@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 import requests
 
 import crypto_alert
+import analysis_log
 import dca_bot
 import trade_journal
 
@@ -32,7 +33,7 @@ INTERVAL_SECONDS = 60
 def git_commit_push(message):
     files = [dca_bot.DCA_STATE_FILE, crypto_alert.CONTROL_FILE, dca_bot.DEPOSIT_INBOX_FILE,
              crypto_alert.TG_OFFSET_FILE, crypto_alert.COMMANDS_FILE, trade_journal.JOURNAL_FILE]
-    existing = [f for f in files if os.path.exists(f)]
+    existing = [f for f in files if os.path.exists(f)] + (["analysis"] if os.path.isdir("analysis") else [])
     subprocess.run(["git", "add", *existing], check=False)
     if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
         return
@@ -92,7 +93,8 @@ def check_once():
             if cycle and state.get("cash_pool_thb", 0) >= dca_bot.DCA_UNIT_THB:
                 dca_bot.run_buys(state, cycle, today, dashboard)
 
-    changed = snapshot(state) != before or bool(inbox)
+    logged = analysis_log.flush_events(kinds={"buy", "sell", "buy_failed"})
+    changed = snapshot(state) != before or bool(inbox) or logged
     if changed:
         dca_bot.save_json(dca_bot.DCA_STATE_FILE, state)
     return changed or control_changed

@@ -55,7 +55,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add latest.json state/
+          git add latest.json state/ analysis/
           git diff --staged --quiet || git commit -m "Update latest.json and bot state [skip ci]"
           git pull --rebase
           git push

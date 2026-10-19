@@ -34,7 +34,7 @@ def load():
 
 def save(journal):
     os.makedirs(os.path.dirname(JOURNAL_FILE), exist_ok=True)
-    journal["lots"] = journal["lots"][-2000:]
+    journal["lots"] = journal["lots"][-50000:]
     with open(JOURNAL_FILE, "w", encoding="utf-8") as f:
         json.dump(journal, f, ensure_ascii=False, indent=2)
 
