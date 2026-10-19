@@ -17,7 +17,7 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
-from bitkub_trade import BitkubAPIError, fetch_fill, place_ask, place_bid
+from bitkub_trade import BitkubAPIError, fetch_fill, floor_amount, place_ask, place_bid
 from strategy import check_exit, compute_indicators, is_entry_signal
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
@@ -146,8 +146,8 @@ def execute_exit(position, current_price):
     if not BITKUB_API_KEY or not BITKUB_API_SECRET:
         return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
     result, res, amt = None, None, position["amount_coin"]
-    for factor in (1.0, 0.995):
-        amt = float(f"{position['amount_coin'] * factor:.8f}")
+    for factor in (1.0, 0.999):
+        amt = floor_amount(position["amount_coin"] * factor)
         try:
             result = place_ask(BITKUB_API_KEY, BITKUB_API_SECRET, position["trade_symbol"], amt, rat=0, typ="market")
         except (BitkubAPIError, requests.RequestException) as e:

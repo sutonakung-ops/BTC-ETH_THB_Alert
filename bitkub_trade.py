@@ -100,6 +100,12 @@ def get_balances(api_key, api_secret):
     return _private_request(api_key, api_secret, "GET", "/api/v4/wallet/balances")
 
 
+def floor_amount(x, decimals=8):
+    """ปัดเศษลง (ไม่ปัดขึ้น) — ปัดขึ้นทำให้สั่งขายเกินยอดจริงแค่ 0.00000001 ก็โดนปฏิเสธว่าเหรียญไม่พอ (error 18)"""
+    f = 10 ** decimals
+    return int(x * f + 1e-9) / f
+
+
 def get_order_info(api_key, api_secret, sym, order_id, side):
     """side = 'buy' หรือ 'sell', sym เช่น 'btc_thb'"""
     query = f"sym={sym}&id={order_id}&sd={side}"

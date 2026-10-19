@@ -577,5 +577,16 @@
   "profit_reserved_thb": 8.2,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
+  },
+  "dust": {
+    "XLM": 0.08344462,
+    "XRP": 0.01145474,
+    "WLD": 0.0154607,
+    "DOGE": 0.18637949,
+    "EPIC": 0.02777777,
+    "NEAR": 0.00155742,
+    "CRV": 0.02179598,
+    "ADA": 0.03351655,
+    "SOL": 0.00014263
   }
 }

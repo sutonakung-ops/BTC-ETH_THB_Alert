@@ -25,7 +25,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 import trade_journal
-from bitkub_trade import BitkubAPIError, fetch_fill, place_ask, place_bid
+from bitkub_trade import BitkubAPIError, fetch_fill, floor_amount, place_ask, place_bid
 
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
 TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
@@ -241,14 +241,16 @@ def execute_buy(trade_symbol, amount_thb):
 def execute_sell(trade_symbol, amount_coin, fallback_price=None):
     """
     สั่งขายจริงทั้งหมดที่ถืออยู่ของเหรียญนี้ (market order) กลับเป็นเงินบาท
-    ถ้าเงินไม่พอเพราะจำนวนเหรียญจริงน้อยกว่าที่บันทึกไว้เล็กน้อย (ค่าธรรมเนียม/ปัดเศษ) ลองใหม่ที่ 99.5%
+    จำนวนปัดเศษลงที่ทศนิยม 8 ตำแหน่ง ถ้ายังโดน error 18 (เหรียญไม่พอ) ลองใหม่ที่ 99.9%
+    คืน sold_coin = จำนวนที่ขายได้จริง (ใช้คำนวณเศษที่เหลือ)
     """
     if not BITKUB_API_KEY or not BITKUB_API_SECRET:
         return {"ok": False, "error": "ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET"}
     sym = order_symbol_of(trade_symbol)
     result, res = None, None
-    for factor in (1.0, 0.995):
-        amt = float(f"{amount_coin * factor:.8f}")
+    amt = 0.0
+    for factor in (1.0, 0.999):
+        amt = floor_amount(amount_coin * factor)
         try:
             result = place_ask(BITKUB_API_KEY, BITKUB_API_SECRET, sym, amt, rat=0, typ="market")
         except (BitkubAPIError, requests.RequestException) as e:
@@ -264,12 +266,12 @@ def execute_sell(trade_symbol, amount_coin, fallback_price=None):
     order_id = str(res["id"])
     fill, _raw = fetch_fill(BITKUB_API_KEY, BITKUB_API_SECRET, sym, order_id, "sell")
     if fill:
-        return {"ok": True, "order_id": order_id, "sell_price": fill["rate"], "proceeds_thb": fill["thb"]}
+        return {"ok": True, "order_id": order_id, "sell_price": fill["rate"], "proceeds_thb": fill["thb"], "sold_coin": amt}
     if fallback_price:
         # ขายไปแล้วจริงแต่ยังอ่านผลไม่ได้ — ประมาณจากราคาตลาดล่าสุด (ไม่หักค่าธรรมเนียม)
         return {"ok": True, "order_id": order_id, "sell_price": fallback_price,
-                "proceeds_thb": amount_coin * fallback_price, "estimated": True}
-    return {"ok": True, "order_id": order_id, "sell_price": 0.0, "proceeds_thb": 0.0, "estimated": True}
+                "proceeds_thb": amt * fallback_price, "estimated": True, "sold_coin": amt}
+    return {"ok": True, "order_id": order_id, "sell_price": 0.0, "proceeds_thb": 0.0, "estimated": True, "sold_coin": amt}
 
 
 def load_journal(state):
@@ -350,8 +352,13 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
             continue
         is_stop_loss = reason != "take_profit"
 
-        outcome = execute_sell(trade_symbol_of(name), h["total_coin"], fallback_price=current_price)
+        # ขายเศษที่ค้างจากการขายครั้งก่อนๆ (state["dust"]) รวมไปด้วย
+        dust = (state.get("dust") or {}).get(name, 0.0)
+        to_sell = h["total_coin"] + dust
+        outcome = execute_sell(trade_symbol_of(name), to_sell, fallback_price=current_price)
         if outcome["ok"]:
+            leftover = max(to_sell - outcome.get("sold_coin", to_sell), 0.0)
+            state.setdefault("dust", {})[name] = round(leftover, 8)
             invested = h["total_invested_thb"]
             realized_pnl = outcome["proceeds_thb"] - invested
             if realized_pnl > 0:
