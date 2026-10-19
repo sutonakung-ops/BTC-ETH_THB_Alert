@@ -1,0 +1,37 @@
+name: Fetch price history (analysis)
+
+on:
+  workflow_dispatch:
+    inputs:
+      coins:
+        default: "BTC,ETH,XRP,ADA,DOGE,SOL,XLM,CRV,WLD,NEAR,EPIC,KUB,OP,LUNA"
+      start_ts:
+        default: "1792083600"
+      resolution:
+        default: "15"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Fetch
+        env:
+          COINS: ${{ inputs.coins }}
+          START_TS: ${{ inputs.start_ts }}
+          RESOLUTION: ${{ inputs.resolution }}
+        run: python tools/fetch_history.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add analysis/
+          git diff --staged --quiet || git commit -m "Price history for analysis [skip ci]"
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
