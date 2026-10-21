@@ -2,19 +2,19 @@
   "holdings": {
     "BTC": {
       "total_invested_thb": 282.71,
-      "total_coin": 0.00010264045357230507,
+      "total_coin": 0.00010264,
       "buy_count": 4,
       "last_bought_date": "2026-10-21"
     },
     "ETH": {
       "total_invested_thb": 200.0,
-      "total_coin": 0.0024904657769727855,
+      "total_coin": 0.00249046,
       "buy_count": 3,
       "last_bought_date": "2026-10-21"
     },
     "XRP": {
       "total_invested_thb": 400.0,
-      "total_coin": 8.839075463760985,
+      "total_coin": 8.83907546,
       "buy_count": 3,
       "last_bought_date": "2026-10-21"
     },
@@ -26,13 +26,13 @@
     },
     "DOGE": {
       "total_invested_thb": 400.0,
-      "total_coin": 146.11540264805083,
+      "total_coin": 146.11540264,
       "buy_count": 3,
       "last_bought_date": "2026-10-21"
     },
     "SOL": {
       "total_invested_thb": 200.0,
-      "total_coin": 0.056114899442888784,
+      "total_coin": 0.05611489,
       "buy_count": 2,
       "last_bought_date": "2026-10-21"
     },
@@ -695,5 +695,5 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1500.33
+  "last_equity_thb": 1499.86
 }
