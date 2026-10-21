@@ -765,6 +765,10 @@ def main():
             cycle = build_new_cycle(today, active_coins, dashboard_so_far)
             state["dca_cycle"] = cycle
             print(f"เริ่มรอบจัดลำดับใหม่ ({today}) ลำดับเหรียญ: {', '.join(cycle['ranking']) or '-'}")
+        elif WHOLE_ACCOUNT_MODE:
+            # โหมดเติมทุนตามเป้า: จัดลำดับใหม่ทุกชั่วโมงจากเหรียญที่ติดเทรนด์ล่าสุด (ไม่ล็อกทั้งสัปดาห์)
+            # ไม่งั้นเหรียญที่เพิ่งติดเทรนด์จะไม่ได้ซื้อ แล้วเงินไหลไปซื้อซ้ำเหรียญเดิมแทน
+            cycle["ranking"] = build_new_cycle(today, active_coins, dashboard_so_far)["ranking"]
         sync_wallet(state)
         # ขายก่อน (เงินทุนที่ได้คืนจะได้ใช้ซื้อเหรียญถัดไปได้ในรอบเดียวกัน) แล้วค่อยซื้อ
         run_take_profit_stop_loss(state, ticker, today, dashboard_so_far)
