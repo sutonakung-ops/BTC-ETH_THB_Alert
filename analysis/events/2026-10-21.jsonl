@@ -69,3 +69,4 @@
 {"at":"2026-10-21T13:29:45.141000+00:00","kind":"buy","coin":"OP","thb":200.0,"order_id":"6ad8be47f8994b5804c2fdfc2e9v48","fill_price":4.366,"rebuy":false,"gc_priority":false,"pool_after":20.39}
 {"at":"2026-10-21T13:29:46.515624+00:00","kind":"buy_failed","coin":"XRP","error":"Bitkub error code 18: {'error': 18}"}
 {"at":"2026-10-21T13:29:54.208672+00:00","kind":"buy","coin":"XRP","thb":20.38,"order_id":"6ad8be50fd416b1e42ca1a15s5oh6d","fill_price":45.77,"rebuy":false,"gc_priority":true,"pool_after":0.0}
+{"at":"2026-10-21T14:23:05.622786+00:00","kind":"hold_in_loss","coin":"OP","pnl_pct":-0.71,"signal":"ยังสรุปแนวโน้มไม่ได้"}
