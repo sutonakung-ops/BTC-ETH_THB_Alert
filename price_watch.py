@@ -49,7 +49,7 @@ def git_commit_push(message):
 def snapshot(state):
     return json.dumps(
         {k: state.get(k) for k in ("holdings", "cash_pool_thb", "profit_reserved_thb", "pending_orders", "dca_cycle",
-                                    "withdrawn_total_thb", "withdraw_alert_sent")},
+                                    "withdrawn_total_thb", "withdraw_alert_sent", "capital_thb")},
         sort_keys=True, ensure_ascii=False,
     )
 
@@ -77,6 +77,7 @@ def check_once():
         today = dca_bot.today_str()
         if state["pending_orders"]:
             dca_bot.reconcile_pending_orders(state, today)
+        dca_bot.sync_wallet(state)
         try:
             ticker = dca_bot.get_ticker()
         except (requests.RequestException, ValueError) as e:
@@ -86,10 +87,11 @@ def check_once():
         if isinstance(ticker, dict) and ticker:
             dca_bot.run_take_profit_stop_loss(state, ticker, today, dashboard)
             cycle = state.get("dca_cycle")
-            if cycle and state.get("cash_pool_thb", 0) >= dca_bot.DCA_UNIT_THB:
+            if cycle and state.get("cash_pool_thb", 0) >= dca_bot.MIN_ORDER_THB:
                 dca_bot.run_buys(state, cycle, today, dashboard)
+            dca_bot.update_equity(state, ticker)
 
-    logged = analysis_log.flush_events(kinds={"buy", "sell", "buy_failed", "withdraw"})
+    logged = analysis_log.flush_events(kinds={"buy", "sell", "buy_failed", "withdraw", "whole_account_start"})
     changed = snapshot(state) != before or bool(inbox) or logged
     if changed:
         dca_bot.save_json(dca_bot.DCA_STATE_FILE, state)

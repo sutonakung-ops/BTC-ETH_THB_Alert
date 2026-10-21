@@ -282,8 +282,8 @@ def process_telegram_commands():
                 inbox.append({"amount_thb": amount, "at": datetime.now(timezone.utc).isoformat()})
                 save_json(DEPOSIT_INBOX_FILE, inbox)
                 send_telegram(
-                    f"💵 รับทราบ เติมกองเงินบอท {amount:,.2f} บาท\n"
-                    "บอทจะใช้ซื้อตามลำดับความเสี่ยงในรอบถัดไป (อย่าลืมโอนเงินเข้า Bitkub ให้ครบด้วย)"
+                    f"💵 รับทราบ บันทึกทุนเพิ่ม {amount:,.2f} บาท\n"
+                    "บอทอ่านเงินบาทในบัญชีเองแล้วซื้อตามลำดับในรอบถัดไป (ใช้คำสั่งนี้เพื่อให้คิดกำไรเทียบทุนถูก)"
                 )
             else:
                 send_telegram(f"⚠️ จำนวนเงินไม่ถูกต้อง (รับได้ 1 - {MAX_DEPOSIT_THB:,.0f} บาทต่อครั้ง)")

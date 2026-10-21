@@ -81,6 +81,8 @@ def record_equity(state, dca_dashboard):
         "cash_pool_thb": pool,
         "profit_reserved_thb": profit,
         "realized_pnl_total_thb": state.get("realized_pnl_total_thb"),
+        "capital_thb": state.get("capital_thb"),
+        "withdrawn_total_thb": state.get("withdrawn_total_thb"),
         "total_equity_thb": round((value or 0) + pool + profit, 2) if value is not None else None,
         "held": held,
     })

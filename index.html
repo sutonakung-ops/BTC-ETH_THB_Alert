@@ -494,6 +494,11 @@
 
       if (dca.cycle_ranking && dca.cycle_ranking.length) {
         bodyHtml += `<div class="row"><span class="label">กองเงินบอท (พร้อมซื้อ)</span><span>${dca.cash_pool_thb != null ? fmtNum(dca.cash_pool_thb) : "-"} บาท</span></div>`;
+        if (dca.whole_account && dca.capital_thb != null && dca.equity_thb != null) {
+          const gain = dca.equity_thb - dca.capital_thb;
+          bodyHtml += `<div class="row"><span class="label">ทุนทั้งบัญชี → มูลค่าตอนนี้</span><span>${fmtNum(dca.capital_thb)} → ${fmtNum(dca.equity_thb)} บาท</span></div>`;
+          bodyHtml += `<div class="row"><span class="label">กำไรเทียบทุน (แจ้งถอนที่ ${fmtNum(dca.withdraw_alert_thb)})</span><span class="${gain >= 0 ? "up" : "down"}">${gain >= 0 ? "+" : ""}${fmtNum(gain)} บาท</span></div>`;
+        } else
         bodyHtml += `<div class="row"><span class="label">กำไรที่แยกเก็บไว้</span><span class="up">${dca.profit_reserved_thb != null ? fmtNum(dca.profit_reserved_thb) : "-"} บาท${dca.withdraw_alert_thb ? ` / ${fmtNum(dca.withdraw_alert_thb)}` : ""}</span></div>`;
         if (dca.withdrawn_total_thb) bodyHtml += `<div class="row"><span class="label">ถอนกำไรเข้าบัญชีแล้ว</span><span class="up">${fmtNum(dca.withdrawn_total_thb)} บาท</span></div>`;
         if (dca.golden_cross_first) bodyHtml += `<div class="row"><span class="label">ลำดับซื้อ</span><span>Golden Cross ก่อน แล้วตามความเสี่ยง</span></div>`;

@@ -100,6 +100,31 @@ def get_balances(api_key, api_secret):
     return _private_request(api_key, api_secret, "GET", "/api/v4/wallet/balances")
 
 
+def get_wallet(api_key, api_secret):
+    """ยอดทุกสกุลในบัญชี คืน {"THB": {"total": .., "available": ..}, "BTC": {...}} หรือ None ถ้าอ่านไม่ได้"""
+    try:
+        r = get_balances(api_key, api_secret)
+    except (BitkubAPIError, requests.RequestException):
+        return None
+    data = r.get("data") if isinstance(r, dict) else r
+    if isinstance(data, dict):
+        rows = [{"currency": k, **v} for k, v in data.items() if isinstance(v, dict)]
+    elif isinstance(data, list):
+        rows = data
+    else:
+        return None
+    out = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        cur = str(row.get("currency") or row.get("symbol") or "").upper()
+        try:
+            out[cur] = {"total": float(row.get("total") or 0), "available": float(row.get("available") or 0)}
+        except (TypeError, ValueError):
+            continue
+    return out if "THB" in out else None
+
+
 def floor_amount(x, decimals=8):
     """ปัดเศษลง (ไม่ปัดขึ้น) — ปัดขึ้นทำให้สั่งขายเกินยอดจริงแค่ 0.00000001 ก็โดนปฏิเสธว่าเหรียญไม่พอ (error 18)"""
     f = 10 ** decimals
