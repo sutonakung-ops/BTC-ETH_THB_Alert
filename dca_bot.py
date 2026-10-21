@@ -66,6 +66,13 @@ MUST_INCLUDE_COINS = ["BTC", "ETH"]
 # เหรียญที่ขาย (TP/SL) ไปแล้วในรอบนี้ ซื้อกลับได้ในรอบเดียวกันถ้าประเมินความเสี่ยงตอนนั้นแล้วผ่าน:
 # ความผันผวน 48 ชม. (risk_pct) ไม่เกินค่านี้ และแนวโน้ม MA ไม่ใช่ขาลง (Death Cross)
 REBUY_MAX_RISK_PCT = 3.0
+# ให้เหรียญที่แนวโน้มเป็น Golden Cross (MA12 > MA24 กราฟรายชั่วโมง) ได้ซื้อก่อน (ผู้ใช้ขอ 21 ต.ค. 2569)
+# ไม่ได้ตัดเหรียญอื่นทิ้ง แค่เลื่อนขึ้นหน้าแถว — เหรียญ Golden Cross เรียงตามความเสี่ยงน้อย -> มากเหมือนเดิม
+# ไม้ที่ซื้อเพราะ Golden Cross ถูกบันทึกใน journal (gc_priority) เพื่อเทียบ winrate กับวิธีเดิมภายหลัง
+GOLDEN_CROSS_FIRST = True
+# แจ้ง Telegram เมื่อกำไรที่แยกเก็บไว้ถึงยอดนี้ ให้ผู้ใช้กดถอนเองใน Bitkub (บอทไม่มีสิทธิ์ถอนเงิน — ปลอดภัยกว่า)
+# ถอนแล้วพิมพ์ "ถอน 300" ใน Telegram เพื่อหักออกจากยอดกำไรแยกเก็บ
+PROFIT_WITHDRAW_ALERT_THB = 300
 # เว้นระยะซื้อคืน (ผู้ใช้เลือกทาง ค): หลังขายต้องรออย่างน้อยเท่านี้ และแนวโน้มต้องเป็นขาขึ้น (Golden Cross)
 # กันการขายแล้วซื้อคืนวนซ้ำที่เสียค่าธรรมเนียมและโดนขายซ้ำ
 REBUY_COOLDOWN_HOURS = 24
@@ -184,6 +191,67 @@ def default_state():
 def risk_score(risk_pct, news_sentiment):
     """คะแนนยิ่งน้อย = ยิ่งถูกเลือกซื้อก่อน (ความเสี่ยงต่ำ + ข่าวดี)"""
     return risk_pct - NEWS_SENTIMENT_WEIGHT * (news_sentiment or 0.0)
+
+
+def apply_inbox(state):
+    """
+    ประมวลผลข้อความเงินเข้า/ออกจาก Telegram (state/deposit_inbox.json)
+    - เติม  -> เพิ่มกองเงินบอท
+    - ถอน   -> หักจากกำไรที่แยกเก็บไว้ (ผู้ใช้ถอนออกจาก Bitkub เองแล้ว) ไม่เกินยอดที่มี
+    คืน True ถ้ามีรายการ
+    """
+    inbox = load_json(DEPOSIT_INBOX_FILE, [])
+    if not inbox:
+        return False
+    for d in inbox:
+        amount = float(d.get("amount_thb") or 0)
+        if d.get("kind") == "withdraw":
+            reserved = state.get("profit_reserved_thb", 0.0)
+            taken = round(min(amount, reserved), 2)
+            state["profit_reserved_thb"] = round(reserved - taken, 2)
+            state["withdrawn_total_thb"] = round(state.get("withdrawn_total_thb", 0.0) + taken, 2)
+            state.setdefault("withdraw_log", []).append({"at": d.get("at"), "requested_thb": amount, "deducted_thb": taken})
+            analysis_log.event("withdraw", None, requested_thb=amount, deducted_thb=taken,
+                               reserved_after=state["profit_reserved_thb"])
+            note = "" if taken >= amount else f"\n(กำไรแยกเก็บมีแค่ {taken:,.2f} บาท จึงหักได้เท่านี้)"
+            send_telegram(f"🏦 บันทึกการถอนกำไร {taken:,.2f} บาทแล้ว{note}\n"
+                          f"กำไรแยกเก็บคงเหลือ {state['profit_reserved_thb']:,.2f} บาท · "
+                          f"ถอนสะสมทั้งหมด {state['withdrawn_total_thb']:,.2f} บาท")
+            print(f"ถอนกำไร {taken:,.2f} บาท")
+        else:
+            state["cash_pool_thb"] = round(state.get("cash_pool_thb", 0.0) + amount, 2)
+            print(f"เติมเงินเข้ากองบอท {amount:,.2f} บาท -> คงเหลือ {state['cash_pool_thb']:,.2f} บาท")
+    save_json(DEPOSIT_INBOX_FILE, [])
+    check_withdraw_alert(state)
+    return True
+
+
+def check_withdraw_alert(state):
+    """แจ้งครั้งเดียวเมื่อกำไรแยกเก็บถึง PROFIT_WITHDRAW_ALERT_THB (รีเซ็ตเมื่อถอนจนต่ำกว่าเกณฑ์)"""
+    reserved = state.get("profit_reserved_thb", 0.0)
+    if reserved >= PROFIT_WITHDRAW_ALERT_THB:
+        if not state.get("withdraw_alert_sent"):
+            send_telegram(
+                f"💰 กำไรที่แยกเก็บไว้ถึง {reserved:,.2f} บาทแล้ว (เกณฑ์ {PROFIT_WITHDRAW_ALERT_THB:,.0f} บาท)\n"
+                "ถอนเข้าบัญชีธนาคารได้ในแอป Bitkub (บอทไม่ถอนเงินเอง)\n"
+                f"ถอนแล้วพิมพ์ \"ถอน {int(reserved)}\" ให้บอทหักยอดออก"
+            )
+            state["withdraw_alert_sent"] = True
+    elif state.get("withdraw_alert_sent"):
+        state["withdraw_alert_sent"] = False
+
+
+def is_golden_cross(name, dashboard):
+    info = (dashboard or {}).get(name) if isinstance(dashboard, dict) else None
+    return "Golden Cross" in str((info or {}).get("signal", ""))
+
+
+def buy_order(ranking, dashboard):
+    """ลำดับซื้อจริง: เหรียญ Golden Cross ขึ้นก่อน (ถ้าเปิด GOLDEN_CROSS_FIRST) ที่เหลือตามลำดับความเสี่ยงเดิม"""
+    if not GOLDEN_CROSS_FIRST:
+        return list(ranking)
+    gc = [n for n in ranking if is_golden_cross(n, dashboard)]
+    return gc + [n for n in ranking if n not in gc]
 
 
 def build_new_cycle(today, active_coins, dashboard_so_far):
@@ -414,6 +482,7 @@ def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
             h["last_bought_date"] = None
         else:
             print(f"{name}: ถึงเกณฑ์ขาย ({pnl_pct_now:+.1f}%) แต่ขายไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
+    check_withdraw_alert(state)
 
 
 def rebuy_check(name, dashboard_so_far, sold_at=None):
@@ -440,7 +509,8 @@ def rebuy_check(name, dashboard_so_far, sold_at=None):
 def run_buys(state, cycle, today, dashboard_so_far):
     """ซื้อไล่ตามลำดับความเสี่ยงด้วยเงินในกอง ครั้งละ DCA_UNIT_THB จนเงินในกองไม่พอ"""
     bought_lines, failed_lines = [], []
-    for name in cycle["ranking"]:
+    for name in buy_order(cycle["ranking"], dashboard_so_far):
+        gc_priority = GOLDEN_CROSS_FIRST and is_golden_cross(name, dashboard_so_far)
         if name in cycle["bought"] or name in state.get("unbuyable", {}):
             continue
         if state["cash_pool_thb"] < DCA_UNIT_THB:
@@ -456,13 +526,13 @@ def run_buys(state, cycle, today, dashboard_so_far):
         outcome = execute_buy(trade_symbol_of(name), DCA_UNIT_THB)
         if outcome["ok"]:
             analysis_log.event("buy", name, thb=DCA_UNIT_THB, order_id=outcome["order_id"],
-                               fill_price=outcome.get("fill_price"), rebuy=name in cycle.get("sold", {}),
+                               fill_price=outcome.get("fill_price"), rebuy=name in cycle.get("sold", {}), gc_priority=gc_priority,
                                pool_after=round(state["cash_pool_thb"] - DCA_UNIT_THB, 2))
             journal = load_journal(state)
             trade_journal.record_buy(
                 journal, name, outcome["order_id"], DCA_UNIT_THB,
                 outcome.get("fill_price"), outcome.get("amount_coin"), dashboard_so_far,
-                rebuy=name in cycle.get("sold", {}),
+                rebuy=name in cycle.get("sold", {}), gc_priority=gc_priority,
             )
             trade_journal.save(journal)
             h = state["holdings"].setdefault(
@@ -489,6 +559,8 @@ def run_buys(state, cycle, today, dashboard_so_far):
                     "order_id": outcome["order_id"],
                 })
                 bought_lines.append(f"  {name}: {DCA_UNIT_THB} บาท @ {outcome['fill_price']:,.4f}")
+            if gc_priority:
+                bought_lines[-1] += " 📈 Golden Cross"
             if cycle.get("sold", {}).pop(name, None):
                 bought_lines[-1] += " (ซื้อกลับ — ผ่านการประเมินความเสี่ยง)"
             cycle["bought"][name] = True
@@ -568,12 +640,7 @@ def main():
     ticker_ok = isinstance(ticker, dict) and len(ticker) > 0
 
     # ---- ยอดเติมเงินที่ผู้ใช้แจ้งผ่าน Telegram ("เติม 300") -> เข้ากองเงินบอท ----
-    inbox = load_json(DEPOSIT_INBOX_FILE, [])
-    if inbox:
-        added = sum(float(d.get("amount_thb") or 0) for d in inbox)
-        state["cash_pool_thb"] = round(state["cash_pool_thb"] + added, 2)
-        save_json(DEPOSIT_INBOX_FILE, [])
-        print(f"เติมเงินเข้ากองบอท {added:,.2f} บาท -> คงเหลือ {state['cash_pool_thb']:,.2f} บาท")
+    apply_inbox(state)
 
     if not trading_enabled:
         print("ยังไม่ได้ตั้งค่า BITKUB_API_KEY / BITKUB_API_SECRET — ข้าม DCA รอบนี้ (ยังไม่ซื้อจริง)")
@@ -688,6 +755,9 @@ def main():
         "active_coins": active_coins,
         "cash_pool_thb": state.get("cash_pool_thb", 0.0),
         "profit_reserved_thb": state.get("profit_reserved_thb", 0.0),
+        "withdrawn_total_thb": state.get("withdrawn_total_thb", 0.0),
+        "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
+        "golden_cross_first": GOLDEN_CROSS_FIRST,
         "unit_thb_per_buy": DCA_UNIT_THB,
         "interval_days": DCA_INTERVAL_DAYS,
         "take_profit_pct": TAKE_PROFIT_PCT,
@@ -717,6 +787,7 @@ def main():
             "unit_thb": DCA_UNIT_THB, "interval_days": DCA_INTERVAL_DAYS,
             "take_profit_pct": TAKE_PROFIT_PCT, "stop_loss_pct": STOP_LOSS_PCT,
             "signal_cut_enabled": SIGNAL_CUT_ENABLED, "cut_zone_pct": CUT_ZONE_PCT,
+            "golden_cross_first": GOLDEN_CROSS_FIRST, "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
             "rebuy_max_risk_pct": REBUY_MAX_RISK_PCT, "rebuy_cooldown_hours": REBUY_COOLDOWN_HOURS,
             "news_sentiment_weight": NEWS_SENTIMENT_WEIGHT, "must_include": MUST_INCLUDE_COINS,
         })

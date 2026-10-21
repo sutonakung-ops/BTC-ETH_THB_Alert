@@ -48,7 +48,8 @@ def git_commit_push(message):
 
 def snapshot(state):
     return json.dumps(
-        {k: state.get(k) for k in ("holdings", "cash_pool_thb", "profit_reserved_thb", "pending_orders", "dca_cycle")},
+        {k: state.get(k) for k in ("holdings", "cash_pool_thb", "profit_reserved_thb", "pending_orders", "dca_cycle",
+                                    "withdrawn_total_thb", "withdraw_alert_sent")},
         sort_keys=True, ensure_ascii=False,
     )
 
@@ -68,12 +69,7 @@ def check_once():
         return control_changed
     before = snapshot(state)
 
-    inbox = dca_bot.load_json(dca_bot.DEPOSIT_INBOX_FILE, [])
-    if inbox:
-        added = sum(float(d.get("amount_thb") or 0) for d in inbox)
-        state["cash_pool_thb"] = round(state.get("cash_pool_thb", 0.0) + added, 2)
-        dca_bot.save_json(dca_bot.DEPOSIT_INBOX_FILE, [])
-        print(f"เติมเงินเข้ากองบอท {added:,.2f} บาท")
+    inbox = dca_bot.apply_inbox(state)
 
     trading_enabled = bool(dca_bot.BITKUB_API_KEY and dca_bot.BITKUB_API_SECRET)
     if trading_enabled and not control.get("paused"):
@@ -93,7 +89,7 @@ def check_once():
             if cycle and state.get("cash_pool_thb", 0) >= dca_bot.DCA_UNIT_THB:
                 dca_bot.run_buys(state, cycle, today, dashboard)
 
-    logged = analysis_log.flush_events(kinds={"buy", "sell", "buy_failed"})
+    logged = analysis_log.flush_events(kinds={"buy", "sell", "buy_failed", "withdraw"})
     changed = snapshot(state) != before or bool(inbox) or logged
     if changed:
         dca_bot.save_json(dca_bot.DCA_STATE_FILE, state)

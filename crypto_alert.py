@@ -287,6 +287,15 @@ def process_telegram_commands():
                 )
             else:
                 send_telegram(f"⚠️ จำนวนเงินไม่ถูกต้อง (รับได้ 1 - {MAX_DEPOSIT_THB:,.0f} บาทต่อครั้ง)")
+        elif re.match(r"^(ถอนกำไร|ถอนเงิน|ถอน)\s*[\d,]+(\.\d+)?\s*(บาท)?$", text):
+            # ผู้ใช้ถอนกำไรออกจาก Bitkub เองแล้ว -> ให้บอทหักออกจากยอดกำไรแยกเก็บ (บอทไม่ได้ถอนเงินจริง)
+            amount = float(re.sub(r"[^\d.]", "", text.replace(",", "")))
+            if 0 < amount <= MAX_DEPOSIT_THB:
+                inbox = load_json(DEPOSIT_INBOX_FILE, [])
+                inbox.append({"kind": "withdraw", "amount_thb": amount, "at": datetime.now(timezone.utc).isoformat()})
+                save_json(DEPOSIT_INBOX_FILE, inbox)
+            else:
+                send_telegram(f"⚠️ จำนวนเงินไม่ถูกต้อง (รับได้ 1 - {MAX_DEPOSIT_THB:,.0f} บาทต่อครั้ง)")
         elif text in CONFIRM_WORDS:
             confirm_seen = True
         elif text in CANCEL_WORDS:

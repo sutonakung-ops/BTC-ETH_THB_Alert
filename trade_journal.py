@@ -70,10 +70,11 @@ def backfill_from_state(journal, state):
             })
 
 
-def record_buy(journal, name, order_id, invested_thb, fill_price, amount_coin, dashboard, rebuy=False):
+def record_buy(journal, name, order_id, invested_thb, fill_price, amount_coin, dashboard, rebuy=False,
+               gc_priority=False):
     journal["lots"].append({
         "lot_id": order_id, "coin": name, "opened_at": _now(), "invested_thb": invested_thb,
-        "fill_price": fill_price, "amount_coin": amount_coin, "rebuy": rebuy,
+        "fill_price": fill_price, "amount_coin": amount_coin, "rebuy": rebuy, "gc_priority": gc_priority,
         "features": snapshot_features(name, dashboard), "status": "open",
     })
 
@@ -120,4 +121,24 @@ def summary(journal):
         "expectancy_pct": avg([l["pnl_pct"] for l in closed]),
         "total_pnl_thb": round(sum(l["pnl_thb"] for l in closed), 2) if closed else 0.0,
         "by_exit_reason": by_reason,
+        "by_entry_trend": _by_entry_trend(closed),
     }
+
+
+def _by_entry_trend(closed):
+    """เทียบผล: ไม้ที่ซื้อตอนแนวโน้ม Golden Cross vs ไม้อื่น (ดูจาก signal ที่บันทึกตอนซื้อ)"""
+    groups = {"golden_cross": [], "other": []}
+    for l in closed:
+        sig = str(((l.get("features") or {}).get("coin") or {}).get("signal") or "")
+        if not l.get("features"):
+            continue
+        groups["golden_cross" if "Golden Cross" in sig else "other"].append(l)
+    out = {}
+    for k, ls in groups.items():
+        wins = [l for l in ls if l["win"]]
+        out[k] = {
+            "closed": len(ls),
+            "winrate_pct": round(len(wins) / len(ls) * 100, 1) if ls else None,
+            "expectancy_pct": round(sum(l["pnl_pct"] for l in ls) / len(ls), 2) if ls else None,
+        }
+    return out
