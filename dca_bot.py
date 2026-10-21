@@ -90,6 +90,7 @@ REBUY_COOLDOWN_HOURS = 24
 # error ที่แปลว่าเหรียญนี้ซื้อผ่าน API ไม่ได้ (ลองใหม่กี่ครั้งก็ไม่ผ่าน): 11 = symbol ไม่ถูกต้อง,
 # 61 = เหรียญแบบ broker (source = broker) ที่ endpoint ซื้อขายไม่รองรับ
 PERMANENT_BUY_ERRORS = (11, 61)  # อยู่ในตัวเลือกเสมอ แม้ไม่ติดอันดับปริมาณซื้อขาย
+REBALANCE_FILE = f"{STATE_DIR}/rebalance_request.json"  # คำขอขายบางส่วน (ครั้งเดียว) เพื่อกระจายเหรียญ
 DEPOSIT_INBOX_FILE = "state/deposit_inbox.json"  # crypto_alert.py เขียนยอดเติมเงินจาก Telegram ไว้ที่นี่
 NEWS_SENTIMENT_WEIGHT = 5.0  # ข่าวบวก/ลบเต็มสเกล (+-1) ขยับคะแนนความเสี่ยงได้สูงสุด 5 แต้ม
 
@@ -464,6 +465,62 @@ def reconcile_pending_orders(state, today):
     return [po["name"] for po in pending if po not in still]
 
 
+def run_rebalance(state, ticker, today):
+    """
+    ขายบางส่วนตามคำขอใน REBALANCE_FILE แล้วลบคำขอทิ้ง (ทำครั้งเดียว)
+    รูปแบบ: {"coins": {"DOGE": {"reduce_thb": 200, "lot_id": "..."}}, "reason": "..."}
+    ลดทุนของเหรียญตามสัดส่วน, ปิดไม้ใน journal ที่ระบุ, เงินที่ได้กลับเข้ากองไปซื้อเหรียญอื่นตามลำดับ
+    """
+    req = load_json(REBALANCE_FILE, None)
+    if not req or not req.get("coins"):
+        return
+    remaining, lines = {}, []
+    for name, spec in req["coins"].items():
+        h = state["holdings"].get(name) or {}
+        reduce_thb = float(spec.get("reduce_thb") or 0)
+        if h.get("total_coin", 0) <= 0 or h.get("total_invested_thb", 0) <= reduce_thb or reduce_thb <= 0:
+            continue
+        if any(po["name"] == name for po in state.get("pending_orders", [])):
+            remaining[name] = spec
+            continue
+        frac = reduce_thb / h["total_invested_thb"]
+        tick = ticker.get(trade_symbol_of(name)) if isinstance(ticker, dict) else None
+        price = (tick or {}).get("last")
+        outcome = execute_sell(trade_symbol_of(name), h["total_coin"] * frac, fallback_price=price)
+        if not outcome["ok"]:
+            remaining[name] = spec
+            print(f"{name}: ขายปรับสัดส่วนไม่สำเร็จ — {outcome['error']} (ลองใหม่รอบหน้า)")
+            continue
+        sold = outcome.get("sold_coin", h["total_coin"] * frac)
+        h["total_coin"] = max(h["total_coin"] - sold, 0.0)
+        h["total_invested_thb"] = round(h["total_invested_thb"] - reduce_thb, 4)
+        pnl = outcome["proceeds_thb"] - reduce_thb
+        state["cash_pool_thb"] = round(state.get("cash_pool_thb", 0.0) + outcome["proceeds_thb"], 2)
+        state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + pnl, 2)
+        state["sell_log"].append({"date": today, "name": name, "sold_coin": sold, "sell_price": outcome["sell_price"],
+                                  "invested_thb": reduce_thb, "proceeds_thb": round(outcome["proceeds_thb"], 2),
+                                  "realized_pnl_thb": round(pnl, 2), "reason": "rebalance"})
+        analysis_log.event("sell", name, reason="rebalance", proceeds_thb=round(outcome["proceeds_thb"], 4),
+                           invested_thb=reduce_thb, sell_price=outcome["sell_price"])
+        journal = load_journal(state)
+        for lot in journal["lots"]:
+            if lot.get("lot_id") == spec.get("lot_id") and lot["status"] == "open":
+                lot.update({"status": "closed", "closed_at": datetime.now(timezone.utc).isoformat(),
+                            "exit_reason": "rebalance", "exit_price": outcome["sell_price"],
+                            "proceeds_thb": round(outcome["proceeds_thb"], 4), "pnl_thb": round(pnl, 4),
+                            "pnl_pct": round(pnl / reduce_thb * 100, 3), "win": pnl > 0,
+                            "position_pnl_pct_at_trigger": None})
+        trade_journal.save(journal)
+        lines.append(f"  {name}: ขาย {reduce_thb:.0f} บาทของทุน → ได้ {outcome['proceeds_thb']:.2f} บาท ({pnl:+.2f})")
+    if lines:
+        send_telegram("⚖️ ปรับสัดส่วน — ขายส่วนเกินเพื่อกระจายไปเหรียญอื่น\n" + "\n".join(lines)
+                      + f"\nกองเงินบอท {state['cash_pool_thb']:,.2f} บาท → ซื้อเหรียญถัดไปตามลำดับ")
+    if remaining:
+        save_json(REBALANCE_FILE, {**req, "coins": remaining})
+    elif os.path.exists(REBALANCE_FILE):
+        os.remove(REBALANCE_FILE)
+
+
 def run_take_profit_stop_loss(state, ticker, today, dashboard_so_far=None):
     """
     เช็คทุกเหรียญที่ถืออยู่ (รวมเหรียญที่หลุดเทรนด์) เทียบกับทุนเฉลี่ย แล้วขายทั้งหมดเมื่อ:
@@ -770,6 +827,7 @@ def main():
             # ไม่งั้นเหรียญที่เพิ่งติดเทรนด์จะไม่ได้ซื้อ แล้วเงินไหลไปซื้อซ้ำเหรียญเดิมแทน
             cycle["ranking"] = build_new_cycle(today, active_coins, dashboard_so_far)["ranking"]
         sync_wallet(state)
+        run_rebalance(state, ticker, today)
         # ขายก่อน (เงินทุนที่ได้คืนจะได้ใช้ซื้อเหรียญถัดไปได้ในรอบเดียวกัน) แล้วค่อยซื้อ
         run_take_profit_stop_loss(state, ticker, today, dashboard_so_far)
         run_buys(state, cycle, today, dashboard_so_far)

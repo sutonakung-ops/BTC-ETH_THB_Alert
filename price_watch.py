@@ -31,9 +31,9 @@ INTERVAL_SECONDS = 60
 
 
 def git_commit_push(message):
-    files = [dca_bot.DCA_STATE_FILE, crypto_alert.CONTROL_FILE, dca_bot.DEPOSIT_INBOX_FILE,
+    files = [dca_bot.DCA_STATE_FILE, dca_bot.REBALANCE_FILE, crypto_alert.CONTROL_FILE, dca_bot.DEPOSIT_INBOX_FILE,
              crypto_alert.TG_OFFSET_FILE, crypto_alert.COMMANDS_FILE, trade_journal.JOURNAL_FILE]
-    existing = [f for f in files if os.path.exists(f)] + (["analysis"] if os.path.isdir("analysis") else [])
+    existing = [f for f in files if os.path.exists(f)] + (["analysis"] if os.path.isdir("analysis") else []) + ["state"]
     subprocess.run(["git", "add", *existing], check=False)
     if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
         return
@@ -85,6 +85,7 @@ def check_once():
             ticker = {}
         dashboard = dca_bot.load_json(dca_bot.DASHBOARD_FILE, {})
         if isinstance(ticker, dict) and ticker:
+            dca_bot.run_rebalance(state, ticker, today)
             dca_bot.run_take_profit_stop_loss(state, ticker, today, dashboard)
             cycle = state.get("dca_cycle")
             if cycle and state.get("cash_pool_thb", 0) >= dca_bot.MIN_ORDER_THB:
