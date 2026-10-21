@@ -1,22 +1,22 @@
 {
   "holdings": {
     "BTC": {
-      "total_invested_thb": 100.0,
-      "total_coin": 3.663294656143002e-05,
-      "buy_count": 2,
-      "last_bought_date": "2026-10-17"
+      "total_invested_thb": 282.71,
+      "total_coin": 0.00010264045357230507,
+      "buy_count": 4,
+      "last_bought_date": "2026-10-21"
     },
     "ETH": {
-      "total_invested_thb": 50.0,
-      "total_coin": 0.0006163748357823343,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-19"
+      "total_invested_thb": 200.0,
+      "total_coin": 0.0024904657769727855,
+      "buy_count": 3,
+      "last_bought_date": "2026-10-21"
     },
     "XRP": {
-      "total_invested_thb": 50.0,
-      "total_coin": 1.1386927806877705,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-19"
+      "total_invested_thb": 400.0,
+      "total_coin": 8.839075463760985,
+      "buy_count": 3,
+      "last_bought_date": "2026-10-21"
     },
     "ADA": {
       "total_invested_thb": 0.0,
@@ -25,16 +25,16 @@
       "last_bought_date": null
     },
     "DOGE": {
-      "total_invested_thb": 50.0,
-      "total_coin": 18.755392175250382,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-19"
+      "total_invested_thb": 400.0,
+      "total_coin": 146.11540264805083,
+      "buy_count": 3,
+      "last_bought_date": "2026-10-21"
     },
     "SOL": {
-      "total_invested_thb": 50.0,
-      "total_coin": 0.014178484433441942,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-19"
+      "total_invested_thb": 200.0,
+      "total_coin": 0.056114899442888784,
+      "buy_count": 2,
+      "last_bought_date": "2026-10-21"
     },
     "KUB": {
       "total_invested_thb": 0.0,
@@ -377,6 +377,62 @@
       "fill_price": 16.94,
       "amount_coin": 2.9515938606847696,
       "order_id": "6ad5c899740fbf4086de6e45my81nv"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "DOGE",
+      "invested_thb": 150.0,
+      "fill_price": 2.7522,
+      "amount_coin": 54.50185306300414,
+      "order_id": "6ad8b08beb9b9f9cd7ef16511o0oz7"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "XRP",
+      "invested_thb": 150.0,
+      "fill_price": 45.52,
+      "amount_coin": 3.2952548330404214,
+      "order_id": "6ad8b08efd416b1e42c8860ds5oh6d"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "ETH",
+      "invested_thb": 25.3,
+      "fill_price": 82799.94,
+      "amount_coin": 0.00030555577697278526,
+      "order_id": "6ad8b090b2fb1387545f4b69j542k5"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "SOL",
+      "invested_thb": 150.0,
+      "fill_price": 3589.05,
+      "amount_coin": 0.041793789442888786,
+      "order_id": "6ad8b0933ceccbe0db2df82300es3u"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "DOGE",
+      "invested_thb": 200.0,
+      "fill_price": 2.7521,
+      "amount_coin": 72.67177791504669,
+      "order_id": "6ad8b095a30c97a966ace53e1o0oz7"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "XRP",
+      "invested_thb": 200.0,
+      "fill_price": 45.52,
+      "amount_coin": 4.393673110720562,
+      "order_id": "6ad8b098eb4f00897d561ed9s5oh6d"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "BTC",
+      "invested_thb": 42.73,
+      "fill_price": 2803722.33,
+      "amount_coin": 1.524045357230507e-05,
+      "order_id": "6ad8b09aeb9b9f9cd7ef1824m8a2qe"
     }
   ],
   "sell_log": [
@@ -623,20 +679,21 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 368.46,
-  "profit_reserved_thb": 14.05,
+  "cash_pool_thb": 0.0,
+  "profit_reserved_thb": 0.0,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
   },
   "dust": {
     "XLM": 0.08344462,
-    "XRP": 0.01145474,
     "WLD": 0.0,
-    "DOGE": 0.18637949,
     "EPIC": 0.02777777,
     "NEAR": 0.0,
     "CRV": 0.02179598,
-    "ADA": 0.03351655,
-    "SOL": 0.00014263
-  }
+    "ADA": 0.03351655
+  },
+  "profit_reserved_moved_thb": 14.05,
+  "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
+  "capital_thb": 1482.71,
+  "last_equity_thb": 1500.33
 }

@@ -44,3 +44,15 @@
 {"at":"2026-10-21T12:19:36.277822+00:00","kind":"rebuy_skipped","coin":"NEAR","reason":"เพิ่งขายไป 3 ชม. (ต้องรอครบ 24 ชม.)"}
 {"at":"2026-10-21T12:19:36.277834+00:00","kind":"rebuy_skipped","coin":"XLM","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
 {"at":"2026-10-21T12:19:36.277839+00:00","kind":"rebuy_skipped","coin":"EPIC","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
+{"at":"2026-10-21T12:31:06.024530+00:00","kind":"whole_account_start","coin":null,"capital_thb":1482.71,"cash_thb":918.03,"invested_thb":564.68}
+{"at":"2026-10-21T12:31:09.159312+00:00","kind":"buy","coin":"DOGE","thb":150.0,"order_id":"6ad8b08beb9b9f9cd7ef16511o0oz7","fill_price":2.7522,"rebuy":false,"gc_priority":true,"pool_after":768.03}
+{"at":"2026-10-21T12:31:11.777477+00:00","kind":"buy","coin":"XRP","thb":150.0,"order_id":"6ad8b08efd416b1e42c8860ds5oh6d","fill_price":45.52,"rebuy":false,"gc_priority":true,"pool_after":618.03}
+{"at":"2026-10-21T12:31:11.779412+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"ผันผวน 5.42% เกิน 3.0%"}
+{"at":"2026-10-21T12:31:11.779428+00:00","kind":"rebuy_skipped","coin":"NEAR","reason":"เพิ่งขายไป 4 ชม. (ต้องรอครบ 24 ชม.)"}
+{"at":"2026-10-21T12:31:14.362472+00:00","kind":"buy","coin":"ETH","thb":25.3,"order_id":"6ad8b090b2fb1387545f4b69j542k5","fill_price":82799.94,"rebuy":false,"gc_priority":false,"pool_after":592.73}
+{"at":"2026-10-21T12:31:16.735510+00:00","kind":"buy","coin":"SOL","thb":150.0,"order_id":"6ad8b0933ceccbe0db2df82300es3u","fill_price":3589.05,"rebuy":false,"gc_priority":false,"pool_after":442.73}
+{"at":"2026-10-21T12:31:16.737493+00:00","kind":"rebuy_skipped","coin":"XLM","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
+{"at":"2026-10-21T12:31:16.737507+00:00","kind":"rebuy_skipped","coin":"EPIC","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
+{"at":"2026-10-21T12:31:19.287739+00:00","kind":"buy","coin":"DOGE","thb":200.0,"order_id":"6ad8b095a30c97a966ace53e1o0oz7","fill_price":2.7521,"rebuy":false,"gc_priority":true,"pool_after":242.73}
+{"at":"2026-10-21T12:31:21.722835+00:00","kind":"buy","coin":"XRP","thb":200.0,"order_id":"6ad8b098eb4f00897d561ed9s5oh6d","fill_price":45.52,"rebuy":false,"gc_priority":true,"pool_after":42.73}
+{"at":"2026-10-21T12:31:24.106199+00:00","kind":"buy","coin":"BTC","thb":42.73,"order_id":"6ad8b09aeb9b9f9cd7ef1824m8a2qe","fill_price":2803722.33,"rebuy":false,"gc_priority":false,"pool_after":0.0}
