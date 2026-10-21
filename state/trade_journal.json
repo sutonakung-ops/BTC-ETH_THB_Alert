@@ -903,7 +903,15 @@
           "analysed_at": "2026-10-21T12:30:42.279195+00:00"
         }
       },
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-21T12:41:32.938399+00:00",
+      "exit_reason": "rebalance",
+      "exit_price": 2.754,
+      "proceeds_thb": 201.2009,
+      "pnl_thb": 1.2009,
+      "pnl_pct": 0.6,
+      "win": true,
+      "position_pnl_pct_at_trigger": null
     },
     {
       "lot_id": "6ad8b098eb4f00897d561ed9s5oh6d",
@@ -931,7 +939,15 @@
           "analysed_at": "2026-10-21T12:30:42.279195+00:00"
         }
       },
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-21T12:41:35.333614+00:00",
+      "exit_reason": "rebalance",
+      "exit_price": 45.56,
+      "proceeds_thb": 201.3541,
+      "pnl_thb": 1.3541,
+      "pnl_pct": 0.677,
+      "win": true,
+      "position_pnl_pct_at_trigger": null
     },
     {
       "lot_id": "6ad8b09aeb9b9f9cd7ef1824m8a2qe",
@@ -957,6 +973,62 @@
           "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
           "btc_change_24h": 2.61,
           "analysed_at": "2026-10-21T12:30:42.279195+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad8b300eb4f00897d564ad07ma6x9",
+      "coin": "CRV",
+      "opened_at": "2026-10-21T12:41:38.571956+00:00",
+      "invested_thb": 200.0,
+      "fill_price": 13.08,
+      "amount_coin": 15.290519877675841,
+      "rebuy": true,
+      "gc_priority": true,
+      "features": {
+        "coin": {
+          "risk_pct": 2.8129,
+          "signal": "Golden Cross (ขาขึ้น)",
+          "gap_percent": 0.9958,
+          "change_24h": 5.57,
+          "premium_pct": 0.09,
+          "depth_imbalance": 0.361,
+          "buy_flow_pct": 24.5
+        },
+        "market": {
+          "market_sentiment": 0.26,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 2.7,
+          "analysed_at": "2026-10-21T12:41:06.525955+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6ad8b30393de9096f7c8fea8bbnbad",
+      "coin": "IOST",
+      "opened_at": "2026-10-21T12:41:41.518145+00:00",
+      "invested_thb": 200.0,
+      "fill_price": 0.04978,
+      "amount_coin": 4017.6777822418644,
+      "rebuy": false,
+      "gc_priority": true,
+      "features": {
+        "coin": {
+          "risk_pct": 24.8138,
+          "signal": "Golden Cross (ขาขึ้น)",
+          "gap_percent": 13.3685,
+          "change_24h": 78.04,
+          "premium_pct": -2.575,
+          "depth_imbalance": null,
+          "buy_flow_pct": 38.1
+        },
+        "market": {
+          "market_sentiment": 0.26,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 2.7,
+          "analysed_at": "2026-10-21T12:41:06.525955+00:00"
         }
       },
       "status": "open"

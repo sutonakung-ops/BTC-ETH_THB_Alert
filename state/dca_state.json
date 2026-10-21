@@ -13,8 +13,8 @@
       "last_bought_date": "2026-10-21"
     },
     "XRP": {
-      "total_invested_thb": 400.0,
-      "total_coin": 8.83907546,
+      "total_invested_thb": 200.0,
+      "total_coin": 4.41953773,
       "buy_count": 3,
       "last_bought_date": "2026-10-21"
     },
@@ -25,8 +25,8 @@
       "last_bought_date": null
     },
     "DOGE": {
-      "total_invested_thb": 400.0,
-      "total_coin": 146.11540264,
+      "total_invested_thb": 200.0,
+      "total_coin": 73.05770132,
       "buy_count": 3,
       "last_bought_date": "2026-10-21"
     },
@@ -61,10 +61,10 @@
       "last_bought_date": null
     },
     "CRV": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 200.0,
+      "total_coin": 15.290519877675841,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-21"
     },
     "OP": {
       "total_invested_thb": 0.0,
@@ -139,10 +139,10 @@
       "last_bought_date": null
     },
     "IOST": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 200.0,
+      "total_coin": 4017.6777822418644,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-21"
     }
   },
   "log": [
@@ -433,6 +433,22 @@
       "fill_price": 2803722.33,
       "amount_coin": 1.524045357230507e-05,
       "order_id": "6ad8b09aeb9b9f9cd7ef1824m8a2qe"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "CRV",
+      "invested_thb": 200.0,
+      "fill_price": 13.08,
+      "amount_coin": 15.290519877675841,
+      "order_id": "6ad8b300eb4f00897d564ad07ma6x9"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "IOST",
+      "invested_thb": 200.0,
+      "fill_price": 0.04978,
+      "amount_coin": 4017.6777822418644,
+      "order_id": "6ad8b30393de9096f7c8fea8bbnbad"
     }
   ],
   "sell_log": [
@@ -615,31 +631,53 @@
       "proceeds_thb": 52.95,
       "realized_pnl_thb": 2.95,
       "reason": "take_profit"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "DOGE",
+      "sold_coin": 73.05770132,
+      "sell_price": 2.754,
+      "invested_thb": 200.0,
+      "proceeds_thb": 201.2,
+      "realized_pnl_thb": 1.2,
+      "reason": "rebalance"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "XRP",
+      "sold_coin": 4.41953773,
+      "sell_price": 45.56,
+      "invested_thb": 200.0,
+      "proceeds_thb": 201.35,
+      "realized_pnl_thb": 1.35,
+      "reason": "rebalance"
     }
   ],
-  "realized_pnl_total_thb": -17.49,
+  "realized_pnl_total_thb": -14.94,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
     "cycle_date": "2026-10-17",
     "ranking": [
       "BTC",
-      "DOGE",
-      "ETH",
       "SOL",
-      "XLM",
+      "ETH",
       "XRP",
-      "WLD",
+      "DOGE",
+      "OP",
+      "CRV",
       "NEAR",
-      "BR",
-      "EPIC"
+      "WLD",
+      "IOST"
     ],
     "bought": {
       "BTC": true,
       "SOL": true,
       "XRP": true,
       "DOGE": true,
-      "ETH": true
+      "ETH": true,
+      "CRV": true,
+      "IOST": true
     },
     "sold": {
       "ADA": {
@@ -653,10 +691,6 @@
       "XLM": {
         "reason": "signal_cut",
         "at": "2026-10-18T18:09:07.929137+00:00"
-      },
-      "CRV": {
-        "reason": "signal_cut",
-        "at": "2026-10-18T19:24:40.704374+00:00"
       },
       "WLD": {
         "reason": "take_profit",
@@ -679,7 +713,7 @@
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 0.0,
+  "cash_pool_thb": 2.55,
   "profit_reserved_thb": 0.0,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
@@ -695,5 +729,5 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1499.86
+  "last_equity_thb": 1495.63
 }

@@ -56,3 +56,9 @@
 {"at":"2026-10-21T12:31:19.287739+00:00","kind":"buy","coin":"DOGE","thb":200.0,"order_id":"6ad8b095a30c97a966ace53e1o0oz7","fill_price":2.7521,"rebuy":false,"gc_priority":true,"pool_after":242.73}
 {"at":"2026-10-21T12:31:21.722835+00:00","kind":"buy","coin":"XRP","thb":200.0,"order_id":"6ad8b098eb4f00897d561ed9s5oh6d","fill_price":45.52,"rebuy":false,"gc_priority":true,"pool_after":42.73}
 {"at":"2026-10-21T12:31:24.106199+00:00","kind":"buy","coin":"BTC","thb":42.73,"order_id":"6ad8b09aeb9b9f9cd7ef1824m8a2qe","fill_price":2803722.33,"rebuy":false,"gc_priority":false,"pool_after":0.0}
+{"at":"2026-10-21T12:41:32.937736+00:00","kind":"sell","coin":"DOGE","reason":"rebalance","proceeds_thb":201.2009,"invested_thb":200.0,"sell_price":2.754}
+{"at":"2026-10-21T12:41:35.332995+00:00","kind":"sell","coin":"XRP","reason":"rebalance","proceeds_thb":201.3541,"invested_thb":200.0,"sell_price":45.56}
+{"at":"2026-10-21T12:41:38.571479+00:00","kind":"buy","coin":"CRV","thb":200.0,"order_id":"6ad8b300eb4f00897d564ad07ma6x9","fill_price":13.08,"rebuy":true,"gc_priority":true,"pool_after":202.55}
+{"at":"2026-10-21T12:41:38.573633+00:00","kind":"rebuy_skipped","coin":"NEAR","reason":"เพิ่งขายไป 4 ชม. (ต้องรอครบ 24 ชม.)"}
+{"at":"2026-10-21T12:41:38.573648+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"ผันผวน 5.41% เกิน 3.0%"}
+{"at":"2026-10-21T12:41:41.517497+00:00","kind":"buy","coin":"IOST","thb":200.0,"order_id":"6ad8b30393de9096f7c8fea8bbnbad","fill_price":0.04978,"rebuy":false,"gc_priority":true,"pool_after":2.55}
