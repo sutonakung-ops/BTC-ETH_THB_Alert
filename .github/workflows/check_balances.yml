@@ -24,10 +24,15 @@ jobs:
           BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
           BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
         run: python tools/check_balances.py
+      - name: Account snapshot (read-only)
+        env:
+          BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
+          BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
+        run: python tools/account_snapshot.py
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add analysis/balance_check.json
+          git add analysis/balance_check.json analysis/account_snapshot.json
           git diff --staged --quiet || git commit -m "Balance check [skip ci]"
           for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
