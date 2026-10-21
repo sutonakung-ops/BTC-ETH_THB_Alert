@@ -58,6 +58,18 @@ def _bkk(ts):
         return None
 
 
+def _capital_of(e):
+    """ทุนของแต่ละจุดเวลา: โหมดทั้งบัญชีใช้ capital_thb · ก่อนหน้านั้น = เงินที่ใส่เข้าบอท
+    (ทุนเหรียญที่ถือ + เงินในกอง + กำไรแยกเก็บ - กำไร/ขาดทุนที่ขายแล้วสะสม)"""
+    if e.get("capital_thb"):
+        return e["capital_thb"]
+    try:
+        return round((e.get("holdings_invested_thb") or 0) + (e.get("cash_pool_thb") or 0)
+                     + (e.get("profit_reserved_thb") or 0) - (e.get("realized_pnl_total_thb") or 0), 2)
+    except TypeError:
+        return BOT_CAPITAL_BEFORE_WHOLE_THB
+
+
 def build(dca_module=None, path=REPORT_FILE):
     from openpyxl import Workbook
     from openpyxl.chart import BarChart, LineChart, Reference
@@ -321,13 +333,13 @@ def build(dca_module=None, path=REPORT_FILE):
     # ---------------- มูลค่าพอร์ต ----------------
     ws = wb.create_sheet("มูลค่าพอร์ต")
     title(ws, "มูลค่าพอร์ตรายชั่วโมง",
-          "ก่อนเริ่มโหมดทั้งบัญชี = เฉพาะเงินของบอท (ทุน 700) · หลังจากนั้น = ทั้งบัญชี (มูลค่ากระโดดตอนเปลี่ยนโหมด ไม่ใช่กำไร — ดูกราฟกำไรเทียบทุนแทน)")
+          "ก่อนเริ่มโหมดทั้งบัญชี = เฉพาะเงินของบอท (ทุน = เงินที่เติมเข้าบอท) · หลังจากนั้น = ทั้งบัญชี (มูลค่ากระโดดตอนเปลี่ยนโหมด ไม่ใช่กำไร — ดูกราฟกำไรเทียบทุนแทน)")
     eq = [e for e in _jsonl("analysis/backfill/equity.jsonl") + _jsonl("analysis/equity.jsonl")
           if e.get("total_equity_thb") is not None]
     eq.sort(key=lambda e: e.get("at") or "")
     erows = []
     for e in eq:
-        cap = e.get("capital_thb") or BOT_CAPITAL_BEFORE_WHOLE_THB
+        cap = _capital_of(e)
         erows.append([_bkk(e.get("at")), e.get("total_equity_thb"), cap,
                       round(e["total_equity_thb"] - cap, 2), e.get("holdings_value_thb"), e.get("cash_pool_thb"),
                       e.get("profit_reserved_thb"), e.get("realized_pnl_total_thb")])
@@ -514,7 +526,7 @@ def export_csv(m=None, out_dir=CSV_DIR):
     eq.sort(key=lambda e: e.get("at") or "")
     erows = []
     for e in eq:
-        cap = e.get("capital_thb") or BOT_CAPITAL_BEFORE_WHOLE_THB
+        cap = _capital_of(e)
         erows.append([_t(_bkk(e.get("at"))), e["total_equity_thb"], cap, _r(e["total_equity_thb"] - cap),
                       e.get("holdings_value_thb"), e.get("cash_pool_thb")])
     tables["equity"] = (["เวลา", "มูลค่ารวม (บาท)", "ทุน (บาท)", "กำไร/ขาดทุนเทียบทุน (บาท)", "มูลค่าเหรียญ (บาท)",
