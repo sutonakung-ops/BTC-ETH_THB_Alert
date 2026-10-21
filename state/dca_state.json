@@ -13,9 +13,9 @@
       "last_bought_date": "2026-10-21"
     },
     "XRP": {
-      "total_invested_thb": 200.0,
-      "total_coin": 4.41953773,
-      "buy_count": 3,
+      "total_invested_thb": 220.38,
+      "total_coin": 4.864807557397858,
+      "buy_count": 4,
       "last_bought_date": "2026-10-21"
     },
     "ADA": {
@@ -68,7 +68,7 @@
     },
     "OP": {
       "total_invested_thb": 200.0,
-      "total_coin": 45.80852038479158,
+      "total_coin": 45.80852038,
       "buy_count": 1,
       "last_bought_date": "2026-10-21"
     },
@@ -457,6 +457,14 @@
       "fill_price": 4.366,
       "amount_coin": 45.80852038479158,
       "order_id": "6ad8be47f8994b5804c2fdfc2e9v48"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "XRP",
+      "invested_thb": 20.38,
+      "fill_price": 45.77,
+      "amount_coin": 0.4452698273978588,
+      "order_id": "6ad8be50fd416b1e42ca1a15s5oh6d"
     }
   ],
   "sell_log": [
@@ -728,14 +736,10 @@
     "BR": {
       "error": "Bitkub error code 61: {'error': 61}",
       "at": "2026-10-17T22:39:41.123959+00:00"
-    },
-    "XRP": {
-      "error": "Bitkub error code 18: {'error': 18}",
-      "at": "2026-10-21T13:29:46.515608+00:00"
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 20.39,
+  "cash_pool_thb": 0.0,
   "profit_reserved_thb": 0.0,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
@@ -751,5 +755,5 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1525.19
+  "last_equity_thb": 1524.43
 }

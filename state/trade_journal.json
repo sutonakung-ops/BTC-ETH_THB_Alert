@@ -1068,6 +1068,34 @@
         }
       },
       "status": "open"
+    },
+    {
+      "lot_id": "6ad8be50fd416b1e42ca1a15s5oh6d",
+      "coin": "XRP",
+      "opened_at": "2026-10-21T13:29:54.209283+00:00",
+      "invested_thb": 20.38,
+      "fill_price": 45.77,
+      "amount_coin": 0.4452698273978588,
+      "rebuy": false,
+      "gc_priority": true,
+      "features": {
+        "coin": {
+          "risk_pct": 1.6581,
+          "signal": "Golden Cross (ขาขึ้น)",
+          "gap_percent": 0.583,
+          "change_24h": 5.31,
+          "premium_pct": 0.163,
+          "depth_imbalance": -0.182,
+          "buy_flow_pct": 42.3
+        },
+        "market": {
+          "market_sentiment": 0.26,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 2.98,
+          "analysed_at": "2026-10-21T13:29:14.858247+00:00"
+        }
+      },
+      "status": "open"
     }
   ]
 }
