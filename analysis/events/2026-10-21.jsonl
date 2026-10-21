@@ -62,3 +62,9 @@
 {"at":"2026-10-21T12:41:38.573633+00:00","kind":"rebuy_skipped","coin":"NEAR","reason":"เพิ่งขายไป 4 ชม. (ต้องรอครบ 24 ชม.)"}
 {"at":"2026-10-21T12:41:38.573648+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"ผันผวน 5.41% เกิน 3.0%"}
 {"at":"2026-10-21T12:41:41.517497+00:00","kind":"buy","coin":"IOST","thb":200.0,"order_id":"6ad8b30393de9096f7c8fea8bbnbad","fill_price":0.04978,"rebuy":false,"gc_priority":true,"pool_after":2.55}
+{"at":"2026-10-21T13:29:42.224306+00:00","kind":"sell","coin":"IOST","reason":"take_profit","pnl_pct":9.02,"proceeds_thb":217.8385,"invested_thb":200.0,"sell_price":0.05422,"back_to_pool":217.8385}
+{"at":"2026-10-21T13:29:42.725783+00:00","kind":"rebuy_skipped","coin":"NEAR","reason":"เพิ่งขายไป 5 ชม. (ต้องรอครบ 24 ชม.)"}
+{"at":"2026-10-21T13:29:42.725808+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"ผันผวน 5.30% เกิน 3.0%"}
+{"at":"2026-10-21T13:29:42.725816+00:00","kind":"rebuy_skipped","coin":"IOST","reason":"รอผลวิเคราะห์รอบใหม่หลังขาย"}
+{"at":"2026-10-21T13:29:45.141000+00:00","kind":"buy","coin":"OP","thb":200.0,"order_id":"6ad8be47f8994b5804c2fdfc2e9v48","fill_price":4.366,"rebuy":false,"gc_priority":false,"pool_after":20.39}
+{"at":"2026-10-21T13:29:46.515624+00:00","kind":"buy_failed","coin":"XRP","error":"Bitkub error code 18: {'error': 18}"}

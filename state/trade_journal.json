@@ -1031,6 +1031,42 @@
           "analysed_at": "2026-10-21T12:41:06.525955+00:00"
         }
       },
+      "status": "closed",
+      "closed_at": "2026-10-21T13:29:42.225013+00:00",
+      "exit_reason": "take_profit",
+      "exit_price": 0.05422,
+      "proceeds_thb": 217.8385,
+      "pnl_thb": 17.8385,
+      "pnl_pct": 8.919,
+      "position_pnl_pct_at_trigger": 9.02,
+      "win": true
+    },
+    {
+      "lot_id": "6ad8be47f8994b5804c2fdfc2e9v48",
+      "coin": "OP",
+      "opened_at": "2026-10-21T13:29:45.141678+00:00",
+      "invested_thb": 200.0,
+      "fill_price": 4.366,
+      "amount_coin": 45.80852038479158,
+      "rebuy": false,
+      "gc_priority": false,
+      "features": {
+        "coin": {
+          "risk_pct": 2.6116,
+          "signal": "ยังสรุปแนวโน้มไม่ได้",
+          "gap_percent": 0.0683,
+          "change_24h": 3.86,
+          "premium_pct": 0.493,
+          "depth_imbalance": 0.762,
+          "buy_flow_pct": 70.3
+        },
+        "market": {
+          "market_sentiment": 0.26,
+          "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
+          "btc_change_24h": 2.98,
+          "analysed_at": "2026-10-21T13:29:14.858247+00:00"
+        }
+      },
       "status": "open"
     }
   ]

@@ -67,10 +67,10 @@
       "last_bought_date": "2026-10-21"
     },
     "OP": {
-      "total_invested_thb": 0.0,
-      "total_coin": 0.0,
-      "buy_count": 0,
-      "last_bought_date": null
+      "total_invested_thb": 200.0,
+      "total_coin": 45.80852038479158,
+      "buy_count": 1,
+      "last_bought_date": "2026-10-21"
     },
     "XLM": {
       "total_invested_thb": 0.0,
@@ -139,10 +139,10 @@
       "last_bought_date": null
     },
     "IOST": {
-      "total_invested_thb": 200.0,
-      "total_coin": 4017.67778224,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-21"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     }
   },
   "log": [
@@ -449,6 +449,14 @@
       "fill_price": 0.04978,
       "amount_coin": 4017.6777822418644,
       "order_id": "6ad8b30393de9096f7c8fea8bbnbad"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "OP",
+      "invested_thb": 200.0,
+      "fill_price": 4.366,
+      "amount_coin": 45.80852038479158,
+      "order_id": "6ad8be47f8994b5804c2fdfc2e9v48"
     }
   ],
   "sell_log": [
@@ -651,9 +659,19 @@
       "proceeds_thb": 201.35,
       "realized_pnl_thb": 1.35,
       "reason": "rebalance"
+    },
+    {
+      "date": "2026-10-21",
+      "name": "IOST",
+      "sold_coin": 4017.67778224,
+      "sell_price": 0.05422,
+      "invested_thb": 200.0,
+      "proceeds_thb": 217.84,
+      "realized_pnl_thb": 17.84,
+      "reason": "take_profit"
     }
   ],
-  "realized_pnl_total_thb": -14.94,
+  "realized_pnl_total_thb": 2.9,
   "last_summary_date": "2026-10-17",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -662,8 +680,8 @@
       "BTC",
       "SOL",
       "ETH",
-      "XRP",
       "DOGE",
+      "XRP",
       "OP",
       "CRV",
       "NEAR",
@@ -677,7 +695,7 @@
       "DOGE": true,
       "ETH": true,
       "CRV": true,
-      "IOST": true
+      "OP": true
     },
     "sold": {
       "ADA": {
@@ -699,21 +717,25 @@
       "NEAR": {
         "reason": "take_profit",
         "at": "2026-10-21T08:50:33.172836+00:00"
+      },
+      "IOST": {
+        "reason": "take_profit",
+        "at": "2026-10-21T13:29:42.224287+00:00"
       }
     }
   },
   "last_errors": {
-    "OP": {
-      "error": "Bitkub error code 18: {'error': 18}",
-      "at": "2026-10-17T09:27:06.668100+00:00"
-    },
     "BR": {
       "error": "Bitkub error code 61: {'error': 61}",
       "at": "2026-10-17T22:39:41.123959+00:00"
+    },
+    "XRP": {
+      "error": "Bitkub error code 18: {'error': 18}",
+      "at": "2026-10-21T13:29:46.515608+00:00"
     }
   },
   "pending_orders": [],
-  "cash_pool_thb": 2.55,
+  "cash_pool_thb": 20.39,
   "profit_reserved_thb": 0.0,
   "unbuyable": {
     "BR": "Bitkub error code 61: {'error': 61}"
@@ -723,10 +745,11 @@
     "WLD": 0.0,
     "EPIC": 0.02777777,
     "NEAR": 0.0,
-    "ADA": 0.03351655
+    "ADA": 0.03351655,
+    "IOST": 0.0
   },
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1501.62
+  "last_equity_thb": 1525.19
 }
