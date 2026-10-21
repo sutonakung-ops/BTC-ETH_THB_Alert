@@ -39,7 +39,7 @@ for cur, c in out["coins"].items():
     sym = f"{cur.lower()}_thb"
     trades, page = [], 1
     while page <= 10:
-        r = _private_request(KEY, SECRET, "GET", "/api/v3/market/my-order-history", query=f"sym={sym}&p={page}&lmt=100")
+        r = _private_request(KEY, SECRET, "GET", "/api/v3/market/my-order-history", query=f"sym={sym}&p={page}&lmt=100&start=1500000000&end=1900000000")
         res = r.get("result") if isinstance(r, dict) else None
         if not isinstance(res, list) or not res:
             if page == 1:
@@ -58,15 +58,16 @@ for cur, c in out["coins"].items():
         amt, rate = float(tr.get("amount") or 0), float(tr.get("rate") or 0)
         fee, credit = float(tr.get("fee") or 0), float(tr.get("credit") or 0)
         cash_fee = max(fee - credit, 0.0)
-        if tr.get("side") == "buy":
+        if tr.get("side") == "buy":  # ฝั่งซื้อ amount = เงินบาทที่จ่าย
             buys += 1
-            coin_held += amt
-            cost += amt * rate + cash_fee
+            coin_held += (amt - cash_fee) / rate if rate else 0
+            cost += amt
         elif tr.get("side") == "sell" and coin_held > 0:
             sells += 1
             frac = min(amt / coin_held, 1.0)
             cost -= cost * frac
             coin_held -= min(amt, coin_held)
+    c["trades"] = [{"ts": t.get("ts"), "side": t.get("side"), "rate": t.get("rate"), "amount": t.get("amount")} for t in trades]
     c.update({"history_trades": len(trades), "buys": buys, "sells": sells,
               "history_coin": round(coin_held, 10), "history_cost_thb": round(cost, 2),
               "avg_cost": round(cost / coin_held, 6) if coin_held > 0 else None,
