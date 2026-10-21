@@ -62,7 +62,7 @@
     },
     "CRV": {
       "total_invested_thb": 200.0,
-      "total_coin": 15.290519877675841,
+      "total_coin": 15.31231585,
       "buy_count": 1,
       "last_bought_date": "2026-10-21"
     },
@@ -140,7 +140,7 @@
     },
     "IOST": {
       "total_invested_thb": 200.0,
-      "total_coin": 4017.6777822418644,
+      "total_coin": 4017.67778224,
       "buy_count": 1,
       "last_bought_date": "2026-10-21"
     }
@@ -723,11 +723,10 @@
     "WLD": 0.0,
     "EPIC": 0.02777777,
     "NEAR": 0.0,
-    "CRV": 0.02179598,
     "ADA": 0.03351655
   },
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1495.63
+  "last_equity_thb": 1501.62
 }
