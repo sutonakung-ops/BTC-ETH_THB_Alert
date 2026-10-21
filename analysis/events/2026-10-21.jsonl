@@ -28,3 +28,7 @@
 {"at":"2026-10-21T08:23:26.813616+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"ผันผวน 5.80% เกิน 3.0%"}
 {"at":"2026-10-21T08:23:26.813628+00:00","kind":"rebuy_skipped","coin":"EPIC","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
 {"at":"2026-10-21T08:50:33.172854+00:00","kind":"sell","coin":"NEAR","reason":"take_profit","pnl_pct":5.221,"proceeds_thb":52.9485,"invested_thb":50.0,"sell_price":176.96,"back_to_pool":50.0}
+{"at":"2026-10-21T09:23:31.519689+00:00","kind":"rebuy_skipped","coin":"XLM","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
+{"at":"2026-10-21T09:23:31.519714+00:00","kind":"rebuy_skipped","coin":"WLD","reason":"ผันผวน 5.72% เกิน 3.0%"}
+{"at":"2026-10-21T09:23:31.519726+00:00","kind":"rebuy_skipped","coin":"NEAR","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
+{"at":"2026-10-21T09:23:31.519732+00:00","kind":"rebuy_skipped","coin":"EPIC","reason":"ไม่มีข้อมูลความเสี่ยงล่าสุด"}
