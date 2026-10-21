@@ -14,7 +14,7 @@
     },
     "XRP": {
       "total_invested_thb": 220.38,
-      "total_coin": 4.864807557397858,
+      "total_coin": 4.86480755,
       "buy_count": 4,
       "last_bought_date": "2026-10-21"
     },
@@ -755,5 +755,5 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1524.43
+  "last_equity_thb": 1519.71
 }
