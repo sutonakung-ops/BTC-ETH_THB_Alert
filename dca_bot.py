@@ -72,6 +72,7 @@ REBUY_MAX_RISK_PCT = 3.0
 # ไม่ได้ตัดเหรียญอื่นทิ้ง แค่เลื่อนขึ้นหน้าแถว — เหรียญ Golden Cross เรียงตามความเสี่ยงน้อย -> มากเหมือนเดิม
 # ไม้ที่ซื้อเพราะ Golden Cross ถูกบันทึกใน journal (gc_priority) เพื่อเทียบ winrate กับวิธีเดิมภายหลัง
 GOLDEN_CROSS_FIRST = True
+GC_PRIORITY_MAX_RISK_PCT = 5.0  # ได้ซื้อก่อนเฉพาะเหรียญ Golden Cross ที่ผันผวน 48 ชม. ไม่เกินนี้ (21 ต.ค. 2569)
 # แจ้ง Telegram เมื่อกำไรที่แยกเก็บไว้ถึงยอดนี้ ให้ผู้ใช้กดถอนเองใน Bitkub (บอทไม่มีสิทธิ์ถอนเงิน — ปลอดภัยกว่า)
 # ถอนแล้วพิมพ์ "ถอน 300" ใน Telegram เพื่อหักออกจากยอดกำไรแยกเก็บ
 PROFIT_WITHDRAW_ALERT_THB = 300
@@ -97,14 +98,14 @@ NEWS_SENTIMENT_WEIGHT = 5.0  # ข่าวบวก/ลบเต็มสเก
 # ขายอัตโนมัติ (ผู้ใช้เลือกให้ใช้ TP/SL ชุดเดียวกับบอทเทรดกับเหรียญ DCA แทนการเปิดไม้ใหม่ด้วยเงินบาท)
 # เทียบราคาปัจจุบันกับทุนเฉลี่ยของแต่ละเหรียญ: กำไรถึง TAKE_PROFIT_PCT หรือขาดทุนถึง STOP_LOSS_PCT
 # ขายเหรียญนั้นทั้งหมดกลับเป็นเงินบาท แล้วเริ่มสะสม DCA ใหม่จากศูนย์ (เหรียญอื่นไม่กระทบ)
-TAKE_PROFIT_PCT = 5.0  # ผู้ใช้ปรับจาก 4% (20 ต.ค. 2569: "TP 5-6%")
-STOP_LOSS_PCT = 15.0  # ผู้ใช้ปรับจาก 5% เป็น 15% (19 ต.ค. 2569)
+TAKE_PROFIT_PCT = 6.0  # ผู้ใช้ปรับ 4% -> 5% (20 ต.ค.) -> 6% (21 ต.ค. 2569)
+STOP_LOSS_PCT = 20.0  # ผู้ใช้ปรับ 5% -> 15% (19 ต.ค.) -> 20% (21 ต.ค. 2569 หลังดูความผันผวนย้อนหลัง 120 วัน)
 # ตัดขาดทุนตามสัญญาณ (ผู้ใช้เลือกทางเลือกที่ 4): ขาดทุนตั้งแต่ CUT_ZONE_PCT ขึ้นไป และแนวโน้ม MA เป็นขาลง
 # (Death Cross) -> ขายเลยไม่ต้องรอถึง STOP_LOSS_PCT / ถ้าแนวโน้มยังไม่ลง ถือรอ (STOP_LOSS_PCT ยังเป็นเพดานเสมอ)
-CUT_ZONE_PCT = 3.0
+CUT_ZONE_PCT = 10.0  # 21 ต.ค. 2569: เปิดกลับ แต่เริ่มที่ขาดทุน 10% (เดิม 3% ขายตรงก้นตอนราคาแค่แกว่ง)
 # ปิดการตัดขาดทุนตามสัญญาณ (ผู้ใช้เลือกทาง ก, 20 ต.ค. 2569): ผลทบทวน 17-19 ต.ค. พบว่ากฎนี้ขายตรงก้น
 # ตอนตลาดลงทั้งกระดานแล้วเด้งกลับ (15 จาก 17 ไม้ที่แพ้) — เหลือแค่ TP 4% และเพดาน SL 15%
-SIGNAL_CUT_ENABLED = False
+SIGNAL_CUT_ENABLED = True  # 21 ต.ค. 2569: ผู้ใช้เปิดกลับ ไว้กันกรณีตลาดร่วงจริง
 
 # ส่งสรุปพอร์ตรวมทาง Telegram ทุกๆ กี่วัน (รายสัปดาห์)
 SUMMARY_INTERVAL_DAYS = 7
@@ -322,8 +323,12 @@ def update_equity(state, ticker):
 
 
 def is_golden_cross(name, dashboard):
-    info = (dashboard or {}).get(name) if isinstance(dashboard, dict) else None
-    return "Golden Cross" in str((info or {}).get("signal", ""))
+    """Golden Cross ที่ได้สิทธิ์ซื้อก่อน: แนวโน้มขาขึ้น และผันผวนไม่เกิน GC_PRIORITY_MAX_RISK_PCT"""
+    info = ((dashboard or {}).get(name) if isinstance(dashboard, dict) else None) or {}
+    if "Golden Cross" not in str(info.get("signal", "")):
+        return False
+    risk = info.get("risk_pct")
+    return risk is not None and risk <= GC_PRIORITY_MAX_RISK_PCT
 
 
 def buy_order(ranking, dashboard):
@@ -939,6 +944,7 @@ def main():
         "max_per_coin_thb": MAX_PER_COIN_THB,
         "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
         "golden_cross_first": GOLDEN_CROSS_FIRST,
+        "gc_priority_max_risk_pct": GC_PRIORITY_MAX_RISK_PCT,
         "unit_thb_per_buy": DCA_UNIT_THB,
         "interval_days": DCA_INTERVAL_DAYS,
         "take_profit_pct": TAKE_PROFIT_PCT,
@@ -968,7 +974,8 @@ def main():
             "unit_thb": DCA_UNIT_THB, "interval_days": DCA_INTERVAL_DAYS,
             "take_profit_pct": TAKE_PROFIT_PCT, "stop_loss_pct": STOP_LOSS_PCT,
             "signal_cut_enabled": SIGNAL_CUT_ENABLED, "cut_zone_pct": CUT_ZONE_PCT,
-            "golden_cross_first": GOLDEN_CROSS_FIRST, "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
+            "golden_cross_first": GOLDEN_CROSS_FIRST, "gc_priority_max_risk_pct": GC_PRIORITY_MAX_RISK_PCT,
+            "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
             "whole_account": WHOLE_ACCOUNT_MODE, "reinvest_profit": REINVEST_PROFIT,
             "max_per_coin_thb": MAX_PER_COIN_THB, "min_order_thb": MIN_ORDER_THB,
             "rebuy_max_risk_pct": REBUY_MAX_RISK_PCT, "rebuy_cooldown_hours": REBUY_COOLDOWN_HOURS,
