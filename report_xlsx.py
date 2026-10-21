@@ -384,14 +384,176 @@ def build(dca_module=None, path=REPORT_FILE):
     return path
 
 
+# ======================= CSV สำหรับ Google Sheets (IMPORTDATA) =======================
+CSV_DIR = "reports/csv"
+REASON_TH = {"take_profit": "ขายทำกำไร (TP)", "stop_loss": "ตัดขาดทุน (SL)", "signal_cut": "ตัดตาม Death Cross",
+             "rebalance": "ปรับสัดส่วน"}
+KIND_TH = {"buy": "ซื้อ", "sell": "ขาย", "buy_failed": "ซื้อไม่สำเร็จ", "rebuy_skipped": "ยังไม่ซื้อกลับ",
+           "hold_in_loss": "ถือรอ (ติดลบ)", "withdraw": "ถอน", "whole_account_start": "เริ่มโหมดทั้งบัญชี",
+           "holding_gone": "เหรียญหายจากบัญชี"}
+
+
+def _t(dt):
+    return dt.strftime("%Y-%m-%d %H:%M") if isinstance(dt, datetime) else ("" if dt is None else dt)
+
+
+def _r(x, n=2):
+    return "" if x is None else round(x, n)
+
+
+def export_csv(m=None, out_dir=CSV_DIR):
+    """เขียนข้อมูลแต่ละแท็บเป็น CSV (ค่าคำนวณแล้ว ไม่มีสูตร) ให้ Google Sheets ดึงด้วย IMPORTDATA"""
+    import csv
+    state = _load("state/dca_state.json", {})
+    journal = _load("state/trade_journal.json", {"lots": []})
+    latest = _load("latest.json", {})
+    g = lambda k, d=None: getattr(m, k, d)
+    now = datetime.now(BKK).replace(tzinfo=None)
+    tables = {}
+
+    holdings = {n: h for n, h in (state.get("holdings") or {}).items() if (h or {}).get("total_coin", 0) > 0}
+    tp, sl, cz = (g("TAKE_PROFIT_PCT", 6.0) or 0) / 100, (g("STOP_LOSS_PCT", 20.0) or 0) / 100, (g("CUT_ZONE_PCT", 10.0) or 0) / 100
+    hrows, value_now = [], 0.0
+    for n, h in sorted(holdings.items(), key=lambda kv: -kv[1]["total_invested_thb"]):
+        info = latest.get(n) or {}
+        avg = h["total_invested_thb"] / h["total_coin"]
+        px = info.get("price")
+        val = h["total_coin"] * px if px else None
+        value_now += val or 0.0
+        hrows.append([n, _r(h["total_invested_thb"]), h["total_coin"], _r(avg, 6), px, _r(val),
+                      _r(val - h["total_invested_thb"]) if val is not None else "",
+                      _r((val / h["total_invested_thb"] - 1) * 100) if val is not None else "",
+                      info.get("signal") or "", info.get("risk_pct"), _r(avg * (1 + tp), 6), _r(avg * (1 - cz), 6),
+                      _r(avg * (1 - sl), 6), h.get("buy_count"), h.get("last_bought_date") or ""])
+    tables["holdings"] = (["เหรียญ", "ทุน (บาท)", "จำนวนเหรียญ", "ทุนเฉลี่ย/เหรียญ", "ราคาล่าสุด", "มูลค่า (บาท)",
+                           "กำไร/ขาดทุน (บาท)", "กำไร/ขาดทุน (%)", "แนวโน้ม", "ผันผวน 48 ชม. (%)",
+                           f"ราคา TP (+{tp*100:.0f}%)", f"ราคาเริ่มตัด DC (-{cz*100:.0f}%)", f"ราคา SL (-{sl*100:.0f}%)",
+                           "ซื้อกี่ครั้ง", "ซื้อล่าสุด"], hrows)
+
+    pool = state.get("cash_pool_thb", 0.0)
+    capital = state.get("capital_thb")
+    equity = value_now + pool
+    closed = [l for l in journal.get("lots", []) if l.get("status") == "closed" and l.get("pnl_pct") is not None]
+    wins = [l for l in closed if l.get("win")]
+    sells = state.get("sell_log") or []
+    since = state.get("whole_account_since")
+    closed_new = [l for l in closed if since and (l.get("closed_at") or "") >= since]
+    tables["overview"] = (["รายการ", "ค่า"], [
+        ["อัปเดตล่าสุด (เวลาไทย)", _t(now)],
+        ["ทุนทั้งบัญชี (บาท)", _r(capital)],
+        ["มูลค่าเหรียญตอนนี้ (บาท)", _r(value_now)],
+        ["เงินบาทในกอง (บาท)", _r(pool)],
+        ["มูลค่าทั้งบัญชี (บาท)", _r(equity)],
+        ["กำไร/ขาดทุนเทียบทุน (บาท)", _r(equity - capital) if capital else ""],
+        ["กำไร/ขาดทุนเทียบทุน (%)", _r((equity / capital - 1) * 100) if capital else ""],
+        ["แจ้งถอนเมื่อกำไรถึง (บาท)", g("PROFIT_WITHDRAW_ALERT_THB", 300)],
+        ["กำไรที่ขายแล้วสะสม ตั้งแต่เริ่มบอท (บาท)", _r(state.get("realized_pnl_total_thb", 0.0))],
+        ["ถอนออกสะสม (บาท)", _r(state.get("withdrawn_total_thb", 0.0))],
+        ["ไม้ที่ปิดแล้ว (ทั้งหมด)", len(closed)],
+        ["Winrate ทั้งหมด (%)", _r(len(wins) / len(closed) * 100, 1) if closed else ""],
+        ["ไม้ที่ปิดแล้ว (กติกาปัจจุบัน ตั้งแต่โหมดทั้งบัญชี)", len(closed_new)],
+        ["Winrate กติกาปัจจุบัน (%)", _r(sum(1 for l in closed_new if l.get("win")) / len(closed_new) * 100, 1) if closed_new else ""],
+        ["จำนวนครั้งที่ขาย (ทั้งหมด)", len(sells)],
+        ["เหรียญที่ถืออยู่", len(holdings)],
+        ["TP / ตัดตาม DC / SL (%)", f"+{g('TAKE_PROFIT_PCT')} / -{g('CUT_ZONE_PCT')} (เมื่อ Death Cross) / -{g('STOP_LOSS_PCT')}"],
+    ])
+
+    tables["rules"] = (["กลุ่ม", "กติกา", "รายละเอียด"], [
+        ["ขาย", "TP (ขายทำกำไร)", f"+{g('TAKE_PROFIT_PCT')}% จากทุนเฉลี่ย → ขายทั้งหมด"],
+        ["ขาย", "ตัดตาม Death Cross", (f"ขาดทุนเกิน {g('CUT_ZONE_PCT')}% และ MA12 ต่ำกว่า MA24 (กราฟรายชั่วโมง)"
+                                       if g("SIGNAL_CUT_ENABLED") else "ปิดอยู่")],
+        ["ขาย", "SL (ขายแน่นอน)", f"-{g('STOP_LOSS_PCT')}% จากทุนเฉลี่ย"],
+        ["ซื้อ", "เลือกเหรียญ", "10 อันดับแรกตามมูลค่าซื้อขาย 24 ชม. บน Bitkub + BTC/ETH เสมอ · ตัดเหรียญที่ซื้อผ่าน API ไม่ได้"],
+        ["ซื้อ", "ลำดับซื้อ", f"Golden Cross ที่ผันผวน ≤ {g('GC_PRIORITY_MAX_RISK_PCT')}% ได้ก่อน → ที่เหลือเรียงผันผวน 48 ชม. น้อยไปมาก"],
+        ["ซื้อ", "ขนาดซื้อ", f"เติมแต่ละเหรียญให้ทุนครบ {g('DCA_UNIT_THB')} บาท · ครบทุกตัวแล้วซื้อซ้ำได้ถึง {g('MAX_PER_COIN_THB')} บาท · ขั้นต่ำ {g('MIN_ORDER_THB')} บาท"],
+        ["ซื้อ", "ซื้อกลับหลังขาย", f"รอ {g('REBUY_COOLDOWN_HOURS')} ชม. + Golden Cross + ผันผวน ≤ {g('REBUY_MAX_RISK_PCT')}%"],
+        ["จังหวะ", "รอบทำงาน", "จัดลำดับใหม่ทุกชั่วโมง · เช็คราคาและซื้อขายทุก 1 นาที"],
+        ["เงิน", "กองเงิน", "ทั้งบัญชี: เงินบาทในบัญชี = กองเงินบอท · กำไรทบลงทุนต่อ" if g("WHOLE_ACCOUNT_MODE") else "กองเงินแยก"],
+        ["เงิน", "แจ้งถอน", f"พอร์ตโตเกินทุน {g('PROFIT_WITHDRAW_ALERT_THB')} บาท → แจ้ง Telegram (ถอนเองในแอป แล้วพิมพ์ \"ถอน X\")"],
+        ["บันทึก", "ยังไม่ใช้ตัดสินใจ", "premium · ความหนากระดาน · แรงซื้อ 200 รายการล่าสุด · ราคา 24 ชม. · แนวโน้ม BTC (รอพิสูจน์ ~30 ไม้)"],
+    ])
+
+    brow = []
+    for l in sorted(journal.get("lots", []), key=lambda x: x.get("opened_at") or "", reverse=True):
+        f = ((l.get("features") or {}).get("coin") or {})
+        brow.append([_t(_bkk(l.get("opened_at"))), l.get("coin"), l.get("invested_thb"), l.get("fill_price"),
+                     "ปิดแล้ว" if l.get("status") == "closed" else "ถืออยู่", _t(_bkk(l.get("closed_at"))),
+                     REASON_TH.get(l.get("exit_reason"), l.get("exit_reason") or ""), l.get("exit_price") or "",
+                     _r(l.get("proceeds_thb")), _r(l.get("pnl_thb")), _r(l.get("pnl_pct")), f.get("signal") or "",
+                     f.get("risk_pct") or "", f.get("premium_pct") or "", f.get("depth_imbalance") or "",
+                     f.get("buy_flow_pct") or "", "ใช่" if l.get("gc_priority") else "", "ใช่" if l.get("rebuy") else "",
+                     l.get("note") or ""])
+    tables["buys"] = (["ซื้อเมื่อ", "เหรียญ", "ทุน (บาท)", "ราคาซื้อ", "สถานะ", "ปิดเมื่อ", "เหตุผลขาย", "ราคาขาย",
+                       "ได้คืน (บาท)", "กำไร/ขาดทุน (บาท)", "กำไร/ขาดทุน (%)", "แนวโน้มตอนซื้อ", "ผันผวน (%)",
+                       "premium (%)", "ความหนากระดาน", "แรงซื้อ (%)", "GC ได้ก่อน", "ซื้อกลับ", "หมายเหตุ"], brow)
+
+    tables["sells"] = (["วันที่", "เหรียญ", "เหตุผล", "จำนวนเหรียญ", "ราคาขาย", "ทุน (บาท)", "ได้คืน (บาท)",
+                        "กำไร/ขาดทุน (บาท)", "กำไร/ขาดทุน (%)"],
+                       [[s.get("date"), s.get("name"), REASON_TH.get(s.get("reason"), s.get("reason")), s.get("sold_coin"),
+                         s.get("sell_price"), s.get("invested_thb"), s.get("proceeds_thb"), s.get("realized_pnl_thb"),
+                         _r(s["realized_pnl_thb"] / s["invested_thb"] * 100) if s.get("invested_thb") else ""]
+                        for s in reversed(sells)])
+
+    by_coin = defaultdict(lambda: [0, 0, 0.0, 0.0])
+    by_day = OrderedDict()
+    for s in sells:
+        pnl = s.get("realized_pnl_thb") or 0.0
+        bc = by_coin[s.get("name")]
+        bc[0] += 1; bc[1] += 1 if pnl > 0 else 0; bc[2] += s.get("invested_thb") or 0.0; bc[3] += pnl
+        by_day[s.get("date")] = by_day.get(s.get("date"), 0.0) + pnl
+    tables["pnl_coin"] = (["เหรียญ", "ขายกี่ครั้ง", "ชนะ", "ทุนรวมที่ขาย (บาท)", "กำไร/ขาดทุนรวม (บาท)"],
+                          [[k, v[0], v[1], _r(v[2]), _r(v[3])] for k, v in sorted(by_coin.items(), key=lambda kv: -kv[1][3])])
+    cum, drows = 0.0, []
+    for k, v in by_day.items():
+        cum += v
+        drows.append([k, _r(v), _r(cum)])
+    tables["pnl_day"] = (["วันที่", "กำไร/ขาดทุนของวัน (บาท)", "สะสม (บาท)"], drows)
+
+    eq = [e for e in _jsonl("analysis/backfill/equity.jsonl") + _jsonl("analysis/equity.jsonl")
+          if e.get("total_equity_thb") is not None]
+    eq.sort(key=lambda e: e.get("at") or "")
+    erows = []
+    for e in eq:
+        cap = e.get("capital_thb") or BOT_CAPITAL_BEFORE_WHOLE_THB
+        erows.append([_t(_bkk(e.get("at"))), e["total_equity_thb"], cap, _r(e["total_equity_thb"] - cap),
+                      e.get("holdings_value_thb"), e.get("cash_pool_thb")])
+    tables["equity"] = (["เวลา", "มูลค่ารวม (บาท)", "ทุน (บาท)", "กำไร/ขาดทุนเทียบทุน (บาท)", "มูลค่าเหรียญ (บาท)",
+                         "เงินในกอง (บาท)"], erows)
+
+    evs = []
+    for fpath in sorted(glob.glob("analysis/events/*.jsonl")):
+        evs += _jsonl(fpath)
+    evs = [e for e in evs if e.get("kind") != "hold_in_loss"][-1000:]
+    tables["events"] = (["เวลา", "เหตุการณ์", "เหรียญ", "เหตุผล", "บาท", "รายละเอียด"],
+                        [[_t(_bkk(e.get("at"))), KIND_TH.get(e.get("kind"), e.get("kind")), e.get("coin") or "",
+                          e.get("reason") or "", e.get("thb") or e.get("proceeds_thb") or "",
+                          json.dumps({k: v for k, v in e.items() if k not in ("at", "kind", "coin")}, ensure_ascii=False)]
+                         for e in reversed(evs)])
+
+    os.makedirs(out_dir, exist_ok=True)
+    for name, (headers, rows) in tables.items():
+        tmp = f"{out_dir}/{name}.csv.tmp"
+        with open(tmp, "w", encoding="utf-8", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(headers)
+            w.writerows(rows)
+        os.replace(tmp, f"{out_dir}/{name}.csv")
+    return sorted(tables)
+
+
 def safe_build(dca_module=None):
+    path = None
     try:
-        return build(dca_module)
+        path = build(dca_module)
     except Exception as e:  # noqa: BLE001 — รายงานพังต้องไม่ทำให้บอทหยุดเทรด
         print(f"สร้างไฟล์ Excel ไม่สำเร็จ: {e}")
-        return None
+    try:
+        export_csv(dca_module)
+    except Exception as e:  # noqa: BLE001
+        print(f"สร้างไฟล์ CSV ไม่สำเร็จ: {e}")
+    return path
 
 
 if __name__ == "__main__":
     import dca_bot  # noqa: F401
-    print(build(dca_bot))
+    print(safe_build(dca_bot))
