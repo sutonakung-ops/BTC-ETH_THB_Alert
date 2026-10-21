@@ -24,6 +24,7 @@ import requests
 import crypto_alert
 import analysis_log
 import dca_bot
+import report_xlsx
 import trade_journal
 
 WATCH_MINUTES = float(os.environ.get("WATCH_MINUTES", "50"))
@@ -33,7 +34,7 @@ INTERVAL_SECONDS = 60
 def git_commit_push(message):
     files = [dca_bot.DCA_STATE_FILE, dca_bot.REBALANCE_FILE, crypto_alert.CONTROL_FILE, dca_bot.DEPOSIT_INBOX_FILE,
              crypto_alert.TG_OFFSET_FILE, crypto_alert.COMMANDS_FILE, trade_journal.JOURNAL_FILE]
-    existing = [f for f in files if os.path.exists(f)] + (["analysis"] if os.path.isdir("analysis") else []) + ["state"]
+    existing = [f for f in files if os.path.exists(f)] + (["analysis"] if os.path.isdir("analysis") else []) + ["state"] + (["reports"] if os.path.isdir("reports") else [])
     subprocess.run(["git", "add", *existing], check=False)
     if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
         return
@@ -108,6 +109,7 @@ def main():
         rounds += 1
         try:
             if check_once():
+                report_xlsx.safe_build(dca_bot)
                 git_commit_push(f"Price watch update {datetime.now(timezone.utc).strftime('%H:%M')}")
         except Exception as e:  # noqa: BLE001 — รอบใดรอบหนึ่งพัง อย่าให้หยุดเฝ้าทั้งชั่วโมง
             print(f"รอบที่ {rounds} ผิดพลาด: {e}")

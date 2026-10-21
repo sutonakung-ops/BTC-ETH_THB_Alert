@@ -985,6 +985,14 @@ def main():
     except Exception as e:  # noqa: BLE001 — การบันทึกพังต้องไม่ทำให้บอทหยุด
         print(f"บันทึกข้อมูลวิเคราะห์ไม่สำเร็จ: {e}")
 
+    # ---- ไฟล์ Excel รวมข้อมูลทั้งหมด (reports/steady_stack.xlsx) ----
+    try:
+        import sys
+        import report_xlsx
+        report_xlsx.safe_build(sys.modules[__name__])
+    except ImportError as e:
+        print(f"ข้ามการสร้างไฟล์ Excel: {e}")
+
     print("dca_bot: ทำงานเสร็จสิ้น")
 
 
