@@ -1,0 +1,127 @@
+{
+  "at": "2026-10-21T12:22:21.340790+00:00",
+  "thb": {
+    "total": 408.03,
+    "available": 408.03
+  },
+  "coins": {
+    "ADA": {
+      "total": 0.03351655,
+      "price": 7.587,
+      "value_thb": 0.25
+    },
+    "EPIC": {
+      "total": 0.02777777,
+      "price": 5.841,
+      "value_thb": 0.16
+    },
+    "XRP": {
+      "total": 1.15014752,
+      "price": 45.58,
+      "value_thb": 52.42,
+      "history_trades": 4,
+      "buys": 3,
+      "sells": 1,
+      "history_coin": 147.72050353,
+      "history_cost_thb": 6461.0,
+      "avg_cost": 43.738004,
+      "unexplained_coin": -146.57035601
+    },
+    "LUNA2": {
+      "total": 0.15659905,
+      "price": 0.0,
+      "value_thb": 0.0
+    },
+    "DON": {
+      "total": 0.00537043,
+      "price": 0.0,
+      "value_thb": 0.0
+    },
+    "XLM": {
+      "total": 0.08344462,
+      "price": 6.2,
+      "value_thb": 0.52
+    },
+    "DOGE": {
+      "total": 18.94177167,
+      "price": 2.7546,
+      "value_thb": 52.18,
+      "history_trades": 6,
+      "buys": 4,
+      "sells": 2,
+      "history_coin": 144.08375679,
+      "history_cost_thb": 384.57,
+      "avg_cost": 2.669092,
+      "unexplained_coin": -125.14198512
+    },
+    "ETH": {
+      "total": 0.00218491,
+      "price": 82912.35,
+      "value_thb": 181.16,
+      "history_trades": 7,
+      "buys": 5,
+      "sells": 2,
+      "history_coin": 449.69679634,
+      "history_cost_thb": 37614322.36,
+      "avg_cost": 83643.740989,
+      "unexplained_coin": -449.69461143
+    },
+    "SOL": {
+      "total": 0.01432111,
+      "price": 3596.45,
+      "value_thb": 51.51,
+      "history_trades": 6,
+      "buys": 4,
+      "sells": 2,
+      "history_coin": 199.95719942,
+      "history_cost_thb": 700134.65,
+      "avg_cost": 3501.422569,
+      "unexplained_coin": -199.94287831
+    },
+    "CRV": {
+      "total": 0.02179598,
+      "price": 13.06,
+      "value_thb": 0.28
+    },
+    "BTC": {
+      "total": 8.74e-05,
+      "price": 2804332.39,
+      "value_thb": 245.1,
+      "history_trades": 5,
+      "buys": 4,
+      "sells": 1,
+      "history_coin": 379.93995013,
+      "history_cost_thb": 1051691405.27,
+      "avg_cost": 2768046.384467,
+      "unexplained_coin": -379.93986273
+    }
+  },
+  "debug": {
+    "sample": {
+      "txn_id": "6ad58bf8626893cb4156740es5oh6d",
+      "order_id": "6ad58bf791ca2ff15db800c8s5oh6d",
+      "parent_order_id": "6ad58bf791ca2ff15db800c8s5oh6d",
+      "super_order_id": "6ad58bf791ca2ff15db800c8s5oh6d",
+      "client_id": "",
+      "taken_by_me": false,
+      "is_maker": false,
+      "side": "buy",
+      "type": "market",
+      "rate": "43.91",
+      "fee": "0.13",
+      "credit": "0.13",
+      "amount": "50",
+      "ts": 1792379896032
+    },
+    "fiat_deposit": {
+      "error": 404,
+      "rows": null,
+      "keys": null
+    },
+    "fiat_withdraw": {
+      "error": 404,
+      "rows": null,
+      "keys": null
+    }
+  }
+}
