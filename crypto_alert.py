@@ -163,7 +163,7 @@ def analyze_trend(name, symbol, market_sentiment):
         print(f"{name}: เส้นยังชิดกันเกินไป ยังสรุปแนวโน้มไม่ได้")
 
     return {
-        "price": round(current_price, 2),
+        "price": round(current_price, 2) if current_price >= 100 else round(current_price, 6),  # เหรียญราคาต่ำ ปัดแค่ 2 ตำแหน่งจะเพี้ยนมาก
         "ma12": round(ma12, 2),
         "ma24": round(ma24, 2),
         "gap_percent": round(gap_percent, 4),
