@@ -71,10 +71,11 @@ def backfill_from_state(journal, state):
 
 
 def record_buy(journal, name, order_id, invested_thb, fill_price, amount_coin, dashboard, rebuy=False,
-               gc_priority=False):
+               gc_priority=False, pool="main"):
     journal["lots"].append({
         "lot_id": order_id, "coin": name, "opened_at": _now(), "invested_thb": invested_thb,
         "fill_price": fill_price, "amount_coin": amount_coin, "rebuy": rebuy, "gc_priority": gc_priority,
+        "pool": pool,
         "features": snapshot_features(name, dashboard), "status": "open",
     })
 
@@ -86,8 +87,10 @@ def record_fill(journal, order_id, fill_price, amount_coin):
             lot["fill_price"], lot["amount_coin"] = fill_price, amount_coin
 
 
-def record_close(journal, name, sell_price, proceeds_thb, reason, pnl_pct_at_trigger):
-    lots = [l for l in journal["lots"] if l["coin"] == name and l["status"] == "open"]
+def record_close(journal, name, sell_price, proceeds_thb, reason, pnl_pct_at_trigger, pool="main"):
+    """ปิดทุกไม้ที่เปิดอยู่ของเหรียญนี้ในกองเดียวกัน (main = DCA ปกติ, dip = กองช้อนซื้อ)"""
+    lots = [l for l in journal["lots"] if l["coin"] == name and l["status"] == "open"
+            and (l.get("pool") or "main") == pool]
     total_coin = sum(l.get("amount_coin") or 0 for l in lots)
     for lot in lots:
         share = (lot.get("amount_coin") or 0) / total_coin if total_coin else 1 / len(lots)

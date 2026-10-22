@@ -50,7 +50,8 @@ def git_commit_push(message):
 def snapshot(state):
     return json.dumps(
         {k: state.get(k) for k in ("holdings", "cash_pool_thb", "profit_reserved_thb", "pending_orders", "dca_cycle",
-                                    "withdrawn_total_thb", "withdraw_alert_sent", "capital_thb")},
+                                    "withdrawn_total_thb", "withdraw_alert_sent", "capital_thb",
+                                    "dip_positions")},
         sort_keys=True, ensure_ascii=False,
     )
 
@@ -88,6 +89,7 @@ def check_once():
         if isinstance(ticker, dict) and ticker:
             dca_bot.run_rebalance(state, ticker, today)
             dca_bot.run_take_profit_stop_loss(state, ticker, today, dashboard)
+            dca_bot.run_dip(state, ticker, today, dashboard)
             cycle = state.get("dca_cycle")
             if cycle and state.get("cash_pool_thb", 0) >= dca_bot.MIN_ORDER_THB:
                 dca_bot.run_buys(state, cycle, today, dashboard)

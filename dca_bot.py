@@ -80,6 +80,18 @@ WITHDRAW_ALERT_RESET_THB = 250  # แจ้งแล้ว ต้องลดล
 # ทั้งบัญชีเป็นกองเงินบอท (ผู้ใช้สั่ง 21 ต.ค. 2569): เงินบาทในบัญชีทั้งหมด = กองเงินบอท (อ่านจาก Bitkub ทุกรอบ)
 # และทุกเหรียญในบัญชีอยู่ใต้กติกา TP/SL รวมถึงเหรียญที่ผู้ใช้ซื้อเองก่อนหน้า (ใช้ทุนจริงตาม EXTERNAL_HOLDINGS)
 WHOLE_ACCOUNT_MODE = True
+# กองช้อนซื้อช่วงขาลง (ผู้ใช้ขอ 22 ต.ค. 2569) — Bitkub ไม่มี Short/Futures จึงกันเงินสดไว้ช้อนซื้อตอนร่วงแรง ขายตอนเด้ง
+# เป้ากอง = DIP_RESERVE_PCT% ของทุนทั้งบัญชี · เติมกองจากเงินที่ได้คืนตอนขาย (ไม่ขายเหรียญที่ถืออยู่เพื่อสร้างกอง)
+# ซื้อเมื่อราคาต่ำกว่าจุดสูงสุด 72 ชม. ตั้งแต่ DIP_DROP_PCT% · ขายที่ +DIP_TP_PCT% หรือ -DIP_SL_PCT% จากราคาที่ช้อน
+# ทดสอบย้อนหลัง 120 วัน (13 เหรียญ, กราฟรายชั่วโมง Bitkub): ชนะ 89% ถือเฉลี่ย 5 วัน
+DIP_ENABLED = True
+DIP_RESERVE_PCT = 30.0
+DIP_DROP_PCT = 10.0
+DIP_TP_PCT = 6.0
+DIP_SL_PCT = 20.0
+DIP_UNIT_THB = 200
+DIP_MIN_ORDER_THB = 100  # เงินในกองช้อนต่ำกว่านี้ยังไม่ช้อน (รอสะสมก่อน)
+DIP_COOLDOWN_HOURS = 24  # ขายไม้ช้อนของเหรียญไหนแล้ว รอเท่านี้ก่อนช้อนเหรียญนั้นใหม่
 REINVEST_PROFIT = True  # ขายได้กำไร -> เงินทั้งหมดกลับเข้ากองไปซื้อต่อ (ไม่แยกเก็บกำไรแล้ว)
 EXTERNAL_HOLDINGS = {  # เหรียญที่ผู้ใช้ซื้อเองนอกบอท (จากประวัติเทรดในแอป Bitkub ที่ผู้ใช้ส่งมา)
     "BTC": {"coin": 0.00005077, "cost_thb": 139.98, "bought": "2026-10-08", "price": 2757000.0},
@@ -275,7 +287,8 @@ def _sync_from_wallet(state, wallet):
     pending = {po["name"] for po in state.get("pending_orders", [])}
     for name, h in state["holdings"].items():
         if h.get("total_coin", 0) > 0 and name not in pending and name in wallet:
-            h["total_coin"] = wallet[name]["total"]
+            dip_coin = ((state.get("dip_positions") or {}).get(name) or {}).get("coin", 0.0)
+            h["total_coin"] = max(wallet[name]["total"] - dip_coin, 0.0)
             (state.get("dust") or {}).pop(name, None)  # เศษรวมอยู่ในยอดจริงแล้ว
             if h["total_coin"] <= 0:  # เหรียญหายจากบัญชี (เช่น ผู้ใช้ขายเอง) — เริ่มนับทุนใหม่
                 analysis_log.event("holding_gone", name, invested_thb=h["total_invested_thb"])
@@ -306,6 +319,9 @@ def update_equity(state, ticker):
         if h.get("total_coin", 0) > 0:
             t = ticker.get(trade_symbol_of(name)) or {}
             value += h["total_coin"] * float(t.get("last") or 0)
+    for name, d in (state.get("dip_positions") or {}).items():
+        t = ticker.get(trade_symbol_of(name)) or {}
+        value += d.get("coin", 0.0) * float(t.get("last") or 0)
     equity = round(state.get("cash_pool_thb", 0.0) + value, 2)
     state["last_equity_thb"] = equity
     if not state.get("capital_thb"):
@@ -450,10 +466,16 @@ def reconcile_pending_orders(state, today):
             still.append(po)
             continue
         name = po["name"]
-        h = state["holdings"].setdefault(
-            name, {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None}
-        )
-        h["total_coin"] = h["total_coin"] + fill["coin"]
+        if po.get("pool") == "dip":
+            d = (state.get("dip_positions") or {}).get(name)
+            if d is not None:
+                d["coin"] = d.get("coin", 0.0) + fill["coin"]
+                d["entry_price"] = fill["rate"]
+        else:
+            h = state["holdings"].setdefault(
+                name, {"total_invested_thb": 0.0, "total_coin": 0.0, "buy_count": 0, "last_bought_date": None}
+            )
+            h["total_coin"] = h["total_coin"] + fill["coin"]
         journal = load_journal(state)
         trade_journal.record_fill(journal, po["order_id"], fill["rate"], fill["coin"])
         trade_journal.save(journal)
@@ -648,6 +670,111 @@ def rebuy_check(name, dashboard_so_far, sold_at=None):
     return True, f"ผันผวน {risk_pct:.2f}% แนวโน้มขาขึ้น"
 
 
+def dip_reserve_cash(state):
+    """เงินสดที่ต้องกันไว้ให้กองช้อน = เป้ากอง - ทุนที่ช้อนค้างอยู่ (ไม่ติดลบ, ไม่เกินเงินในกอง)"""
+    if not DIP_ENABLED or not state.get("capital_thb"):
+        return 0.0
+    target = state["capital_thb"] * DIP_RESERVE_PCT / 100
+    in_dips = sum(d.get("invested_thb", 0.0) for d in (state.get("dip_positions") or {}).values())
+    return round(min(max(target - in_dips, 0.0), state.get("cash_pool_thb", 0.0)), 2)
+
+
+def run_dip(state, ticker, today, dashboard):
+    """กองช้อนซื้อ: ขายไม้ที่ถึง TP/SL ก่อน แล้วช้อนเหรียญที่ร่วงจากจุดสูง 72 ชม. ถึงเกณฑ์"""
+    if not DIP_ENABLED or not isinstance(ticker, dict) or not ticker:
+        return
+    dips = state.setdefault("dip_positions", {})
+    pending = {po["name"] for po in state.get("pending_orders", [])}
+    # ---- ขาย ----
+    for name in list(dips):
+        d = dips[name]
+        if name in pending or d.get("coin", 0) <= 0:
+            continue
+        px = float((ticker.get(trade_symbol_of(name)) or {}).get("last") or 0)
+        if not px:
+            continue
+        entry = d["invested_thb"] / d["coin"]
+        pnl_pct = (px / entry - 1) * 100
+        if pnl_pct >= DIP_TP_PCT:
+            reason = "dip_take_profit"
+        elif pnl_pct <= -DIP_SL_PCT:
+            reason = "dip_stop_loss"
+        else:
+            continue
+        outcome = execute_sell(trade_symbol_of(name), d["coin"], fallback_price=px)
+        if not outcome["ok"]:
+            print(f"{name} (กองช้อน): ขายไม่สำเร็จ — {outcome['error']}")
+            continue
+        pnl = outcome["proceeds_thb"] - d["invested_thb"]
+        state["cash_pool_thb"] = round(state.get("cash_pool_thb", 0.0) + outcome["proceeds_thb"], 2)
+        state["realized_pnl_total_thb"] = round(state.get("realized_pnl_total_thb", 0.0) + pnl, 2)
+        state.setdefault("sell_log", []).append({
+            "date": today, "name": name, "sold_coin": outcome.get("sold_coin", d["coin"]),
+            "sell_price": outcome["sell_price"], "invested_thb": d["invested_thb"],
+            "proceeds_thb": round(outcome["proceeds_thb"], 2), "realized_pnl_thb": round(pnl, 2), "reason": reason})
+        analysis_log.event("sell", name, reason=reason, pnl_pct=round(pnl_pct, 3),
+                           proceeds_thb=round(outcome["proceeds_thb"], 4), invested_thb=d["invested_thb"],
+                           sell_price=outcome["sell_price"], pool="dip")
+        journal = load_journal(state)
+        trade_journal.record_close(journal, name, outcome["sell_price"], outcome["proceeds_thb"], reason, pnl_pct, pool="dip")
+        trade_journal.save(journal)
+        state.setdefault("dip_cooldown", {})[name] = datetime.now(timezone.utc).isoformat()
+        del dips[name]
+        head = "🎯 ขายไม้ช้อนทำกำไร" if reason == "dip_take_profit" else "🛑 ตัดขาดทุนไม้ช้อน"
+        send_telegram(f"{head} {name} ({pnl_pct:+.1f}%)\nทุน {d['invested_thb']:.2f} → ได้คืน {outcome['proceeds_thb']:.2f} บาท "
+                      f"({pnl:+.2f})\nเงินกลับเข้ากองช้อน (เกินเป้ากองจะไปซื้อตามลำดับปกติ)")
+    # ---- ช้อน ----
+    cash = dip_reserve_cash(state)
+    lines = []
+    candidates = []
+    for name, info in (dashboard or {}).items():
+        if not isinstance(info, dict) or not info.get("high_72h") or name in dips or name in pending:
+            continue
+        if name in state.get("unbuyable", {}):
+            continue
+        cd = (state.get("dip_cooldown") or {}).get(name)
+        if cd:
+            try:
+                if datetime.now(timezone.utc) - datetime.fromisoformat(cd) < timedelta(hours=DIP_COOLDOWN_HOURS):
+                    continue
+            except ValueError:
+                pass
+        px = float((ticker.get(trade_symbol_of(name)) or {}).get("last") or 0)
+        if not px:
+            continue
+        drop = (1 - px / float(info["high_72h"])) * 100
+        if drop >= DIP_DROP_PCT:
+            candidates.append((drop, name, px, info))
+    for drop, name, px, info in sorted(candidates, reverse=True):  # ร่วงลึกสุดก่อน
+        amt = int(min(DIP_UNIT_THB, cash) * 100) / 100
+        if amt < DIP_MIN_ORDER_THB:
+            break
+        outcome = execute_buy(trade_symbol_of(name), amt)
+        if not outcome["ok"]:
+            analysis_log.event("buy_failed", name, error=outcome["error"], pool="dip")
+            if "error code 18" in outcome["error"]:
+                break
+            continue
+        dips[name] = {"invested_thb": amt, "coin": 0.0 if outcome.get("pending") else outcome["amount_coin"],
+                      "entry_price": outcome.get("fill_price"), "bought_at": datetime.now(timezone.utc).isoformat(),
+                      "high_72h": info["high_72h"], "drop_pct": round(drop, 2)}
+        if outcome.get("pending"):
+            state["pending_orders"].append({"name": name, "sym": outcome["sym"], "order_id": outcome["order_id"],
+                                            "side": "buy", "amt_thb": amt, "date": today, "pool": "dip"})
+        state["cash_pool_thb"] = round(state["cash_pool_thb"] - amt, 2)
+        cash = round(cash - amt, 2)
+        journal = load_journal(state)
+        trade_journal.record_buy(journal, name, outcome["order_id"], amt, outcome.get("fill_price"),
+                                 outcome.get("amount_coin"), dashboard, pool="dip")
+        trade_journal.save(journal)
+        analysis_log.event("buy", name, thb=amt, order_id=outcome["order_id"], fill_price=outcome.get("fill_price"),
+                           pool="dip", drop_pct=round(drop, 2), pool_after=state["cash_pool_thb"])
+        lines.append(f"  {name}: {amt:.2f} บาท — ร่วง {drop:.1f}% จากจุดสูง 3 วัน")
+    if lines:
+        send_telegram("🪝 ช้อนซื้อช่วงร่วง (กองช้อน)\n" + "\n".join(lines)
+                      + f"\nขายเมื่อเด้ง +{DIP_TP_PCT:g}% · ตัดขาดทุน -{DIP_SL_PCT:g}%")
+
+
 def _buy_one(state, cycle, name, amt, today, dashboard_so_far, gc_priority, bought_lines, failed_lines):
     """ซื้อเหรียญเดียวจำนวน amt บาท คืน "ok" / "skip" (ไปเหรียญถัดไป) / "stop" (เงินในบัญชีไม่พอ หยุดรอบนี้)"""
     outcome = execute_buy(trade_symbol_of(name), amt)
@@ -734,7 +861,8 @@ def run_buys(state, cycle, today, dashboard_so_far):
     blocked, stop = set(), False
     for cap in (DCA_UNIT_THB, MAX_PER_COIN_THB):
         for name in order:
-            if stop or state["cash_pool_thb"] < MIN_ORDER_THB:
+            spendable = state["cash_pool_thb"] - dip_reserve_cash(state)  # เงินที่กันไว้ให้กองช้อน ห้ามใช้
+            if stop or spendable < MIN_ORDER_THB:
                 break
             if name in state.get("unbuyable", {}) or name in blocked:
                 continue
@@ -749,7 +877,7 @@ def run_buys(state, cycle, today, dashboard_so_far):
             if _rebuy_blocked(name, cycle, dashboard_so_far):
                 blocked.add(name)
                 continue
-            amt = int(min(need, state["cash_pool_thb"], DCA_UNIT_THB) * 100) / 100
+            amt = int(min(need, spendable, DCA_UNIT_THB) * 100) / 100
             gc_priority = GOLDEN_CROSS_FIRST and is_golden_cross(name, dashboard_so_far)
             if _buy_one(state, cycle, name, amt, today, dashboard_so_far, gc_priority,
                         bought_lines, failed_lines) == "stop":
@@ -835,6 +963,7 @@ def main():
         run_rebalance(state, ticker, today)
         # ขายก่อน (เงินทุนที่ได้คืนจะได้ใช้ซื้อเหรียญถัดไปได้ในรอบเดียวกัน) แล้วค่อยซื้อ
         run_take_profit_stop_loss(state, ticker, today, dashboard_so_far)
+        run_dip(state, ticker, today, dashboard_so_far)
         run_buys(state, cycle, today, dashboard_so_far)
         update_equity(state, ticker)
 
@@ -942,6 +1071,9 @@ def main():
         "capital_thb": state.get("capital_thb"),
         "equity_thb": state.get("last_equity_thb"),
         "max_per_coin_thb": MAX_PER_COIN_THB,
+        "dip": {"enabled": DIP_ENABLED, "reserve_pct": DIP_RESERVE_PCT, "drop_pct": DIP_DROP_PCT, "tp_pct": DIP_TP_PCT,
+                "sl_pct": DIP_SL_PCT, "reserve_cash_thb": dip_reserve_cash(state),
+                "positions": state.get("dip_positions") or {}},
         "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
         "golden_cross_first": GOLDEN_CROSS_FIRST,
         "gc_priority_max_risk_pct": GC_PRIORITY_MAX_RISK_PCT,
@@ -978,6 +1110,8 @@ def main():
             "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
             "whole_account": WHOLE_ACCOUNT_MODE, "reinvest_profit": REINVEST_PROFIT,
             "max_per_coin_thb": MAX_PER_COIN_THB, "min_order_thb": MIN_ORDER_THB,
+            "dip_enabled": DIP_ENABLED, "dip_reserve_pct": DIP_RESERVE_PCT, "dip_drop_pct": DIP_DROP_PCT,
+            "dip_tp_pct": DIP_TP_PCT, "dip_sl_pct": DIP_SL_PCT,
             "rebuy_max_risk_pct": REBUY_MAX_RISK_PCT, "rebuy_cooldown_hours": REBUY_COOLDOWN_HOURS,
             "news_sentiment_weight": NEWS_SENTIMENT_WEIGHT, "must_include": MUST_INCLUDE_COINS,
         })

@@ -136,7 +136,7 @@ def fetch_market_sentiment():
 
 
 def analyze_trend(name, symbol, market_sentiment):
-    data = get_candles(symbol, "60", 48)
+    data = get_candles(symbol, "60", 72)  # 72 ชม. — ใช้หาจุดสูงสุด 3 วันสำหรับกติกาช้อนซื้อ
     closes = data.get("c")
     if not closes or len(closes) < 24:
         raise ValueError(f"ข้อมูลแท่งเทียนของ {name} ไม่พอคำนวณ MA (อาจเป็นเหรียญใหม่/เทรดบางเบามาก)")
@@ -171,6 +171,8 @@ def analyze_trend(name, symbol, market_sentiment):
         "risk_pct": round(risk_pct, 4) if risk_pct is not None else None,
         "news_sentiment": round(news_sentiment, 3),
         "closes": [round(c, 6) for c in closes[-48:]],
+        "high_72h": max([float(x) for x in (data.get("h") or closes)]),
+        "last_price": current_price,
     }
 
 

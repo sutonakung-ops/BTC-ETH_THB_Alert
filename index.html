@@ -502,6 +502,12 @@
         } else
         bodyHtml += `<div class="row"><span class="label">กำไรที่แยกเก็บไว้</span><span class="up">${dca.profit_reserved_thb != null ? fmtNum(dca.profit_reserved_thb) : "-"} บาท${dca.withdraw_alert_thb ? ` / ${fmtNum(dca.withdraw_alert_thb)}` : ""}</span></div>`;
         if (dca.withdrawn_total_thb) bodyHtml += `<div class="row"><span class="label">ถอนกำไรเข้าบัญชีแล้ว</span><span class="up">${fmtNum(dca.withdrawn_total_thb)} บาท</span></div>`;
+        if (dca.dip && dca.dip.enabled) {
+          const dp = dca.dip.positions || {};
+          const names = Object.keys(dp);
+          bodyHtml += `<div class="row"><span class="label">กองช้อนช่วงร่วง (${dca.dip.reserve_pct}% ของทุน)</span><span>เงินรอช้อน ${fmtNum(dca.dip.reserve_cash_thb)} บาท · ไม้เปิด ${names.length ? names.map(n => `${n} ${fmtNum(dp[n].invested_thb)}`).join(", ") : "-"}</span></div>`;
+          bodyHtml += `<div class="row"><span class="label">กติกากองช้อน</span><span>ร่วง ${dca.dip.drop_pct}% จากจุดสูง 3 วัน → ซื้อ · ขาย +${dca.dip.tp_pct}% / -${dca.dip.sl_pct}%</span></div>`;
+        }
         if (dca.golden_cross_first) bodyHtml += `<div class="row"><span class="label">ลำดับซื้อ</span><span>Golden Cross (ผันผวน ≤ ${dca.gc_priority_max_risk_pct ?? 5}%) ก่อน แล้วตามความเสี่ยง</span></div>`;
         const ms = dca.market_sentiment;
         const msStr = ms != null ? `อารมณ์ตลาด (Fear & Greed) ${ms > 0 ? "+" : ""}${ms} ใช้กับทุกเหรียญ` : "";

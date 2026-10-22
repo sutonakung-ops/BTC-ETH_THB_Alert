@@ -135,6 +135,11 @@ def build(dca_module=None, path=REPORT_FILE):
         px = (latest.get(n) or {}).get("price")
         if px:
             value_now += h["total_coin"] * px
+    dips = state.get("dip_positions") or {}
+    for n, d in dips.items():
+        px = (latest.get(n) or {}).get("price")
+        if px:
+            value_now += d.get("coin", 0.0) * px
     pool = state.get("cash_pool_thb", 0.0)
     capital = state.get("capital_thb")
     closed = [l for l in journal.get("lots", []) if l.get("status") == "closed" and l.get("pnl_pct") is not None]
@@ -182,6 +187,15 @@ def build(dca_module=None, path=REPORT_FILE):
         prow.append([n, h["total_invested_thb"], h["total_coin"], avg, info.get("price"), None, None,
                      info.get("signal"), (info.get("risk_pct") or 0) / 100 if info.get("risk_pct") is not None else None,
                      avg * (1 + tp), avg * (1 - cz), avg * (1 - sl), h.get("buy_count"), h.get("last_bought_date")])
+    dtp, dsl = getattr(m, "DIP_TP_PCT", 6.0) / 100, getattr(m, "DIP_SL_PCT", 20.0) / 100
+    for n, d in dips.items():
+        if d.get("coin", 0) <= 0:
+            continue
+        info = latest.get(n) or {}
+        avg = d["invested_thb"] / d["coin"]
+        prow.append([f"{n} (ช้อน)", d["invested_thb"], d["coin"], avg, info.get("price"), None, None,
+                     f"ร่วง {d.get('drop_pct')}% ตอนช้อน", (info.get("risk_pct") or 0) / 100 if info.get("risk_pct") is not None else None,
+                     avg * (1 + dtp), None, avg * (1 - dsl), 1, (d.get("bought_at") or "")[:10]])
     end = table(ws, 3, ["เหรียญ", "ทุน", "จำนวนเหรียญ", "ทุนเฉลี่ย/เหรียญ", "ราคาล่าสุด", "มูลค่า", "กำไร/ขาดทุน",
                         "แนวโน้ม", "ผันผวน 48 ชม.", f"ราคา TP (+{tp:.0%})", f"ราคาเริ่มตัด DC (-{cz:.0%})",
                         f"ราคา SL (-{sl:.0%})", "ซื้อกี่ครั้ง", "ซื้อล่าสุด"], prow,
@@ -258,7 +272,7 @@ def build(dca_module=None, path=REPORT_FILE):
     ws = wb.create_sheet("ประวัติขาย")
     title(ws, "ทุกครั้งที่ขาย")
     reason_th = {"take_profit": "ขายทำกำไร (TP)", "stop_loss": "ตัดขาดทุน (SL)", "signal_cut": "ตัดตาม Death Cross",
-                 "rebalance": "ปรับสัดส่วน"}
+                 "rebalance": "ปรับสัดส่วน", "dip_take_profit": "กองช้อน: ขายทำกำไร", "dip_stop_loss": "กองช้อน: ตัดขาดทุน"}
     srows = [[s.get("date"), s.get("name"), reason_th.get(s.get("reason"), s.get("reason")), s.get("sold_coin"),
               s.get("sell_price"), s.get("invested_thb"), s.get("proceeds_thb"), s.get("realized_pnl_thb"),
               (s["realized_pnl_thb"] / s["invested_thb"]) if s.get("invested_thb") else None] for s in sells]
@@ -399,7 +413,7 @@ def build(dca_module=None, path=REPORT_FILE):
 # ======================= CSV สำหรับ Google Sheets (IMPORTDATA) =======================
 CSV_DIR = "reports/csv"
 REASON_TH = {"take_profit": "ขายทำกำไร (TP)", "stop_loss": "ตัดขาดทุน (SL)", "signal_cut": "ตัดตาม Death Cross",
-             "rebalance": "ปรับสัดส่วน"}
+             "rebalance": "ปรับสัดส่วน", "dip_take_profit": "กองช้อน: ขายทำกำไร", "dip_stop_loss": "กองช้อน: ตัดขาดทุน"}
 KIND_TH = {"buy": "ซื้อ", "sell": "ขาย", "buy_failed": "ซื้อไม่สำเร็จ", "rebuy_skipped": "ยังไม่ซื้อกลับ",
            "hold_in_loss": "ถือรอ (ติดลบ)", "withdraw": "ถอน", "whole_account_start": "เริ่มโหมดทั้งบัญชี",
            "holding_gone": "เหรียญหายจากบัญชี"}
@@ -437,6 +451,20 @@ def export_csv(m=None, out_dir=CSV_DIR):
                       _r((val / h["total_invested_thb"] - 1) * 100) if val is not None else "",
                       info.get("signal") or "", info.get("risk_pct"), _r(avg * (1 + tp), 6), _r(avg * (1 - cz), 6),
                       _r(avg * (1 - sl), 6), h.get("buy_count"), h.get("last_bought_date") or ""])
+    dtp, dsl = (g("DIP_TP_PCT", 6.0) or 0) / 100, (g("DIP_SL_PCT", 20.0) or 0) / 100
+    for n, d in (state.get("dip_positions") or {}).items():
+        if d.get("coin", 0) <= 0:
+            continue
+        info = latest.get(n) or {}
+        avg = d["invested_thb"] / d["coin"]
+        px = info.get("price")
+        val = d["coin"] * px if px else None
+        value_now += val or 0.0
+        hrows.append([f"{n} (ช้อน)", _r(d["invested_thb"]), d["coin"], _r(avg, 6), px, _r(val),
+                      _r(val - d["invested_thb"]) if val is not None else "",
+                      _r((val / d["invested_thb"] - 1) * 100) if val is not None else "",
+                      f"ร่วง {d.get('drop_pct')}% ตอนช้อน", info.get("risk_pct"), _r(avg * (1 + dtp), 6), "",
+                      _r(avg * (1 - dsl), 6), 1, (d.get("bought_at") or "")[:10]])
     tables["holdings"] = (["เหรียญ", "ทุน (บาท)", "จำนวนเหรียญ", "ทุนเฉลี่ย/เหรียญ", "ราคาล่าสุด", "มูลค่า (บาท)",
                            "กำไร/ขาดทุน (บาท)", "กำไร/ขาดทุน (%)", "แนวโน้ม", "ผันผวน 48 ชม. (%)",
                            f"ราคา TP (+{tp*100:.0f}%)", f"ราคาเริ่มตัด DC (-{cz*100:.0f}%)", f"ราคา SL (-{sl*100:.0f}%)",
@@ -467,6 +495,9 @@ def export_csv(m=None, out_dir=CSV_DIR):
         ["Winrate กติกาปัจจุบัน (%)", _r(sum(1 for l in closed_new if l.get("win")) / len(closed_new) * 100, 1) if closed_new else ""],
         ["จำนวนครั้งที่ขาย (ทั้งหมด)", len(sells)],
         ["เหรียญที่ถืออยู่", len(holdings)],
+        ["กองช้อน: เป้า (บาท)", _r((capital or 0) * (g("DIP_RESERVE_PCT", 0) or 0) / 100)],
+        ["กองช้อน: เงินรอช้อน (บาท)", _r(g("dip_reserve_cash")(state)) if g("dip_reserve_cash") else ""],
+        ["กองช้อน: ไม้ที่เปิดอยู่", len(state.get("dip_positions") or {})],
         ["TP / ตัดตาม DC / SL (%)", f"+{g('TAKE_PROFIT_PCT')} / -{g('CUT_ZONE_PCT')} (เมื่อ Death Cross) / -{g('STOP_LOSS_PCT')}"],
     ])
 
@@ -482,6 +513,9 @@ def export_csv(m=None, out_dir=CSV_DIR):
         ["จังหวะ", "รอบทำงาน", "จัดลำดับใหม่ทุกชั่วโมง · เช็คราคาและซื้อขายทุก 1 นาที"],
         ["เงิน", "กองเงิน", "ทั้งบัญชี: เงินบาทในบัญชี = กองเงินบอท · กำไรทบลงทุนต่อ" if g("WHOLE_ACCOUNT_MODE") else "กองเงินแยก"],
         ["เงิน", "แจ้งถอน", f"พอร์ตโตเกินทุน {g('PROFIT_WITHDRAW_ALERT_THB')} บาท → แจ้ง Telegram (ถอนเองในแอป แล้วพิมพ์ \"ถอน X\")"],
+        ["กองช้อน", "ขนาดกอง", f"{g('DIP_RESERVE_PCT')}% ของทุนทั้งบัญชี · เติมจากเงินที่ได้คืนตอนขาย (เงินส่วนนี้ห้ามใช้ซื้อแบบปกติ)"],
+        ["กองช้อน", "ช้อนซื้อ", f"ราคาต่ำกว่าจุดสูงสุด 72 ชม. ตั้งแต่ {g('DIP_DROP_PCT')}% → ซื้อ {g('DIP_UNIT_THB')} บาท (ร่วงลึกสุดก่อน)"],
+        ["กองช้อน", "ขายไม้ช้อน", f"+{g('DIP_TP_PCT')}% ขายทำกำไร · -{g('DIP_SL_PCT')}% ตัดขาดทุน · ขายแล้วรอ {g('DIP_COOLDOWN_HOURS')} ชม. ก่อนช้อนเหรียญเดิม"],
         ["บันทึก", "ยังไม่ใช้ตัดสินใจ", "premium · ความหนากระดาน · แรงซื้อ 200 รายการล่าสุด · ราคา 24 ชม. · แนวโน้ม BTC (รอพิสูจน์ ~30 ไม้)"],
     ])
 
