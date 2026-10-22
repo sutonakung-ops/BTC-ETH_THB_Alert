@@ -91,6 +91,7 @@ DIP_TP_PCT = 6.0
 DIP_SL_PCT = 20.0
 DIP_UNIT_THB = 200
 DIP_MIN_ORDER_THB = 100  # เงินในกองช้อนต่ำกว่านี้ยังไม่ช้อน (รอสะสมก่อน)
+DIP_MAX_RISK_PCT = 8.0  # ไม่ช้อนเหรียญที่ผันผวน 48 ชม. เกินนี้ (แบบ IOST ~25%) — ทดสอบย้อนหลัง: IOST โดน SL 5 จาก 9 ครั้งทั้งหมด
 DIP_COOLDOWN_HOURS = 24  # ขายไม้ช้อนของเหรียญไหนแล้ว รอเท่านี้ก่อนช้อนเหรียญนั้นใหม่
 REINVEST_PROFIT = True  # ขายได้กำไร -> เงินทั้งหมดกลับเข้ากองไปซื้อต่อ (ไม่แยกเก็บกำไรแล้ว)
 EXTERNAL_HOLDINGS = {  # เหรียญที่ผู้ใช้ซื้อเองนอกบอท (จากประวัติเทรดในแอป Bitkub ที่ผู้ใช้ส่งมา)
@@ -732,6 +733,8 @@ def run_dip(state, ticker, today, dashboard):
             continue
         if name in state.get("unbuyable", {}):
             continue
+        if info.get("risk_pct") is None or info["risk_pct"] > DIP_MAX_RISK_PCT:
+            continue  # ผันผวนสุดขั้ว ร่วง 10% เป็นเรื่องปกติของมัน ไม่ใช่จังหวะช้อน
         cd = (state.get("dip_cooldown") or {}).get(name)
         if cd:
             try:
@@ -1072,7 +1075,7 @@ def main():
         "equity_thb": state.get("last_equity_thb"),
         "max_per_coin_thb": MAX_PER_COIN_THB,
         "dip": {"enabled": DIP_ENABLED, "reserve_pct": DIP_RESERVE_PCT, "drop_pct": DIP_DROP_PCT, "tp_pct": DIP_TP_PCT,
-                "sl_pct": DIP_SL_PCT, "reserve_cash_thb": dip_reserve_cash(state),
+                "sl_pct": DIP_SL_PCT, "max_risk_pct": DIP_MAX_RISK_PCT, "reserve_cash_thb": dip_reserve_cash(state),
                 "positions": state.get("dip_positions") or {}},
         "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
         "golden_cross_first": GOLDEN_CROSS_FIRST,
@@ -1111,7 +1114,7 @@ def main():
             "whole_account": WHOLE_ACCOUNT_MODE, "reinvest_profit": REINVEST_PROFIT,
             "max_per_coin_thb": MAX_PER_COIN_THB, "min_order_thb": MIN_ORDER_THB,
             "dip_enabled": DIP_ENABLED, "dip_reserve_pct": DIP_RESERVE_PCT, "dip_drop_pct": DIP_DROP_PCT,
-            "dip_tp_pct": DIP_TP_PCT, "dip_sl_pct": DIP_SL_PCT,
+            "dip_tp_pct": DIP_TP_PCT, "dip_sl_pct": DIP_SL_PCT, "dip_max_risk_pct": DIP_MAX_RISK_PCT,
             "rebuy_max_risk_pct": REBUY_MAX_RISK_PCT, "rebuy_cooldown_hours": REBUY_COOLDOWN_HOURS,
             "news_sentiment_weight": NEWS_SENTIMENT_WEIGHT, "must_include": MUST_INCLUDE_COINS,
         })
