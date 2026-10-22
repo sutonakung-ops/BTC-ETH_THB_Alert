@@ -686,8 +686,8 @@
     "cycle_date": "2026-10-17",
     "ranking": [
       "BTC",
-      "SOL",
       "ETH",
+      "SOL",
       "DOGE",
       "ADA",
       "XRP",
@@ -755,5 +755,5 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1475.41
+  "last_equity_thb": 1475.07
 }
