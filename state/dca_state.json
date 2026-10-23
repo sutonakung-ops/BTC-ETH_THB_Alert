@@ -686,57 +686,23 @@
     }
   ],
   "realized_pnl_total_thb": 2.9,
-  "last_summary_date": "2026-10-17",
+  "last_summary_date": "2026-10-24",
   "crash_alert_active": false,
   "dca_cycle": {
-    "cycle_date": "2026-10-17",
+    "cycle_date": "2026-10-24",
     "ranking": [
       "XAUT",
       "BTC",
+      "SOL",
       "ETH",
       "DOGE",
       "XRP",
       "WLD",
       "NEAR",
       "CRV",
-      "OP",
       "IOST"
     ],
-    "bought": {
-      "BTC": true,
-      "SOL": true,
-      "XRP": true,
-      "DOGE": true,
-      "ETH": true,
-      "CRV": true,
-      "OP": true
-    },
-    "sold": {
-      "ADA": {
-        "reason": "signal_cut",
-        "at": "2026-10-17T21:37:58.880436+00:00"
-      },
-      "EPIC": {
-        "reason": "take_profit",
-        "at": "2026-10-17T23:25:04.457937+00:00"
-      },
-      "XLM": {
-        "reason": "signal_cut",
-        "at": "2026-10-18T18:09:07.929137+00:00"
-      },
-      "WLD": {
-        "reason": "take_profit",
-        "at": "2026-10-19T22:16:48.034440+00:00"
-      },
-      "NEAR": {
-        "reason": "take_profit",
-        "at": "2026-10-21T08:50:33.172836+00:00"
-      },
-      "IOST": {
-        "reason": "take_profit",
-        "at": "2026-10-21T13:29:42.224287+00:00"
-      }
-    }
+    "bought": {}
   },
   "last_errors": {
     "BR": {
@@ -761,6 +727,6 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1467.14,
+  "last_equity_thb": 1467.72,
   "dip_positions": {}
 }
