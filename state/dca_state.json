@@ -67,10 +67,10 @@
       "last_bought_date": "2026-10-21"
     },
     "OP": {
-      "total_invested_thb": 200.0,
-      "total_coin": 45.80852038,
-      "buy_count": 1,
-      "last_bought_date": "2026-10-21"
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     },
     "XLM": {
       "total_invested_thb": 0.0,
@@ -683,9 +683,19 @@
       "proceeds_thb": 217.84,
       "realized_pnl_thb": 17.84,
       "reason": "take_profit"
+    },
+    {
+      "date": "2026-10-24",
+      "name": "OP",
+      "sold_coin": 45.80852038,
+      "sell_price": 3.917,
+      "invested_thb": 200.0,
+      "proceeds_thb": 179.43,
+      "realized_pnl_thb": -20.57,
+      "reason": "signal_cut"
     }
   ],
-  "realized_pnl_total_thb": 2.9,
+  "realized_pnl_total_thb": -17.67,
   "last_summary_date": "2026-10-24",
   "crash_alert_active": false,
   "dca_cycle": {
@@ -702,7 +712,13 @@
       "CRV",
       "IOST"
     ],
-    "bought": {}
+    "bought": {},
+    "sold": {
+      "OP": {
+        "reason": "signal_cut",
+        "at": "2026-10-23T19:51:27.301571+00:00"
+      }
+    }
   },
   "last_errors": {
     "BR": {
@@ -722,11 +738,21 @@
     "EPIC": 0.02777777,
     "NEAR": 0.0,
     "ADA": 0.03351655,
-    "IOST": 0.0
+    "IOST": 0.0,
+    "OP": 0.0
   },
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1455.13,
-  "dip_positions": {}
+  "last_equity_thb": 1453.16,
+  "dip_positions": {
+    "OP": {
+      "invested_thb": 179.43,
+      "coin": 45.67973523421588,
+      "entry_price": 3.9280000000000004,
+      "bought_at": "2026-10-23T19:51:30.612932+00:00",
+      "high_72h": 4.499,
+      "drop_pct": 12.8
+    }
+  }
 }

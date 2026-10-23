@@ -108,3 +108,5 @@
 {"at":"2026-10-23T19:24:19.128627+00:00","kind":"hold_in_loss","coin":"SOL","pnl_pct":-1.883,"signal":"ยังสรุปแนวโน้มไม่ได้"}
 {"at":"2026-10-23T19:24:19.128638+00:00","kind":"hold_in_loss","coin":"CRV","pnl_pct":-6.901,"signal":"ยังสรุปแนวโน้มไม่ได้"}
 {"at":"2026-10-23T19:24:19.128643+00:00","kind":"hold_in_loss","coin":"OP","pnl_pct":-9.437,"signal":"Death Cross (ขาลง)"}
+{"at":"2026-10-23T19:51:27.301588+00:00","kind":"sell","coin":"OP","reason":"signal_cut","pnl_pct":-10.147,"proceeds_thb":179.432,"invested_thb":200.0,"sell_price":3.917,"back_to_pool":179.432}
+{"at":"2026-10-23T19:51:30.614825+00:00","kind":"buy","coin":"OP","thb":179.43,"order_id":"6adbbac1f36e54fa30e7771b2e9v48","fill_price":3.9280000000000004,"pool":"dip","drop_pct":12.8,"pool_after":0.0}
