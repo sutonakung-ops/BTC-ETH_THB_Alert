@@ -703,13 +703,13 @@
     "ranking": [
       "SOL",
       "BTC",
-      "XAUT",
       "ETH",
-      "XRP",
+      "XAUT",
       "DOGE",
+      "XRP",
       "NEAR",
-      "WLD",
       "CRV",
+      "WLD",
       "IOST"
     ],
     "bought": {},
@@ -744,7 +744,7 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1457.87,
+  "last_equity_thb": 1454.54,
   "dip_positions": {
     "OP": {
       "invested_thb": 179.43,
