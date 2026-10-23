@@ -143,6 +143,12 @@
       "total_coin": 0.0,
       "buy_count": 0,
       "last_bought_date": null
+    },
+    "XAUT": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     }
   },
   "log": [
@@ -685,6 +691,7 @@
   "dca_cycle": {
     "cycle_date": "2026-10-17",
     "ranking": [
+      "XAUT",
       "BTC",
       "SOL",
       "ETH",
@@ -693,8 +700,7 @@
       "ADA",
       "NEAR",
       "CRV",
-      "WLD",
-      "IOST"
+      "WLD"
     ],
     "bought": {
       "BTC": true,
@@ -755,6 +761,6 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1460.32,
+  "last_equity_thb": 1462.26,
   "dip_positions": {}
 }
