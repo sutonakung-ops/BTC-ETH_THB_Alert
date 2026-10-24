@@ -149,6 +149,12 @@
       "total_coin": 0.0,
       "buy_count": 0,
       "last_bought_date": null
+    },
+    "ORDER": {
+      "total_invested_thb": 0.0,
+      "total_coin": 0.0,
+      "buy_count": 0,
+      "last_bought_date": null
     }
   },
   "log": [
@@ -705,12 +711,12 @@
       "ETH",
       "DOGE",
       "XRP",
-      "ADA",
       "CRV",
       "NEAR",
       "KUB",
       "IOST",
-      "WLD"
+      "WLD",
+      "ORDER"
     ],
     "bought": {},
     "sold": {
@@ -744,7 +750,7 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1427.87,
+  "last_equity_thb": 1426.9,
   "dip_positions": {
     "OP": {
       "invested_thb": 179.43,
@@ -752,7 +758,10 @@
       "entry_price": 3.9280000000000004,
       "bought_at": "2026-10-23T19:51:30.612932+00:00",
       "high_72h": 4.499,
-      "drop_pct": 12.8
+      "drop_pct": 12.8,
+      "current_price": 3.778,
+      "current_value_thb": 172.58,
+      "pnl_pct": -3.82
     }
   }
 }
