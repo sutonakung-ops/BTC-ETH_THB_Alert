@@ -1,38 +1,60 @@
 {
   "note": "ยอดจริงใน Bitkub เทียบยอดที่บอทบันทึก (เฉพาะเหรียญที่บอทเกี่ยวข้อง)",
   "coins": {
+    "USDT": {
+      "balances": {
+        "reserved": "0",
+        "available": "0",
+        "total": "0"
+      },
+      "recorded_coin": 0.0,
+      "wallet_total": 0.0,
+      "diff_coin": 0.0,
+      "diff_pct_of_recorded": null
+    },
     "CRV": {
       "balances": {
         "reserved": "0",
-        "available": "0.02179598",
-        "total": "0.02179598"
+        "available": "15.31231585",
+        "total": "15.31231585"
       },
-      "recorded_coin": 0.0,
-      "wallet_total": 0.02179598,
-      "diff_coin": 0.02179598,
-      "diff_pct_of_recorded": null
-    },
-    "SOL": {
-      "balances": {
-        "reserved": "0",
-        "available": "0.01432111",
-        "total": "0.01432111"
-      },
-      "recorded_coin": 0.014178484433441942,
-      "wallet_total": 0.01432111,
-      "diff_coin": 0.0001426255665580578,
-      "diff_pct_of_recorded": 1.0059
+      "recorded_coin": 15.31231585,
+      "wallet_total": 15.31231585,
+      "diff_coin": 0.0,
+      "diff_pct_of_recorded": 0.0
     },
     "DOGE": {
       "balances": {
         "reserved": "0",
-        "available": "18.94177167",
-        "total": "18.94177167"
+        "available": "73.05770132",
+        "total": "73.05770132"
       },
-      "recorded_coin": 18.755392175250382,
-      "wallet_total": 18.94177167,
-      "diff_coin": 0.18637949474961957,
-      "diff_pct_of_recorded": 0.9937
+      "recorded_coin": 73.05770132,
+      "wallet_total": 73.05770132,
+      "diff_coin": 0.0,
+      "diff_pct_of_recorded": 0.0
+    },
+    "IOST": {
+      "balances": {
+        "reserved": "0",
+        "available": "0",
+        "total": "0"
+      },
+      "recorded_coin": 0.0,
+      "wallet_total": 0.0,
+      "diff_coin": 0.0,
+      "diff_pct_of_recorded": null
+    },
+    "NEAR": {
+      "balances": {
+        "reserved": "0",
+        "available": "0",
+        "total": "0"
+      },
+      "recorded_coin": 0.0,
+      "wallet_total": 0.0,
+      "diff_coin": 0.0,
+      "diff_pct_of_recorded": null
     },
     "ARB": {
       "balances": {
@@ -56,29 +78,29 @@
       "diff_coin": 0.0,
       "diff_pct_of_recorded": null
     },
-    "USDC": {
+    "XRP": {
       "balances": {
         "reserved": "0",
-        "available": "0",
-        "total": "0"
+        "available": "4.86480755",
+        "total": "4.86480755"
       },
-      "recorded_coin": 0.0,
-      "wallet_total": 0.0,
+      "recorded_coin": 4.86480755,
+      "wallet_total": 4.86480755,
       "diff_coin": 0.0,
-      "diff_pct_of_recorded": null
+      "diff_pct_of_recorded": 0.0
     },
-    "USDT": {
+    "ADA": {
       "balances": {
         "reserved": "0",
-        "available": "0",
-        "total": "0"
+        "available": "0.03351655",
+        "total": "0.03351655"
       },
       "recorded_coin": 0.0,
-      "wallet_total": 0.0,
-      "diff_coin": 0.0,
+      "wallet_total": 0.03351655,
+      "diff_coin": 0.03351655,
       "diff_pct_of_recorded": null
     },
-    "IOST": {
+    "LUNA": {
       "balances": {
         "reserved": "0",
         "available": "0",
@@ -100,18 +122,18 @@
       "diff_coin": 0.0,
       "diff_pct_of_recorded": null
     },
-    "NEAR": {
+    "EPIC": {
       "balances": {
         "reserved": "0",
-        "available": "0",
-        "total": "0"
+        "available": "0.02777777",
+        "total": "0.02777777"
       },
       "recorded_coin": 0.0,
-      "wallet_total": 0.0,
-      "diff_coin": 0.0,
+      "wallet_total": 0.02777777,
+      "diff_coin": 0.02777777,
       "diff_pct_of_recorded": null
     },
-    "OP": {
+    "USDC": {
       "balances": {
         "reserved": "0",
         "available": "0",
@@ -133,48 +155,15 @@
       "diff_coin": 0.0,
       "diff_pct_of_recorded": null
     },
-    "ADA": {
+    "OP": {
       "balances": {
         "reserved": "0",
-        "available": "0.03351655",
-        "total": "0.03351655"
+        "available": "45.67973523",
+        "total": "45.67973523"
       },
       "recorded_coin": 0.0,
-      "wallet_total": 0.03351655,
-      "diff_coin": 0.03351655,
-      "diff_pct_of_recorded": null
-    },
-    "EPIC": {
-      "balances": {
-        "reserved": "0",
-        "available": "0.02777777",
-        "total": "0.02777777"
-      },
-      "recorded_coin": 0.0,
-      "wallet_total": 0.02777777,
-      "diff_coin": 0.02777777,
-      "diff_pct_of_recorded": null
-    },
-    "XRP": {
-      "balances": {
-        "reserved": "0",
-        "available": "1.15014752",
-        "total": "1.15014752"
-      },
-      "recorded_coin": 1.1386927806877705,
-      "wallet_total": 1.15014752,
-      "diff_coin": 0.011454739312229512,
-      "diff_pct_of_recorded": 1.006
-    },
-    "LUNA": {
-      "balances": {
-        "reserved": "0",
-        "available": "0",
-        "total": "0"
-      },
-      "recorded_coin": 0.0,
-      "wallet_total": 0.0,
-      "diff_coin": 0.0,
+      "wallet_total": 45.67973523,
+      "diff_coin": 45.67973523,
       "diff_pct_of_recorded": null
     },
     "XLM": {
@@ -187,6 +176,17 @@
       "wallet_total": 0.08344462,
       "diff_coin": 0.08344462,
       "diff_pct_of_recorded": null
+    },
+    "SOL": {
+      "balances": {
+        "reserved": "0",
+        "available": "0.05611489",
+        "total": "0.05611489"
+      },
+      "recorded_coin": 0.05611489,
+      "wallet_total": 0.05611489,
+      "diff_coin": 0.0,
+      "diff_pct_of_recorded": 0.0
     },
     "BLU": {
       "recorded_coin": 0.0,
@@ -201,6 +201,10 @@
       "wallet_total": null
     },
     "STRK": {
+      "recorded_coin": 0.0,
+      "wallet_total": null
+    },
+    "XAUT": {
       "recorded_coin": 0.0,
       "wallet_total": null
     },

@@ -1,19 +1,27 @@
 {
-  "at": "2026-10-21T12:23:15.067000+00:00",
+  "at": "2026-10-24T11:40:23.043257+00:00",
   "thb": {
-    "total": 918.03,
-    "available": 918.03
+    "total": 0.0,
+    "available": 0.0
   },
   "coins": {
     "CRV": {
-      "total": 0.02179598,
-      "price": 13.06,
-      "value_thb": 0.28
+      "total": 15.31231585,
+      "price": 11.91,
+      "value_thb": 182.37,
+      "trades": [],
+      "history_trades": 0,
+      "buys": 0,
+      "sells": 0,
+      "history_coin": 0.0,
+      "history_cost_thb": 0.0,
+      "avg_cost": null,
+      "unexplained_coin": 15.31231585
     },
     "SOL": {
-      "total": 0.01432111,
-      "price": 3595.08,
-      "value_thb": 51.49,
+      "total": 0.05611489,
+      "price": 3424.28,
+      "value_thb": 192.15,
       "trades": [],
       "history_trades": 0,
       "buys": 0,
@@ -21,12 +29,12 @@
       "history_coin": 0.0,
       "history_cost_thb": 0.0,
       "avg_cost": null,
-      "unexplained_coin": 0.01432111
+      "unexplained_coin": 0.05611489
     },
-    "DOGE": {
-      "total": 18.94177167,
-      "price": 2.7542,
-      "value_thb": 52.17,
+    "BTC": {
+      "total": 0.00010264,
+      "price": 2720748.48,
+      "value_thb": 279.26,
       "trades": [],
       "history_trades": 0,
       "buys": 0,
@@ -34,53 +42,27 @@
       "history_coin": 0.0,
       "history_cost_thb": 0.0,
       "avg_cost": null,
-      "unexplained_coin": 18.94177167
-    },
-    "ETH": {
-      "total": 0.00218491,
-      "price": 82821.18,
-      "value_thb": 180.96,
-      "trades": [],
-      "history_trades": 0,
-      "buys": 0,
-      "sells": 0,
-      "history_coin": 0.0,
-      "history_cost_thb": 0.0,
-      "avg_cost": null,
-      "unexplained_coin": 0.00218491
-    },
-    "EPIC": {
-      "total": 0.02777777,
-      "price": 5.841,
-      "value_thb": 0.16
-    },
-    "XRP": {
-      "total": 1.15014752,
-      "price": 45.58,
-      "value_thb": 52.42,
-      "trades": [],
-      "history_trades": 0,
-      "buys": 0,
-      "sells": 0,
-      "history_coin": 0.0,
-      "history_cost_thb": 0.0,
-      "avg_cost": null,
-      "unexplained_coin": 1.15014752
+      "unexplained_coin": 0.00010264
     },
     "DON": {
       "total": 0.00537043,
       "price": 0.0,
       "value_thb": 0.0
     },
+    "EPIC": {
+      "total": 0.02777777,
+      "price": 4.436,
+      "value_thb": 0.12
+    },
     "XLM": {
       "total": 0.08344462,
-      "price": 6.2,
-      "value_thb": 0.52
+      "price": 5.738,
+      "value_thb": 0.48
     },
-    "BTC": {
-      "total": 8.74e-05,
-      "price": 2803915.62,
-      "value_thb": 245.06,
+    "XRP": {
+      "total": 4.86480755,
+      "price": 43.17,
+      "value_thb": 210.01,
       "trades": [],
       "history_trades": 0,
       "buys": 0,
@@ -88,29 +70,68 @@
       "history_coin": 0.0,
       "history_cost_thb": 0.0,
       "avg_cost": null,
-      "unexplained_coin": 8.74e-05
+      "unexplained_coin": 4.86480755
+    },
+    "DOGE": {
+      "total": 73.05770132,
+      "price": 2.6173,
+      "value_thb": 191.21,
+      "trades": [],
+      "history_trades": 0,
+      "buys": 0,
+      "sells": 0,
+      "history_coin": 0.0,
+      "history_cost_thb": 0.0,
+      "avg_cost": null,
+      "unexplained_coin": 73.05770132
+    },
+    "OP": {
+      "total": 45.67973523,
+      "price": 3.773,
+      "value_thb": 172.35,
+      "trades": [],
+      "history_trades": 0,
+      "buys": 0,
+      "sells": 0,
+      "history_coin": 0.0,
+      "history_cost_thb": 0.0,
+      "avg_cost": null,
+      "unexplained_coin": 45.67973523
     },
     "LUNA2": {
       "total": 0.15659905,
       "price": 0.0,
       "value_thb": 0.0
     },
+    "ETH": {
+      "total": 0.00249046,
+      "price": 79877.7,
+      "value_thb": 198.93,
+      "trades": [],
+      "history_trades": 0,
+      "buys": 0,
+      "sells": 0,
+      "history_coin": 0.0,
+      "history_cost_thb": 0.0,
+      "avg_cost": null,
+      "unexplained_coin": 0.00249046
+    },
     "ADA": {
       "total": 0.03351655,
-      "price": 7.587,
-      "value_thb": 0.25
+      "price": 7.035,
+      "value_thb": 0.24
     }
   },
   "debug": {
+    "CRV": {
+      "error": 0,
+      "message": null
+    },
     "SOL": {
       "error": 0,
       "message": null
     },
-    "DOGE": {
-      "error": 0,
-      "message": null
-    },
-    "ETH": {
+    "BTC": {
       "error": 0,
       "message": null
     },
@@ -118,7 +139,15 @@
       "error": 0,
       "message": null
     },
-    "BTC": {
+    "DOGE": {
+      "error": 0,
+      "message": null
+    },
+    "OP": {
+      "error": 0,
+      "message": null
+    },
+    "ETH": {
       "error": 0,
       "message": null
     },
