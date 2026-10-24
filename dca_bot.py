@@ -735,6 +735,14 @@ def run_dip(state, ticker, today, dashboard):
             continue
         if info.get("risk_pct") is None or info["risk_pct"] > DIP_MAX_RISK_PCT:
             continue  # ผันผวนสุดขั้ว ร่วง 10% เป็นเรื่องปกติของมัน ไม่ใช่จังหวะช้อน
+        sold_main = ((state.get("dca_cycle") or {}).get("sold") or {}).get(name)
+        sold_at = sold_main.get("at") if isinstance(sold_main, dict) else None
+        if sold_at:
+            try:
+                if datetime.now(timezone.utc) - datetime.fromisoformat(sold_at) < timedelta(hours=DIP_COOLDOWN_HOURS):
+                    continue  # กองปกติเพิ่งขาย/ตัดเหรียญนี้ไป — ไม่ช้อนกลับทันที (กันขัดกันเอง)
+            except ValueError:
+                pass
         cd = (state.get("dip_cooldown") or {}).get(name)
         if cd:
             try:
@@ -1010,6 +1018,19 @@ def main():
         total_invested += h["total_invested_thb"]
         if current_value is not None:
             total_value += current_value
+
+    # ไม้ในกองช้อน: นับรวมมูลค่าพอร์ตด้วย (ไม่งั้นพอร์ตดูเหมือนขาดทุนเท่ามูลค่าไม้ช้อนทั้งก้อน)
+    for name, d in (state.get("dip_positions") or {}).items():
+        tick = ticker.get(trade_symbol_of(name)) if isinstance(ticker, dict) else None
+        px = tick.get("last") if isinstance(tick, dict) else None
+        if any(po["name"] == name and po.get("pool") == "dip" for po in state.get("pending_orders", [])):
+            continue
+        d["current_price"] = px
+        d["current_value_thb"] = round(d.get("coin", 0.0) * px, 2) if px else None
+        d["pnl_pct"] = round((d["current_value_thb"] / d["invested_thb"] - 1) * 100, 2) if px and d.get("invested_thb") else None
+        total_invested += d.get("invested_thb", 0.0)
+        if px:
+            total_value += d.get("coin", 0.0) * px
 
     # หมายเหตุ: ถ้าดึงราคาล่าสุด (ticker) ไม่สำเร็จรอบนี้ ไม่คำนวณ pnl รวม (เป็น None)
     # กันไม่ให้เข้าใจผิดว่าพอร์ตขาดทุน 100% ทั้งที่จริงแค่ดึงราคาไม่ได้ชั่วคราว

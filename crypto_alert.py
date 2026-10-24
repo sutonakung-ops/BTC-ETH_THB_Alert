@@ -321,7 +321,12 @@ def main():
     active_names = [c["name"] for c in trending]
     # วิเคราะห์เหรียญที่ DCA ถืออยู่ด้วยเสมอ (แม้หลุดเทรนด์) เพื่อให้ตัดขาดทุนตามสัญญาณได้
     # (ไม่นับเป็น active_coins — ไม่ได้เพิ่มเข้าตัวเลือกซื้อ)
-    held = load_json(DCA_STATE_FILE, {}).get("holdings", {})
+    _st = load_json(DCA_STATE_FILE, {})
+    held = dict(_st.get("holdings", {}))
+    for name, d in (_st.get("dip_positions") or {}).items():  # ไม้กองช้อนต้องมีราคา/แนวโน้มด้วย
+        held.setdefault(name, {"total_coin": d.get("coin", 0.0)})
+        if not held[name].get("total_coin"):
+            held[name] = {"total_coin": d.get("coin", 0.0)}
     for name, h in held.items():
         if (h or {}).get("total_coin", 0) > 0 and name not in active_names and f"THB_{name}" in ticker:
             trending.append({"name": name, "ticker_symbol": f"THB_{name}", "candle_symbol": f"{name}_THB",

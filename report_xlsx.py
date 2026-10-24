@@ -137,7 +137,7 @@ def build(dca_module=None, path=REPORT_FILE):
             value_now += h["total_coin"] * px
     dips = state.get("dip_positions") or {}
     for n, d in dips.items():
-        px = (latest.get(n) or {}).get("price")
+        px = (latest.get(n) or {}).get("price") or d.get("current_price")
         if px:
             value_now += d.get("coin", 0.0) * px
     pool = state.get("cash_pool_thb", 0.0)
@@ -193,7 +193,7 @@ def build(dca_module=None, path=REPORT_FILE):
             continue
         info = latest.get(n) or {}
         avg = d["invested_thb"] / d["coin"]
-        prow.append([f"{n} (ช้อน)", d["invested_thb"], d["coin"], avg, info.get("price"), None, None,
+        prow.append([f"{n} (ช้อน)", d["invested_thb"], d["coin"], avg, info.get("price") or d.get("current_price"), None, None,
                      f"ร่วง {d.get('drop_pct')}% ตอนช้อน", (info.get("risk_pct") or 0) / 100 if info.get("risk_pct") is not None else None,
                      avg * (1 + dtp), None, avg * (1 - dsl), 1, (d.get("bought_at") or "")[:10]])
     end = table(ws, 3, ["เหรียญ", "ทุน", "จำนวนเหรียญ", "ทุนเฉลี่ย/เหรียญ", "ราคาล่าสุด", "มูลค่า", "กำไร/ขาดทุน",
@@ -349,7 +349,7 @@ def build(dca_module=None, path=REPORT_FILE):
     title(ws, "มูลค่าพอร์ตรายชั่วโมง",
           "ก่อนเริ่มโหมดทั้งบัญชี = เฉพาะเงินของบอท (ทุน = เงินที่เติมเข้าบอท) · หลังจากนั้น = ทั้งบัญชี (มูลค่ากระโดดตอนเปลี่ยนโหมด ไม่ใช่กำไร — ดูกราฟกำไรเทียบทุนแทน)")
     eq = [e for e in _jsonl("analysis/backfill/equity.jsonl") + _jsonl("analysis/equity.jsonl")
-          if e.get("total_equity_thb") is not None]
+          if e.get("total_equity_thb") is not None and not e.get("invalid")]
     eq.sort(key=lambda e: e.get("at") or "")
     erows = []
     for e in eq:
@@ -457,7 +457,7 @@ def export_csv(m=None, out_dir=CSV_DIR):
             continue
         info = latest.get(n) or {}
         avg = d["invested_thb"] / d["coin"]
-        px = info.get("price")
+        px = info.get("price") or d.get("current_price")
         val = d["coin"] * px if px else None
         value_now += val or 0.0
         hrows.append([f"{n} (ช้อน)", _r(d["invested_thb"]), d["coin"], _r(avg, 6), px, _r(val),
@@ -556,7 +556,7 @@ def export_csv(m=None, out_dir=CSV_DIR):
     tables["pnl_day"] = (["วันที่", "กำไร/ขาดทุนของวัน (บาท)", "สะสม (บาท)"], drows)
 
     eq = [e for e in _jsonl("analysis/backfill/equity.jsonl") + _jsonl("analysis/equity.jsonl")
-          if e.get("total_equity_thb") is not None]
+          if e.get("total_equity_thb") is not None and not e.get("invalid")]
     eq.sort(key=lambda e: e.get("at") or "")
     erows = []
     for e in eq:
