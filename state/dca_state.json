@@ -765,7 +765,7 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1410.1,
+  "last_equity_thb": 1412.38,
   "dip_positions": {
     "OP": {
       "invested_thb": 179.43,
@@ -785,9 +785,9 @@
       "bought_at": "2026-10-24T14:17:20.048955+00:00",
       "high_72h": 19.77,
       "drop_pct": 21.6,
-      "current_price": 15.59,
-      "current_value_thb": 179.61,
-      "pnl_pct": -0.26
+      "current_price": 15.58,
+      "current_value_thb": 179.49,
+      "pnl_pct": -0.32
     }
   }
 }
