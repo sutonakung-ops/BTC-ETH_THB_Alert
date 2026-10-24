@@ -598,6 +598,25 @@
         invested += c.total_invested_thb || 0;
         value += c.current_value_thb || 0;
       }
+      // ไม้กองช้อน: นับรวมมูลค่าพอร์ตด้วย (ราคาสดเหมือนกัน)
+      const dipPos = (live.dip && live.dip.positions) || {};
+      for (const name in dipPos) {
+        const d = dipPos[name];
+        if (!d.coin) continue;
+        const t = ticker[`THB_${name}`];
+        const price = t && t.last != null ? Number(t.last) : null;
+        if (price) {
+          d.current_price = price;
+          d.current_value_thb = Math.round(d.coin * price * 100) / 100;
+        } else {
+          priced = false;
+        }
+        invested += d.invested_thb || 0;
+        value += d.current_value_thb || 0;
+      }
+      if (invested && priced && live.whole_account) {
+        live.equity_thb = Math.round((value + (live.cash_pool_thb || 0)) * 100) / 100;
+      }
       if (invested && priced) {
         live.total_invested_thb = Math.round(invested * 100) / 100;
         live.total_value_thb = Math.round(value * 100) / 100;

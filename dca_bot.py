@@ -735,6 +735,8 @@ def run_dip(state, ticker, today, dashboard):
             continue
         if info.get("risk_pct") is None or info["risk_pct"] > DIP_MAX_RISK_PCT:
             continue  # ผันผวนสุดขั้ว ร่วง 10% เป็นเรื่องปกติของมัน ไม่ใช่จังหวะช้อน
+        if (state["holdings"].get(name) or {}).get("total_coin", 0) > 0:
+            continue  # กองปกติถืออยู่แล้ว — ไม่ช้อนซ้อน (กันถือเหรียญเดียวกันหนักเกิน และกันสองกองตัดสินใจขัดกัน)
         sold_main = ((state.get("dca_cycle") or {}).get("sold") or {}).get(name)
         sold_at = sold_main.get("at") if isinstance(sold_main, dict) else None
         if sold_at:
@@ -963,7 +965,15 @@ def main():
     else:
         cycle = state.get("dca_cycle")
         if cycle is None or days_since(cycle["cycle_date"], today) >= DCA_INTERVAL_DAYS:
+            old_sold = (cycle or {}).get("sold") or {}
             cycle = build_new_cycle(today, active_coins, dashboard_so_far)
+            # เก็บรายการขายล่าสุดข้ามรอบสัปดาห์ด้วย ไม่งั้นกฎรอ 24 ชม. ก่อนซื้อกลับ/ช้อนจะหายตอนขึ้นรอบใหม่
+            def _recent(v):
+                try:
+                    return datetime.now(timezone.utc) - datetime.fromisoformat(v["at"]) < timedelta(hours=48)
+                except (KeyError, TypeError, ValueError):
+                    return False
+            cycle["sold"] = {n: v for n, v in old_sold.items() if isinstance(v, dict) and _recent(v)}
             state["dca_cycle"] = cycle
             print(f"เริ่มรอบจัดลำดับใหม่ ({today}) ลำดับเหรียญ: {', '.join(cycle['ranking']) or '-'}")
         elif WHOLE_ACCOUNT_MODE:

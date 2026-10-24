@@ -37,6 +37,7 @@ jobs:
         run: python crypto_alert.py
 
       - name: Run trading bot (semi-automatic)
+        continue-on-error: true  # บอทจับจังหวะปิดการเปิดไม้ใหม่อยู่ — ถ้าพลาดชั่วคราว ไม่ควรทำให้ DCA/เฝ้าราคาทั้งชั่วโมงหยุด
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -53,6 +54,7 @@ jobs:
         run: python dca_bot.py
 
       - name: Commit latest.json and bot state
+        if: ${{ !cancelled() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -62,6 +64,7 @@ jobs:
           git push
 
       - name: Watch prices every minute until the next hourly run
+        if: ${{ !cancelled() }}
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
