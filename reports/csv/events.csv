@@ -1,4 +1,6 @@
 เวลา,เหตุการณ์,เหรียญ,เหตุผล,บาท,รายละเอียด
+2026-10-24 21:17,ซื้อ,WLD,,180.07,"{""thb"": 180.07, ""order_id"": ""6adcbdee9afed45b4207c047my81nv"", ""fill_price"": 15.63, ""pool"": ""dip"", ""drop_pct"": 21.6, ""pool_after"": 0.0}"
+2026-10-24 21:17,ขาย,CRV,signal_cut,180.0728,"{""reason"": ""signal_cut"", ""pnl_pct"": -10.04, ""proceeds_thb"": 180.0728, ""invested_thb"": 200.0, ""sell_price"": 11.76, ""back_to_pool"": 180.0728}"
 2026-10-24 02:51,ซื้อ,OP,,179.43,"{""thb"": 179.43, ""order_id"": ""6adbbac1f36e54fa30e7771b2e9v48"", ""fill_price"": 3.9280000000000004, ""pool"": ""dip"", ""drop_pct"": 12.8, ""pool_after"": 0.0}"
 2026-10-24 02:51,ขาย,OP,signal_cut,179.432,"{""reason"": ""signal_cut"", ""pnl_pct"": -10.147, ""proceeds_thb"": 179.432, ""invested_thb"": 200.0, ""sell_price"": 3.917, ""back_to_pool"": 179.432}"
 2026-10-21 20:29,ซื้อ,XRP,,20.38,"{""thb"": 20.38, ""order_id"": ""6ad8be50fd416b1e42ca1a15s5oh6d"", ""fill_price"": 45.77, ""rebuy"": false, ""gc_priority"": true, ""pool_after"": 0.0}"

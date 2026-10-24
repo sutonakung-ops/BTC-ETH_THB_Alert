@@ -76,3 +76,5 @@
 {"at":"2026-10-24T14:13:09.658937+00:00","kind":"hold_in_loss","coin":"DOGE","pnl_pct":-4.579,"signal":"Death Cross (ขาลง)"}
 {"at":"2026-10-24T14:13:09.658943+00:00","kind":"hold_in_loss","coin":"SOL","pnl_pct":-3.953,"signal":"Death Cross (ขาลง)"}
 {"at":"2026-10-24T14:13:09.658957+00:00","kind":"hold_in_loss","coin":"CRV","pnl_pct":-8.815,"signal":"Death Cross (ขาลง)"}
+{"at":"2026-10-24T14:17:16.524603+00:00","kind":"sell","coin":"CRV","reason":"signal_cut","pnl_pct":-10.04,"proceeds_thb":180.0728,"invested_thb":200.0,"sell_price":11.76,"back_to_pool":180.0728}
+{"at":"2026-10-24T14:17:20.051338+00:00","kind":"buy","coin":"WLD","thb":180.07,"order_id":"6adcbdee9afed45b4207c047my81nv","fill_price":15.63,"pool":"dip","drop_pct":21.6,"pool_after":0.0}

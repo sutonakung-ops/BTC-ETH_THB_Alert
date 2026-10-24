@@ -1003,7 +1003,15 @@
           "analysed_at": "2026-10-21T12:41:06.525955+00:00"
         }
       },
-      "status": "open"
+      "status": "closed",
+      "closed_at": "2026-10-24T14:17:16.525330+00:00",
+      "exit_reason": "signal_cut",
+      "exit_price": 11.76,
+      "proceeds_thb": 180.0728,
+      "pnl_thb": -19.9272,
+      "pnl_pct": -9.964,
+      "position_pnl_pct_at_trigger": -10.04,
+      "win": false
     },
     {
       "lot_id": "6ad8b30393de9096f7c8fea8bbnbad",
@@ -1130,6 +1138,35 @@
           "btc_signal": "ยังสรุปแนวโน้มไม่ได้",
           "btc_change_24h": -0.05,
           "analysed_at": "2026-10-23T19:23:50.199666+00:00"
+        }
+      },
+      "status": "open"
+    },
+    {
+      "lot_id": "6adcbdee9afed45b4207c047my81nv",
+      "coin": "WLD",
+      "opened_at": "2026-10-24T14:17:20.049694+00:00",
+      "invested_thb": 180.07,
+      "fill_price": 15.63,
+      "amount_coin": 11.520793346129238,
+      "rebuy": false,
+      "gc_priority": false,
+      "pool": "dip",
+      "features": {
+        "coin": {
+          "risk_pct": 6.3005,
+          "signal": "Death Cross (ขาลง)",
+          "gap_percent": -3.2652,
+          "change_24h": -12.72,
+          "premium_pct": 0.066,
+          "depth_imbalance": 0.488,
+          "buy_flow_pct": 27.6
+        },
+        "market": {
+          "market_sentiment": 0.02,
+          "btc_signal": "Death Cross (ขาลง)",
+          "btc_change_24h": -1.03,
+          "analysed_at": "2026-10-24T14:12:40.097519+00:00"
         }
       },
       "status": "open"
