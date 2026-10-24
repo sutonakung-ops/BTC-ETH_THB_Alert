@@ -719,12 +719,12 @@
     "ranking": [
       "BTC",
       "ETH",
-      "SOL",
       "XRP",
+      "SOL",
       "DOGE",
+      "ADA",
       "NEAR",
       "KUB",
-      "IOST",
       "WLD",
       "ORDER"
     ],
@@ -765,7 +765,7 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1407.52,
+  "last_equity_thb": 1408.05,
   "dip_positions": {
     "OP": {
       "invested_thb": 179.43,
@@ -774,9 +774,9 @@
       "bought_at": "2026-10-23T19:51:30.612932+00:00",
       "high_72h": 4.499,
       "drop_pct": 12.8,
-      "current_price": 3.744,
-      "current_value_thb": 171.02,
-      "pnl_pct": -4.69
+      "current_price": 3.733,
+      "current_value_thb": 170.52,
+      "pnl_pct": -4.97
     },
     "WLD": {
       "invested_thb": 180.07,
@@ -785,9 +785,9 @@
       "bought_at": "2026-10-24T14:17:20.048955+00:00",
       "high_72h": 19.77,
       "drop_pct": 21.6,
-      "current_price": 15.65,
-      "current_value_thb": 180.3,
-      "pnl_pct": 0.13
+      "current_price": 15.62,
+      "current_value_thb": 179.95,
+      "pnl_pct": -0.07
     }
   }
 }
