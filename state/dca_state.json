@@ -711,8 +711,8 @@
       "ETH",
       "XRP",
       "DOGE",
-      "ADA",
       "CRV",
+      "ADA",
       "NEAR",
       "KUB",
       "WLD",
@@ -750,7 +750,7 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1428.36,
+  "last_equity_thb": 1426.74,
   "dip_positions": {
     "OP": {
       "invested_thb": 179.43,
@@ -759,9 +759,9 @@
       "bought_at": "2026-10-23T19:51:30.612932+00:00",
       "high_72h": 4.499,
       "drop_pct": 12.8,
-      "current_price": 3.772,
-      "current_value_thb": 172.3,
-      "pnl_pct": -3.97
+      "current_price": 3.77,
+      "current_value_thb": 172.21,
+      "pnl_pct": -4.02
     }
   }
 }
