@@ -86,7 +86,7 @@ WHOLE_ACCOUNT_MODE = True
 # ทดสอบย้อนหลัง 120 วัน (13 เหรียญ, กราฟรายชั่วโมง Bitkub): ชนะ 89% ถือเฉลี่ย 5 วัน
 DIP_ENABLED = True
 DIP_RESERVE_PCT = 30.0
-DIP_DROP_PCT = 10.0
+DIP_DROP_PCT = 15.0  # 26 ต.ค. 2569: จาก 10% -> 15% (ทดสอบ 150 วัน: หลังร่วง 10% มักลงต่ออีก ~9%; 15% ชนะ 90% เทียบ 82%)
 DIP_TP_PCT = 6.0
 DIP_SL_PCT = 20.0
 DIP_UNIT_THB = 200
