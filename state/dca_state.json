@@ -727,12 +727,12 @@
       "BTC",
       "DOGE",
       "XRP",
-      "SOL",
       "ETH",
       "GALA",
       "CRV",
       "NEAR",
-      "WLD"
+      "WLD",
+      "IOST"
     ],
     "bought": {},
     "sold": {
@@ -771,7 +771,7 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1399.58,
+  "last_equity_thb": 1402.41,
   "dip_positions": {
     "OP": {
       "invested_thb": 179.43,
@@ -780,9 +780,9 @@
       "bought_at": "2026-10-23T19:51:30.612932+00:00",
       "high_72h": 4.499,
       "drop_pct": 12.8,
-      "current_price": 3.69,
-      "current_value_thb": 168.56,
-      "pnl_pct": -6.06
+      "current_price": 3.706,
+      "current_value_thb": 169.29,
+      "pnl_pct": -5.65
     },
     "WLD": {
       "invested_thb": 180.07,
@@ -791,9 +791,9 @@
       "bought_at": "2026-10-24T14:17:20.048955+00:00",
       "high_72h": 19.77,
       "drop_pct": 21.6,
-      "current_price": 14.66,
-      "current_value_thb": 168.89,
-      "pnl_pct": -6.21
+      "current_price": 14.71,
+      "current_value_thb": 169.47,
+      "pnl_pct": -5.89
     }
   }
 }
