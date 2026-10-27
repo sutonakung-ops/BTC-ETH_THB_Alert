@@ -58,3 +58,8 @@
 {"at":"2026-10-27T11:25:07.194692+00:00","kind":"hold_in_loss","coin":"XRP","pnl_pct":-3.004,"signal":"ยังสรุปแนวโน้มไม่ได้"}
 {"at":"2026-10-27T11:25:07.194698+00:00","kind":"hold_in_loss","coin":"DOGE","pnl_pct":-4.872,"signal":"ยังสรุปแนวโน้มไม่ได้"}
 {"at":"2026-10-27T11:25:07.194703+00:00","kind":"hold_in_loss","coin":"SOL","pnl_pct":-5.42,"signal":"Death Cross (ขาลง)"}
+{"at":"2026-10-27T12:24:12.478383+00:00","kind":"hold_in_loss","coin":"BTC","pnl_pct":-2.085,"signal":"ยังสรุปแนวโน้มไม่ได้"}
+{"at":"2026-10-27T12:24:12.478400+00:00","kind":"hold_in_loss","coin":"ETH","pnl_pct":-2.635,"signal":"ยังสรุปแนวโน้มไม่ได้"}
+{"at":"2026-10-27T12:24:12.478404+00:00","kind":"hold_in_loss","coin":"XRP","pnl_pct":-2.805,"signal":"ยังสรุปแนวโน้มไม่ได้"}
+{"at":"2026-10-27T12:24:12.478408+00:00","kind":"hold_in_loss","coin":"DOGE","pnl_pct":-4.842,"signal":"ยังสรุปแนวโน้มไม่ได้"}
+{"at":"2026-10-27T12:24:12.478412+00:00","kind":"hold_in_loss","coin":"SOL","pnl_pct":-5.312,"signal":"Death Cross (ขาลง)"}
