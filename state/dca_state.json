@@ -726,8 +726,8 @@
       "XAUT",
       "BTC",
       "DOGE",
-      "XRP",
       "ETH",
+      "XRP",
       "ADA",
       "SOL",
       "NEAR",
@@ -771,7 +771,7 @@
   "profit_reserved_moved_thb": 14.05,
   "whole_account_since": "2026-10-21T12:31:06.024490+00:00",
   "capital_thb": 1482.71,
-  "last_equity_thb": 1408.14,
+  "last_equity_thb": 1414.59,
   "dip_positions": {
     "OP": {
       "invested_thb": 179.43,
@@ -780,9 +780,9 @@
       "bought_at": "2026-10-23T19:51:30.612932+00:00",
       "high_72h": 4.499,
       "drop_pct": 12.8,
-      "current_price": 3.711,
-      "current_value_thb": 169.52,
-      "pnl_pct": -5.52
+      "current_price": 3.754,
+      "current_value_thb": 171.48,
+      "pnl_pct": -4.43
     },
     "WLD": {
       "invested_thb": 180.07,
@@ -791,9 +791,9 @@
       "bought_at": "2026-10-24T14:17:20.048955+00:00",
       "high_72h": 19.77,
       "drop_pct": 21.6,
-      "current_price": 14.5,
-      "current_value_thb": 167.05,
-      "pnl_pct": -7.23
+      "current_price": 14.67,
+      "current_value_thb": 169.01,
+      "pnl_pct": -6.14
     }
   }
 }
