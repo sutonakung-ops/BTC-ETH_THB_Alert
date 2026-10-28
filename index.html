@@ -259,6 +259,31 @@
     letter-spacing: 0.08em;
     margin-top: 2px;
   }
+
+  /* ---- หน้าใส่รหัสปลดล็อกข้อมูล (vault) ---- */
+  .vault-overlay {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    background: rgba(9, 11, 16, 0.92);
+  }
+  .vault-box {
+    width: 100%; max-width: 360px; padding: 24px 20px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  }
+  .vault-box h2 { margin: 0 0 6px; font-size: 1.1rem; }
+  .vault-box p { margin: 0 0 16px; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+  .vault-box input[type=password] {
+    width: 100%; padding: 11px 12px; font-size: 1rem; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text);
+  }
+  .vault-box input[type=password]:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+  .vault-box label { display: flex; gap: 8px; align-items: center; margin: 12px 0 16px; font-size: 0.85rem; color: var(--muted); }
+  .vault-box button {
+    width: 100%; padding: 11px; font-size: 1rem; font-weight: 600; cursor: pointer;
+    border: 0; border-radius: 8px; background: var(--teal); color: #071512;
+  }
+  .vault-box .vault-err { color: var(--red); font-size: 0.85rem; min-height: 1.2em; margin: 10px 0 0; }
+  .file-links a { color: inherit; font-weight: 600; margin: 0 6px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -266,7 +291,12 @@
   <div class="page-header">
     <h1 class="brand">Steady Stack</h1>
     <p class="tagline">บอทสะสมคริปโตบน Bitkub · เสี่ยงต่ำซื้อก่อน · ขายตามกฎ · เฝ้าราคาทุกนาที</p>
-    <p class="tagline"><a href="reports/steady_stack.xlsx" download style="color:inherit;font-weight:600;">📊 ดาวน์โหลด Excel รวมข้อมูลทั้งหมด (อัปเดตทุกการซื้อขาย)</a></p>
+    <p class="tagline file-links">
+      <a href="#" data-vault-file="reports/steady_stack.xlsx" data-mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">📊 ดาวน์โหลด Excel รวมข้อมูลทั้งหมด</a>
+      <a href="#" data-vault-file="state/logs/watch.log" data-mime="text/plain">📜 log เฝ้าราคา</a>
+      <a href="#" data-vault-file="state/logs/alert.log" data-mime="text/plain">📜 log รอบรายชั่วโมง</a>
+      <a href="#" id="vaultLock" style="display:none;">🔒 ล็อก</a>
+    </p>
   </div>
   <div class="updated" id="updated">กำลังโหลดข้อมูล...</div>
   <div class="updated" id="liveUpdated" style="margin-top:-18px; font-size:0.74rem;"></div>
@@ -279,6 +309,144 @@
 
   <div class="section-title">พอร์ต DCA (งบรวมรายสัปดาห์ เลือกเหรียญเอง)</div>
   <div class="bot-card" id="dcaCard">กำลังโหลด...</div>
+
+  <script>
+    // ================= ตู้เซฟข้อมูล (vault) =================
+    // ข้อมูลบัญชีใน repo ถูกเข้ารหัสเป็นไฟล์ .enc (ดู tools/vault.py) หน้านี้ถอดรหัสในเบราว์เซอร์ด้วยรหัสที่คุณใส่
+    // รหัสไม่ถูกส่งไปไหน ถ้ายังไม่มีไฟล์ .enc (ยังไม่ได้ตั้งรหัสฝั่งบอท) จะอ่านไฟล์แบบเดิม
+    const Vault = (() => {
+      const te = new TextEncoder();
+      const REMEMBER_KEY = "steadyStackVaultPw";
+      let params = null;
+      let keyPromise = null;
+
+      function b64ToBytes(b64) { return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)); }
+
+      async function getParams() {
+        if (!params) {
+          const r = await fetch("vault.json?t=" + Date.now());
+          if (!r.ok) throw new Error("ไม่พบ vault.json");
+          params = await r.json();
+        }
+        return params;
+      }
+
+      async function deriveKey(pw) {
+        const p = await getParams();
+        const base = await crypto.subtle.importKey("raw", te.encode(pw), "PBKDF2", false, ["deriveKey"]);
+        return crypto.subtle.deriveKey(
+          { name: "PBKDF2", salt: b64ToBytes(p.salt), iterations: p.iterations, hash: "SHA-256" },
+          base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+      }
+
+      async function decrypt(key, buf, path) {
+        const u = new Uint8Array(buf);
+        if (String.fromCharCode(...u.slice(0, 4)) !== "SSV1") throw new Error("ไฟล์ " + path + " ไม่ใช่ไฟล์เข้ารหัส");
+        const plain = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: u.slice(4, 16), additionalData: te.encode(path) }, key, u.slice(16));
+        const stream = new Blob([plain]).stream().pipeThrough(new DecompressionStream("gzip"));
+        return new Uint8Array(await new Response(stream).arrayBuffer());
+      }
+
+      async function tryPassword(pw, sample, path) {
+        try {
+          const key = await deriveKey(pw);
+          await decrypt(key, sample, path);
+          return key;
+        } catch (e) { return null; }
+      }
+
+      function storageGet() { try { return localStorage.getItem(REMEMBER_KEY); } catch (e) { return null; } }
+      function storageSet(v) { try { v ? localStorage.setItem(REMEMBER_KEY, v) : localStorage.removeItem(REMEMBER_KEY); } catch (e) {} }
+
+      function askPassword(sample, path) {
+        return new Promise((resolve) => {
+          const overlay = document.createElement("div");
+          overlay.className = "vault-overlay";
+          overlay.innerHTML = `
+            <form class="vault-box" autocomplete="on">
+              <h2>🔐 ปลดล็อกข้อมูลบอท</h2>
+              <p>ข้อมูลยอดเงินและการซื้อขายถูกเข้ารหัสไว้ ใส่รหัสเดียวกับ DATA_PASSWORD ที่ตั้งใน GitHub</p>
+              <input type="text" name="username" value="steady-stack" autocomplete="username" hidden>
+              <input type="password" name="password" autocomplete="current-password" placeholder="รหัสผ่าน" required>
+              <label><input type="checkbox" name="remember"> จำรหัสไว้บนเครื่องนี้</label>
+              <button type="submit">ปลดล็อก</button>
+              <div class="vault-err"></div>
+            </form>`;
+          document.body.appendChild(overlay);
+          const form = overlay.querySelector("form");
+          const input = form.querySelector("input[type=password]");
+          const err = form.querySelector(".vault-err");
+          const btn = form.querySelector("button");
+          input.focus();
+          form.addEventListener("submit", async (ev) => {
+            ev.preventDefault();
+            btn.disabled = true; btn.textContent = "กำลังตรวจรหัส..."; err.textContent = "";
+            const key = await tryPassword(input.value, sample, path);
+            btn.disabled = false; btn.textContent = "ปลดล็อก";
+            if (!key) { err.textContent = "รหัสไม่ถูกต้อง"; input.select(); return; }
+            storageSet(form.remember.checked ? input.value : null);
+            overlay.remove();
+            resolve(key);
+          });
+        });
+      }
+
+      async function getKey(sample, path) {
+        if (!keyPromise) {
+          keyPromise = (async () => {
+            const saved = storageGet();
+            const key = saved ? await tryPassword(saved, sample, path) : null;
+            if (!key && saved) storageSet(null);
+            const result = key || await askPassword(sample, path);
+            const lockBtn = document.getElementById("vaultLock");
+            if (lockBtn) lockBtn.style.display = "";
+            return result;
+          })();
+        }
+        return keyPromise;
+      }
+
+      // อ่านไฟล์ข้อมูล: ลองไฟล์ .enc ก่อน ถ้าไม่มี (ยังไม่เปิดใช้การเข้ารหัส) ใช้ไฟล์เดิม
+      async function fetchBytes(path) {
+        const r = await fetch(path + ".enc?t=" + Date.now());
+        if (r.ok) {
+          const buf = await r.arrayBuffer();
+          const key = await getKey(buf, path);
+          return decrypt(key, buf, path);
+        }
+        if (r.status !== 404) throw new Error("โหลด " + path + " ไม่สำเร็จ (" + r.status + ")");
+        const plain = await fetch(path + "?t=" + Date.now());
+        if (!plain.ok) throw new Error("ไม่พบไฟล์ " + path);
+        return new Uint8Array(await plain.arrayBuffer());
+      }
+
+      async function fetchJSON(path) {
+        return JSON.parse(new TextDecoder().decode(await fetchBytes(path)));
+      }
+
+      async function download(path, mime) {
+        const bytes = await fetchBytes(path);
+        const url = URL.createObjectURL(new Blob([bytes], { type: mime || "application/octet-stream" }));
+        const a = document.createElement("a");
+        a.href = url; a.download = path.split("/").pop();
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      }
+
+      function lock() { storageSet(null); location.reload(); }
+
+      return { fetchJSON, download, lock };
+    })();
+
+    document.querySelectorAll("[data-vault-file]").forEach((a) => {
+      a.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        Vault.download(a.dataset.vaultFile, a.dataset.mime).catch((e) => alert("ดาวน์โหลดไม่สำเร็จ: " + e.message));
+      });
+    });
+    document.getElementById("vaultLock").addEventListener("click", (ev) => { ev.preventDefault(); Vault.lock(); });
+  </script>
 
   <script>
     function fmtNum(n) {
@@ -505,7 +673,7 @@
         if (dca.withdrawn_total_thb) bodyHtml += `<div class="row"><span class="label">ถอนกำไรเข้าบัญชีแล้ว</span><span class="up">${fmtNum(dca.withdrawn_total_thb)} บาท</span></div>`;
         bodyHtml += `<div class="row"><span class="label">ระบบปรับกติกาเอง (ทุกวันอาทิตย์)</span><span id="tunerStatus">${dca.tuned_params && Object.keys(dca.tuned_params).length ? "ใช้ค่าที่ระบบปรับแล้ว" : "ทดลองเงียบ"}</span></div>`;
         setTimeout(() => {
-          fetch("analysis/optimizer/shadow.json?t=" + Date.now()).then(r => r.ok ? r.json() : null).then(sh => {
+          Vault.fetchJSON("analysis/optimizer/shadow.json").catch(() => null).then(sh => {
             const el = document.getElementById("tunerStatus");
             if (!el || !sh || !sh.params) return;
             const names = {TAKE_PROFIT_PCT: "TP", STOP_LOSS_PCT: "SL", CUT_ZONE_PCT: "ตัด DC", DIP_DROP_PCT: "จุดช้อน", DIP_TP_PCT: "ขายไม้ช้อน"};
@@ -642,11 +810,7 @@
     }
 
     function loadDashboard() {
-      return fetch("latest.json?t=" + Date.now())
-        .then((res) => {
-          if (!res.ok) throw new Error("ไม่พบไฟล์ latest.json");
-          return res.json();
-        })
+      return Vault.fetchJSON("latest.json")
         .then((data) => {
           const updatedDate = new Date(data.updated_at);
           document.getElementById("updated").textContent =

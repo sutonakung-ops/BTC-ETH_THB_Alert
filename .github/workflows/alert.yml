@@ -17,6 +17,8 @@ jobs:
   check-price:
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    env:
+      DATA_PASSWORD: ${{ secrets.DATA_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,14 +29,17 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install requests openpyxl
+        run: pip install requests openpyxl cryptography
+
+      - name: Unlock data (ถอดรหัสข้อมูลบอท)
+        run: python tools/vault.py unlock
 
       - name: Run alert script
         continue-on-error: true  # วิเคราะห์ตลาดพลาดชั่วคราว (เช่น API ช้า) ไม่ควรทำให้รอบซื้อขาย/เฝ้าราคาทั้งชั่วโมงหยุด
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python crypto_alert.py
+        run: python tools/vault.py run --log alert -- python crypto_alert.py
 
       - name: Run trading bot (semi-automatic)
         continue-on-error: true  # บอทจับจังหวะปิดการเปิดไม้ใหม่อยู่ — ถ้าพลาดชั่วคราว ไม่ควรทำให้ DCA/เฝ้าราคาทั้งชั่วโมงหยุด
@@ -43,7 +48,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
           BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
-        run: python trading_bot.py
+        run: python tools/vault.py run --log alert -- python trading_bot.py
 
       - name: Run DCA bot
         env:
@@ -51,14 +56,14 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
           BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
-        run: python dca_bot.py
+        run: python tools/vault.py run --log alert -- python dca_bot.py
 
       - name: Commit latest.json and bot state
         if: ${{ !cancelled() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add latest.json state/ analysis/ reports/
+          python tools/vault.py lock
           git diff --staged --quiet || git commit -m "Update latest.json and bot state [skip ci]"
           git pull --rebase
           git push
@@ -71,4 +76,4 @@ jobs:
           BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
           BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
           WATCH_MINUTES: ${{ github.event_name == 'workflow_dispatch' && '3' || '50' }}
-        run: python price_watch.py
+        run: python tools/vault.py run --log watch -- python price_watch.py

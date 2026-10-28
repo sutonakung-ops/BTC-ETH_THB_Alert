@@ -16,21 +16,26 @@ jobs:
   tune:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      DATA_PASSWORD: ${{ secrets.DATA_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install requests openpyxl
+      - run: pip install requests openpyxl cryptography
+
+      - name: Unlock data (ถอดรหัสข้อมูลบอท)
+        run: python tools/vault.py unlock
       - name: Run optimizer
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python tools/optimizer.py
+        run: python tools/vault.py run --log optimizer -- python tools/optimizer.py
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add analysis/optimizer/ state/tuned_params.json 2>/dev/null || git add analysis/optimizer/
+          python tools/vault.py lock
           git diff --staged --quiet || git commit -m "Weekly strategy tuner [skip ci]"
           for i in 1 2 3 4 5; do git pull --rebase && git push && break; sleep 7; done

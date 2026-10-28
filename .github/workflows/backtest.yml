@@ -54,6 +54,8 @@ permissions:
 jobs:
   backtest:
     runs-on: ubuntu-latest
+    env:
+      DATA_PASSWORD: ${{ secrets.DATA_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,7 +66,10 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests cryptography
+
+      - name: Unlock data (ถอดรหัสข้อมูลบอท)
+        run: python tools/vault.py unlock
 
       - name: Run backtest
         run: |
@@ -76,7 +81,7 @@ jobs:
           elif [ "${{ github.event.inputs.sweep }}" = "true" ]; then
             SWEEP_FLAG="--sweep"
           fi
-          python backtest.py \
+          python tools/vault.py run --log backtest -- python backtest.py \
             --coin "${{ github.event.inputs.coin }}" \
             --days "${{ github.event.inputs.days }}" \
             --capital "${{ github.event.inputs.capital }}" \
@@ -91,7 +96,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add backtest_result.json
+          python tools/vault.py lock
           git diff --staged --quiet || git commit -m "Backtest result: coin=${{ github.event.inputs.coin }} days=${{ github.event.inputs.days }} sl=${{ github.event.inputs.stop_loss }} tp=${{ github.event.inputs.take_profit }} rsi=${{ github.event.inputs.rsi_overbought }} ablation=${{ github.event.inputs.ablation }} validate=${{ github.event.inputs.validate }} sweep=${{ github.event.inputs.sweep }} [skip ci]"
           git pull --rebase
           git push

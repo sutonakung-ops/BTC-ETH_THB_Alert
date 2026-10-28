@@ -8,3 +8,21 @@ __pycache__/
 *.key
 secrets*.json
 state/auth_diag.json
+
+# ---- ตู้เซฟข้อมูล (tools/vault.py) ----
+# ไฟล์ข้อมูลบัญชีตัวจริงห้ามขึ้น repo — ขึ้นได้เฉพาะไฟล์ .enc ที่เข้ารหัสแล้ว
+/latest.json
+/backtest_result.json
+/state/**
+!/state/**/
+!/state/**/*.enc
+!/state/.gitkeep
+/analysis/**
+!/analysis/**/
+!/analysis/**/*.enc
+!/analysis/history_*.json
+/reports/**
+!/reports/**/
+!/reports/**/*.enc
+.vault_unlocked
+*.vaulttmp

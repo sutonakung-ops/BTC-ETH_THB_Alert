@@ -16,6 +16,7 @@
 import json
 import os
 import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 
@@ -27,24 +28,34 @@ import dca_bot
 import report_xlsx
 import trade_journal
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools"))
+import vault  # noqa: E402
+
 WATCH_MINUTES = float(os.environ.get("WATCH_MINUTES", "50"))
 INTERVAL_SECONDS = 60
 
 
 def git_commit_push(message):
-    files = [dca_bot.DCA_STATE_FILE, dca_bot.REBALANCE_FILE, crypto_alert.CONTROL_FILE, dca_bot.DEPOSIT_INBOX_FILE,
-             crypto_alert.TG_OFFSET_FILE, crypto_alert.COMMANDS_FILE, trade_journal.JOURNAL_FILE]
-    existing = [f for f in files if os.path.exists(f)] + (["analysis"] if os.path.isdir("analysis") else []) + ["state"] + (["reports"] if os.path.isdir("reports") else [])
-    subprocess.run(["git", "add", *existing], check=False)
+    # เข้ารหัสไฟล์ข้อมูลทั้งหมดก่อน แล้ว stage เฉพาะไฟล์ .enc (ดู tools/vault.py)
+    vault.lock(quiet=True)
+    vault.stage_all()
     if subprocess.run(["git", "diff", "--staged", "--quiet"]).returncode == 0:
         return
     subprocess.run(["git", "commit", "-q", "-m", f"{message} [skip ci]"], check=False)
+    pushed = False
     for _ in range(3):
         subprocess.run(["git", "pull", "-q", "--rebase"], check=False)
         if subprocess.run(["git", "push", "-q"]).returncode == 0:
-            return
+            pushed = True
+            break
         time.sleep(5)
-    print("push state ไม่สำเร็จ (จะลองใหม่รอบถัดไป)")
+    if not pushed:
+        # ถ้า pull ชนกัน อย่าค้าง repo ไว้กลางทาง และอย่าถอดรหัสทับไฟล์ในเครื่อง (จะได้ไม่เสียข้อมูลรอบนี้)
+        subprocess.run(["git", "rebase", "--abort"], capture_output=True)
+        print("push state ไม่สำเร็จ (จะลองใหม่รอบถัดไป)")
+        return
+    # ไฟล์ที่ workflow อื่นเพิ่งอัปเดต (เช่น ค่าที่ระบบปรับกลยุทธ์) มาเป็น .enc -> ถอดรหัสให้บอทเห็นค่าล่าสุด
+    vault.unlock(quiet=True)
 
 
 def snapshot(state):

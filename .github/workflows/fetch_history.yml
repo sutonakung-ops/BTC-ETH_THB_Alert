@@ -16,12 +16,17 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    env:
+      DATA_PASSWORD: ${{ secrets.DATA_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install requests
+      - run: pip install requests cryptography
+
+      - name: Unlock data (ถอดรหัสข้อมูลบอท)
+        run: python tools/vault.py unlock
       - name: Fetch
         env:
           COINS: ${{ inputs.coins }}
@@ -32,6 +37,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add analysis/
+          python tools/vault.py lock
           git diff --staged --quiet || git commit -m "Price history for analysis [skip ci]"
           for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
