@@ -502,6 +502,19 @@
         } else
         bodyHtml += `<div class="row"><span class="label">กำไรที่แยกเก็บไว้</span><span class="up">${dca.profit_reserved_thb != null ? fmtNum(dca.profit_reserved_thb) : "-"} บาท${dca.withdraw_alert_thb ? ` / ${fmtNum(dca.withdraw_alert_thb)}` : ""}</span></div>`;
         if (dca.withdrawn_total_thb) bodyHtml += `<div class="row"><span class="label">ถอนกำไรเข้าบัญชีแล้ว</span><span class="up">${fmtNum(dca.withdrawn_total_thb)} บาท</span></div>`;
+        bodyHtml += `<div class="row"><span class="label">ระบบปรับกติกาเอง (ทุกวันอาทิตย์)</span><span id="tunerStatus">${dca.tuned_params && Object.keys(dca.tuned_params).length ? "ใช้ค่าที่ระบบปรับแล้ว" : "ทดลองเงียบ"}</span></div>`;
+        setTimeout(() => {
+          fetch("analysis/optimizer/shadow.json?t=" + Date.now()).then(r => r.ok ? r.json() : null).then(sh => {
+            const el = document.getElementById("tunerStatus");
+            if (!el || !sh || !sh.params) return;
+            const names = {TAKE_PROFIT_PCT: "TP", STOP_LOSS_PCT: "SL", CUT_ZONE_PCT: "ตัด DC", DIP_DROP_PCT: "จุดช้อน", DIP_TP_PCT: "ขายไม้ช้อน"};
+            const cur = {TAKE_PROFIT_PCT: dca.take_profit_pct, STOP_LOSS_PCT: dca.stop_loss_pct, CUT_ZONE_PCT: dca.cut_zone_pct,
+                         DIP_DROP_PCT: dca.dip && dca.dip.drop_pct, DIP_TP_PCT: dca.dip && dca.dip.tp_pct};
+            const diffs = Object.keys(sh.params).filter(k => cur[k] != null && Number(cur[k]) !== Number(sh.params[k]))
+              .map(k => `${names[k] || k} ${cur[k]}→${sh.params[k]}%`);
+            el.textContent = diffs.length ? `ทดลองเงียบ: ${diffs.join(", ")} · ชนะ ${sh.streak || 0}/3 สัปดาห์` : "ยังไม่เจอค่าที่ดีกว่าค่าปัจจุบัน";
+          }).catch(() => {});
+        }, 0);
         if (dca.dip && dca.dip.enabled) {
           const dp = dca.dip.positions || {};
           const names = Object.keys(dp);

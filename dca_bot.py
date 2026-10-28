@@ -93,6 +93,36 @@ DIP_UNIT_THB = 200
 DIP_MIN_ORDER_THB = 100  # เงินในกองช้อนต่ำกว่านี้ยังไม่ช้อน (รอสะสมก่อน)
 DIP_MAX_RISK_PCT = 8.0  # ไม่ช้อนเหรียญที่ผันผวน 48 ชม. เกินนี้ (แบบ IOST ~25%) — ทดสอบย้อนหลัง: IOST โดน SL 5 จาก 9 ครั้งทั้งหมด
 DIP_COOLDOWN_HOURS = 24  # ขายไม้ช้อนของเหรียญไหนแล้ว รอเท่านี้ก่อนช้อนเหรียญนั้นใหม่
+
+# ---- ค่าที่ระบบปรับกติกาเอง (tools/optimizer.py) ปล่อยใช้จริงแล้ว — ทับค่าด้านบน แต่ไม่เกินกรอบที่ล็อกไว้ ----
+TUNED_PARAMS_FILE = "state/tuned_params.json"
+TUNABLE_BOUNDS = {
+    "TAKE_PROFIT_PCT": (4.0, 10.0),
+    "STOP_LOSS_PCT": (15.0, 25.0),
+    "CUT_ZONE_PCT": (8.0, 15.0),
+    "DIP_DROP_PCT": (10.0, 20.0),
+    "DIP_TP_PCT": (4.0, 10.0),
+}
+DEFAULT_PARAMS = {}
+TUNED_APPLIED = {}
+
+
+def _apply_tuned_params():
+    try:
+        with open(TUNED_PARAMS_FILE, encoding="utf-8") as f:
+            tuned = (json.load(f) or {}).get("params") or {}
+    except (OSError, ValueError):
+        return
+    g = globals()
+    for k, (lo, hi) in TUNABLE_BOUNDS.items():
+        DEFAULT_PARAMS[k] = g[k]
+        if k in tuned:
+            try:
+                g[k] = float(min(max(float(tuned[k]), lo), hi))
+                TUNED_APPLIED[k] = g[k]
+            except (TypeError, ValueError):
+                pass
+
 REINVEST_PROFIT = True  # ขายได้กำไร -> เงินทั้งหมดกลับเข้ากองไปซื้อต่อ (ไม่แยกเก็บกำไรแล้ว)
 EXTERNAL_HOLDINGS = {  # เหรียญที่ผู้ใช้ซื้อเองนอกบอท (จากประวัติเทรดในแอป Bitkub ที่ผู้ใช้ส่งมา)
     "BTC": {"coin": 0.00005077, "cost_thb": 139.98, "bought": "2026-10-08", "price": 2757000.0},
@@ -119,6 +149,7 @@ CUT_ZONE_PCT = 10.0  # 21 ต.ค. 2569: เปิดกลับ แต่เ�
 # ปิดการตัดขาดทุนตามสัญญาณ (ผู้ใช้เลือกทาง ก, 20 ต.ค. 2569): ผลทบทวน 17-19 ต.ค. พบว่ากฎนี้ขายตรงก้น
 # ตอนตลาดลงทั้งกระดานแล้วเด้งกลับ (15 จาก 17 ไม้ที่แพ้) — เหลือแค่ TP 4% และเพดาน SL 15%
 SIGNAL_CUT_ENABLED = True  # 21 ต.ค. 2569: ผู้ใช้เปิดกลับ ไว้กันกรณีตลาดร่วงจริง
+_apply_tuned_params()  # ต้องอยู่หลังค่าที่ปรับได้ทุกตัว
 
 # ส่งสรุปพอร์ตรวมทาง Telegram ทุกๆ กี่วัน (รายสัปดาห์)
 SUMMARY_INTERVAL_DAYS = 7
@@ -1110,6 +1141,7 @@ def main():
                 "positions": state.get("dip_positions") or {}},
         "withdraw_alert_thb": PROFIT_WITHDRAW_ALERT_THB,
         "golden_cross_first": GOLDEN_CROSS_FIRST,
+        "tuned_params": TUNED_APPLIED,
         "gc_priority_max_risk_pct": GC_PRIORITY_MAX_RISK_PCT,
         "unit_thb_per_buy": DCA_UNIT_THB,
         "interval_days": DCA_INTERVAL_DAYS,

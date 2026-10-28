@@ -1,0 +1,36 @@
+name: Weekly strategy tuner (shadow test, auto-promote)
+
+on:
+  schedule:
+    - cron: '41 1 * * 0'   # ทุกวันอาทิตย์ 08:41 น. เวลาไทย
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crypto-optimizer
+  cancel-in-progress: false
+
+jobs:
+  tune:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests openpyxl
+      - name: Run optimizer
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python tools/optimizer.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add analysis/optimizer/ state/tuned_params.json 2>/dev/null || git add analysis/optimizer/
+          git diff --staged --quiet || git commit -m "Weekly strategy tuner [skip ci]"
+          for i in 1 2 3 4 5; do git pull --rebase && git push && break; sleep 7; done

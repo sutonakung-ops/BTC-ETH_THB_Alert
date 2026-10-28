@@ -516,6 +516,8 @@ def export_csv(m=None, out_dir=CSV_DIR):
         ["กองช้อน", "ขนาดกอง", f"{g('DIP_RESERVE_PCT')}% ของทุนทั้งบัญชี · เติมจากเงินที่ได้คืนตอนขาย (เงินส่วนนี้ห้ามใช้ซื้อแบบปกติ)"],
         ["กองช้อน", "ช้อนซื้อ", f"ราคาต่ำกว่าจุดสูงสุด 72 ชม. ตั้งแต่ {g('DIP_DROP_PCT')}% และผันผวน 48 ชม. ≤ {g('DIP_MAX_RISK_PCT')}% → ซื้อ {g('DIP_UNIT_THB')} บาท (ร่วงลึกสุดก่อน)"],
         ["กองช้อน", "ขายไม้ช้อน", f"+{g('DIP_TP_PCT')}% ขายทำกำไร · -{g('DIP_SL_PCT')}% ตัดขาดทุน · ขายแล้วรอ {g('DIP_COOLDOWN_HOURS')} ชม. ก่อนช้อนเหรียญเดิม"],
+        ["ระบบปรับเอง", "ทดลองเงียบ → ปล่อยใช้จริง", "ทุกวันอาทิตย์ 08:41 น. หาค่าที่ดีกว่าจากกราฟ Bitkub 150 วัน (ต้องดีกว่า ≥10% ทั้งช่วงหาค่าและช่วงทดสอบ) · ทดลองเงียบเทียบค่าจริงทุกสัปดาห์ · ชนะติดกัน 3 สัปดาห์ถึงปล่อยใช้จริง · กรอบ TP 4-10% / SL 15-25% / ตัด DC 8-15% / ช้อน 10-20% / ขายไม้ช้อน 4-10%"
+         + (f" · ใช้อยู่: {g('TUNED_APPLIED')}" if g("TUNED_APPLIED") else "")],
         ["บันทึก", "ยังไม่ใช้ตัดสินใจ", "premium · ความหนากระดาน · แรงซื้อ 200 รายการล่าสุด · ราคา 24 ชม. · แนวโน้ม BTC (รอพิสูจน์ ~30 ไม้)"],
     ])
 
@@ -575,6 +577,17 @@ def export_csv(m=None, out_dir=CSV_DIR):
                           e.get("reason") or "", e.get("thb") or e.get("proceeds_thb") or "",
                           json.dumps({k: v for k, v in e.items() if k not in ("at", "kind", "coin")}, ensure_ascii=False)]
                          for e in reversed(evs)])
+
+    orows = []
+    for r in reversed(_jsonl("analysis/optimizer/history.jsonl")):
+        live, cand = r.get("live") or {}, r.get("candidate") or {}
+        diff = ", ".join(f"{k} {live.get(k)}→{cand.get(k)}" for k in cand if cand.get(k) != live.get(k)) or "ไม่เปลี่ยน"
+        ev = r.get("evidence") or {}
+        orows.append([_t(_bkk(r.get("at"))), "ปล่อยใช้จริง" if r.get("promoted") else "ทดลองเงียบ", diff, r.get("streak"),
+                      ((ev.get("main") or {}).get("live_test") or {}).get("per_day"), ((ev.get("main") or {}).get("test") or {}).get("per_day"),
+                      ((ev.get("dip") or {}).get("live_test") or {}).get("per_day"), ((ev.get("dip") or {}).get("test") or {}).get("per_day")])
+    tables["optimizer"] = (["เวลา", "สถานะ", "ค่าที่ทดลอง (ค่าจริง→ค่าทดลอง)", "ชนะติดกัน (สัปดาห์)",
+                            "กองปกติ ค่าจริง %/วัน", "กองปกติ ค่าทดลอง %/วัน", "กองช้อน ค่าจริง %/วัน", "กองช้อน ค่าทดลอง %/วัน"], orows)
 
     os.makedirs(out_dir, exist_ok=True)
     for name, (headers, rows) in tables.items():
