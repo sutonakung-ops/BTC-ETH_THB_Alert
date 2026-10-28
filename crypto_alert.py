@@ -298,6 +298,9 @@ def process_telegram_commands():
                 save_json(DEPOSIT_INBOX_FILE, inbox)
             else:
                 send_telegram(f"⚠️ จำนวนเงินไม่ถูกต้อง (รับได้ 1 - {MAX_DEPOSIT_THB:,.0f} บาทต่อครั้ง)")
+        elif text in ("รายงาน", "รายงานผล", "report", "/report", "สรุป"):
+            # ข้อมูลบัญชีถูกเข้ารหัสใน repo — ให้ตัวเฝ้าราคา (ที่ถอดรหัสแล้ว) ส่งรายงานภายใน ~1 นาที
+            save_json("state/report_request.json", {"at": datetime.now(timezone.utc).isoformat()})
         elif text in CONFIRM_WORDS:
             confirm_seen = True
         elif text in CANCEL_WORDS:

@@ -25,6 +25,7 @@ import requests
 import crypto_alert
 import analysis_log
 import dca_bot
+import report_tg
 import report_xlsx
 import trade_journal
 
@@ -77,6 +78,7 @@ def check_once():
         control = dca_bot.load_json(dca_bot.CONTROL_FILE, {"paused": False})
     control_changed = json.dumps(dca_bot.load_json(dca_bot.CONTROL_FILE, {}), sort_keys=True) != control_before
 
+    ticker = {}
     state = dca_bot.load_json(dca_bot.DCA_STATE_FILE, None)
     if not state:
         return control_changed
@@ -105,6 +107,11 @@ def check_once():
             if cycle and state.get("cash_pool_thb", 0) >= dca_bot.MIN_ORDER_THB:
                 dca_bot.run_buys(state, cycle, today, dashboard)
             dca_bot.update_equity(state, ticker)
+
+    try:
+        report_tg.handle_request(ticker or None)
+    except Exception as e:  # noqa: BLE001 — รายงานพังต้องไม่ทำให้เฝ้าราคาหยุด
+        print(f"ส่งรายงานไม่สำเร็จ: {e}")
 
     logged = analysis_log.flush_events(kinds={"buy", "sell", "buy_failed", "withdraw", "whole_account_start"})
     changed = snapshot(state) != before or bool(inbox) or logged

@@ -1,0 +1,27 @@
+name: Send report to Telegram
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATA_PASSWORD: ${{ secrets.DATA_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests cryptography
+      - name: Unlock data (ถอดรหัสข้อมูลบอท)
+        run: python tools/vault.py unlock
+      - name: Send report
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python tools/vault.py run --log report -- python report_tg.py
