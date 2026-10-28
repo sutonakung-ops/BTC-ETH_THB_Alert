@@ -1,2 +1,10 @@
 __pycache__/
 *.pyc
+
+# ห้ามอัปไฟล์ความลับขึ้น GitHub
+.env
+*.env
+*.pem
+*.key
+secrets*.json
+state/auth_diag.json
