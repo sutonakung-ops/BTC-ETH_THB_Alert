@@ -1,0 +1,42 @@
+name: Set defensive mode
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "on = หยุดซื้อใหม่ (ยังขายตามกติกา), off = ซื้อตามปกติ"
+        default: "on"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crypto-mode
+  cancel-in-progress: false
+
+jobs:
+  set:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATA_PASSWORD: ${{ secrets.DATA_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests cryptography
+      - name: Unlock data
+        run: python tools/vault.py unlock
+      - name: Set mode
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python tools/set_mode.py ${{ inputs.mode }}
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          python tools/vault.py lock
+          git diff --staged --quiet || git commit -m "Set defensive mode ${{ inputs.mode }} [skip ci]"
+          for i in 1 2 3 4 5; do git pull --rebase && git push && break; sleep 7; done

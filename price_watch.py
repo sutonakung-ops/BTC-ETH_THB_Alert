@@ -102,9 +102,10 @@ def check_once():
         if isinstance(ticker, dict) and ticker:
             dca_bot.run_rebalance(state, ticker, today)
             dca_bot.run_take_profit_stop_loss(state, ticker, today, dashboard)
-            dca_bot.run_dip(state, ticker, today, dashboard)
+            defensive = bool(control.get("defensive"))
+            dca_bot.run_dip(state, ticker, today, dashboard, allow_buy=not defensive)
             cycle = state.get("dca_cycle")
-            if cycle and state.get("cash_pool_thb", 0) >= dca_bot.MIN_ORDER_THB:
+            if cycle and not defensive and state.get("cash_pool_thb", 0) >= dca_bot.MIN_ORDER_THB:
                 dca_bot.run_buys(state, cycle, today, dashboard)
             dca_bot.update_equity(state, ticker)
 

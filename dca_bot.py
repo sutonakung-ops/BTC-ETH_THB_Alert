@@ -711,7 +711,7 @@ def dip_reserve_cash(state):
     return round(min(max(target - in_dips, 0.0), state.get("cash_pool_thb", 0.0)), 2)
 
 
-def run_dip(state, ticker, today, dashboard):
+def run_dip(state, ticker, today, dashboard, allow_buy=True):
     """กองช้อนซื้อ: ขายไม้ที่ถึง TP/SL ก่อน แล้วช้อนเหรียญที่ร่วงจากจุดสูง 72 ชม. ถึงเกณฑ์"""
     if not DIP_ENABLED or not isinstance(ticker, dict) or not ticker:
         return
@@ -756,6 +756,8 @@ def run_dip(state, ticker, today, dashboard):
         send_telegram(f"{head} {name} ({pnl_pct:+.1f}%)\nทุน {d['invested_thb']:.2f} → ได้คืน {outcome['proceeds_thb']:.2f} บาท "
                       f"({pnl:+.2f})\nเงินกลับเข้ากองช้อน (เกินเป้ากองจะไปซื้อตามลำดับปกติ)")
     # ---- ช้อน ----
+    if not allow_buy:
+        return  # โหมดป้องกัน: ไม่ช้อนใหม่
     cash = dip_reserve_cash(state)
     lines = []
     candidates = []
@@ -948,6 +950,7 @@ def main():
     dashboard_so_far = load_json(DASHBOARD_FILE, {})
     control = load_json(CONTROL_FILE, {"paused": False})
     paused = bool(control.get("paused"))
+    defensive = bool(control.get("defensive"))  # โหมดป้องกัน: ไม่ซื้อใหม่ แต่ยังขายตามกติกา
 
     # รายชื่อเหรียญ "ติดเทรนด์" ล่าสุด (คำนวณไว้แล้วโดย crypto_alert.py ที่รันก่อนหน้าในงานเดียวกัน)
     # ถ้าไม่มีข้อมูล (เช่นรันสคริปต์นี้แยกเดี่ยว) ให้ fallback ไปใช้รายชื่อตั้งต้น
@@ -1015,8 +1018,11 @@ def main():
         run_rebalance(state, ticker, today)
         # ขายก่อน (เงินทุนที่ได้คืนจะได้ใช้ซื้อเหรียญถัดไปได้ในรอบเดียวกัน) แล้วค่อยซื้อ
         run_take_profit_stop_loss(state, ticker, today, dashboard_so_far)
-        run_dip(state, ticker, today, dashboard_so_far)
-        run_buys(state, cycle, today, dashboard_so_far)
+        run_dip(state, ticker, today, dashboard_so_far, allow_buy=not defensive)
+        if defensive:
+            print("โหมดป้องกันเปิดอยู่ — ข้ามการซื้อใหม่ (ยังขายตามกติกา)")
+        else:
+            run_buys(state, cycle, today, dashboard_so_far)
         update_equity(state, ticker)
 
     # ----- คำนวณมูลค่าปัจจุบันของแต่ละเหรียญ (ใช้ได้ทั้งตอนเปิด/ปิดใช้งานจริง) -----
@@ -1128,6 +1134,7 @@ def main():
     dashboard["dca_bot"] = {
         "enabled": trading_enabled,
         "paused": paused,
+        "defensive": defensive,
         "active_coins": active_coins,
         "cash_pool_thb": state.get("cash_pool_thb", 0.0),
         "profit_reserved_thb": state.get("profit_reserved_thb", 0.0),

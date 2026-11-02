@@ -817,6 +817,10 @@
             "วิเคราะห์ล่าสุด: " + updatedDate.toLocaleString("th-TH", { timeZone: "Asia/Bangkok" });
 
           const pauseBanner = document.getElementById("pauseBanner");
+          if (data.control && !data.control.paused && data.control.defensive) {
+            pauseBanner.style.display = "block";
+            pauseBanner.textContent = "🛡️ โหมดป้องกัน — หยุดซื้อใหม่ทั้งกองปกติและกองช้อนชั่วคราว แต่ยังขายตามกติกา (TP / ตัดขาดทุน) ปกติ";
+          } else
           if (data.control && data.control.paused) {
             pauseBanner.style.display = "block";
             pauseBanner.textContent = "⏸ ระบบหยุดการซื้อขายทั้งหมดชั่วคราว (สั่งผ่าน Telegram) — ราคายังอัปเดตปกติ แค่ไม่มีคำสั่งซื้อ/ขายใหม่";

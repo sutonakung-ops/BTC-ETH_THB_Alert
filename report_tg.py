@@ -59,6 +59,11 @@ def build_report(ticker=None):
     when = datetime.now(BKK).strftime("%d/%m %H:%M")
     src = "ราคาสด" if ticker else "ราคารอบวิเคราะห์ล่าสุด"
     lines.append(f"📊 รายงานผล ({when} น. · {src})")
+    ctl = _load("state/control.json", {})
+    if ctl.get("paused"):
+        lines.append("⏸ หยุดทำงานทั้งหมดอยู่ (พิมพ์ \"เริ่ม\" เพื่อทำงานต่อ)")
+    elif ctl.get("defensive"):
+        lines.append("🛡️ โหมดป้องกันเปิดอยู่: ไม่ซื้อใหม่ ยังขายตามกติกา (พิมพ์ \"ปิดป้องกัน\" เพื่อกลับมาซื้อ)")
 
     value, rows = 0.0, []
     for n, h in sorted((state.get("holdings") or {}).items(), key=lambda kv: -(kv[1] or {}).get("total_invested_thb", 0)):
