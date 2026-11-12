@@ -42,6 +42,8 @@ BOUNDS = {
 }
 GRID_MAIN = {"TAKE_PROFIT_PCT": [4, 5, 6, 7, 8, 10], "CUT_ZONE_PCT": [8, 10, 12, 15], "STOP_LOSS_PCT": [15, 20, 25]}
 GRID_DIP = {"DIP_DROP_PCT": [10, 12, 15, 18, 20], "DIP_TP_PCT": [4, 6, 8, 10]}
+CUT_ENABLED = True   # อ่านค่าจริงจาก dca_bot ใน live_params()
+DIP_SL = 0.20        # SL กองช้อนตามค่าจริง (ไม่ได้ให้ระบบปรับ)
 BASE_COINS = ["BTC", "ETH", "XRP", "DOGE", "SOL", "NEAR", "WLD", "CRV", "OP", "ADA", "XLM", "KUB"]
 
 
@@ -121,7 +123,7 @@ def prep(data):
 def sim_main(v, p, start, end, maxh=24 * 30, mtm=False):
     """กองปกติ: ซื้อได้ทุกชั่วโมงเมื่อไม่มีไม้ค้าง · ขาย TP / ตัดเมื่อขาดทุนเกิน cut และ MA12<MA24 / SL"""
     h, l, cl, m12, m24 = v["h"], v["l"], v["c"], v["ma12"], v["ma24"]
-    tp, sl, cz = p["TAKE_PROFIT_PCT"] / 100, p["STOP_LOSS_PCT"] / 100, p["CUT_ZONE_PCT"] / 100
+    tp, sl, cz = p["TAKE_PROFIT_PCT"] / 100, p["STOP_LOSS_PCT"] / 100, p.get("CUT_ZONE_PCT", 99.0) / 100
     out, i = [], max(start, 24)
     while i < min(end, len(cl) - 1):
         e, j, r = cl[i], i + 1, None
@@ -130,7 +132,7 @@ def sim_main(v, p, start, end, maxh=24 * 30, mtm=False):
                 r = -sl; break
             if h[j] >= e * (1 + tp):
                 r = tp; break
-            if cl[j] <= e * (1 - cz) and m12[j] and m24[j] and (m12[j] - m24[j]) / m24[j] * 100 < -0.3:
+            if CUT_ENABLED and cl[j] <= e * (1 - cz) and m12[j] and m24[j] and (m12[j] - m24[j]) / m24[j] * 100 < -0.3:
                 r = cl[j] / e - 1; break
             j += 1
         if r is None:
@@ -146,7 +148,8 @@ def sim_main(v, p, start, end, maxh=24 * 30, mtm=False):
     return out
 
 
-def sim_dip(v, p, start, end, maxh=24 * 30, sl=0.20, max_vol=8.0, mtm=False):
+def sim_dip(v, p, start, end, maxh=24 * 30, sl=None, max_vol=8.0, mtm=False):
+    sl = DIP_SL if sl is None else sl
     h, l, cl, vol = v["h"], v["l"], v["c"], v["vol48"]
     drop, tp = p["DIP_DROP_PCT"] / 100, p["DIP_TP_PCT"] / 100
     out, i = [], max(start, 72)
@@ -244,7 +247,17 @@ def live_params():
     os.environ.setdefault("TELEGRAM_TOKEN", "x")
     os.environ.setdefault("TELEGRAM_CHAT_ID", "0")
     dca = importlib.import_module("dca_bot")
+    global CUT_ENABLED, DIP_SL
+    CUT_ENABLED = bool(getattr(dca, "SIGNAL_CUT_ENABLED", True))
+    DIP_SL = float(getattr(dca, "DIP_SL_PCT", 20.0)) / 100
+    if not CUT_ENABLED:
+        GRID_MAIN.pop("CUT_ZONE_PCT", None)  # ปิดการตัดตาม Death Cross อยู่ ไม่ต้องหาค่านี้
     return {k: float(getattr(dca, k)) for k in BOUNDS}
+
+
+def context():
+    """กติกาที่ระบบไม่ได้ปรับเอง — ถ้าผู้ใช้เปลี่ยน ค่าที่ทดลองเงียบอยู่ต้องเริ่มนับใหม่"""
+    return {"signal_cut": CUT_ENABLED, "dip_sl": DIP_SL}
 
 
 def run(data=None, live=None, now=None):
@@ -252,6 +265,8 @@ def run(data=None, live=None, now=None):
     live = live or live_params()
     data = prep(data or fetch(coin_universe()))
     shadow = load(SHADOW_FILE, {})
+    if shadow.get("params") and shadow.get("context") != context():
+        shadow = {}  # ผู้ใช้เปลี่ยนกติกาหลักแล้ว ผลทดลองเดิมเทียบกันไม่ได้ — เริ่มใหม่
     fwd_h = FORWARD_DAYS * 24
     lines, promoted = [], False
 
@@ -290,9 +305,10 @@ def run(data=None, live=None, now=None):
     cand = clamp(dict(live, **cand))
     changed_vs_shadow = shadow.get("params") != cand
     if changed_vs_shadow:
-        shadow = {"params": cand, "since": now.isoformat(), "streak": 0, "weeks": [], "evidence": ev}
+        shadow = {"params": cand, "since": now.isoformat(), "streak": 0, "weeks": [], "evidence": ev, "context": context()}
     else:
         shadow["evidence"] = ev
+        shadow["context"] = context()
     save(SHADOW_FILE, shadow)
 
     diffs = [k for k in BOUNDS if abs(cand[k] - live[k]) > 1e-9]
