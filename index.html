@@ -819,7 +819,8 @@
           const pauseBanner = document.getElementById("pauseBanner");
           if (data.control && !data.control.paused && data.control.defensive) {
             pauseBanner.style.display = "block";
-            pauseBanner.textContent = "🛡️ โหมดป้องกัน — หยุดซื้อใหม่ทั้งกองปกติและกองช้อนชั่วคราว แต่ยังขายตามกติกา (TP / ตัดขาดทุน) ปกติ";
+            const ef = data.control.efds || {};
+            pauseBanner.textContent = `🛡️ EFDS ทำงานอยู่ (${ef.mode === "manual" ? "เปิดเอง" : "อัตโนมัติ"})${ef.reason ? " — " + ef.reason : ""} · หยุดซื้อใหม่ชั่วคราว แต่ยังขายตามกติกาปกติ`;
           } else
           if (data.control && data.control.paused) {
             pauseBanner.style.display = "block";

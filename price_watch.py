@@ -25,6 +25,7 @@ import requests
 import crypto_alert
 import analysis_log
 import dca_bot
+import efds
 import report_tg
 import report_xlsx
 import trade_journal
@@ -102,6 +103,11 @@ def check_once():
         if isinstance(ticker, dict) and ticker:
             dca_bot.run_rebalance(state, ticker, today)
             dca_bot.run_take_profit_stop_loss(state, ticker, today, dashboard)
+            control, ev = efds.update(dict(control), ticker, dashboard)
+            dca_bot.save_json(dca_bot.CONTROL_FILE, control)
+            if ev:
+                dca_bot.send_telegram(efds.message(ev, control))
+                analysis_log.event("efds", None, kind=ev["kind"], reason=ev["reason"])
             defensive = bool(control.get("defensive"))
             dca_bot.run_dip(state, ticker, today, dashboard, allow_buy=not defensive)
             cycle = state.get("dca_cycle")
@@ -114,7 +120,7 @@ def check_once():
     except Exception as e:  # noqa: BLE001 — รายงานพังต้องไม่ทำให้เฝ้าราคาหยุด
         print(f"ส่งรายงานไม่สำเร็จ: {e}")
 
-    logged = analysis_log.flush_events(kinds={"buy", "sell", "buy_failed", "withdraw", "whole_account_start"})
+    logged = analysis_log.flush_events(kinds={"buy", "sell", "buy_failed", "withdraw", "whole_account_start", "efds"})
     changed = snapshot(state) != before or bool(inbox) or logged
     if changed:
         dca_bot.save_json(dca_bot.DCA_STATE_FILE, state)

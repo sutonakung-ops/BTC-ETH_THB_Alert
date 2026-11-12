@@ -1018,9 +1018,16 @@ def main():
         run_rebalance(state, ticker, today)
         # ขายก่อน (เงินทุนที่ได้คืนจะได้ใช้ซื้อเหรียญถัดไปได้ในรอบเดียวกัน) แล้วค่อยซื้อ
         run_take_profit_stop_loss(state, ticker, today, dashboard_so_far)
+        import efds
+        control, ev = efds.update(dict(control), ticker, dashboard_so_far)
+        save_json(CONTROL_FILE, control)
+        if ev:
+            send_telegram(efds.message(ev, control))
+            analysis_log.event("efds", None, kind=ev["kind"], reason=ev["reason"])
+        defensive = bool(control.get("defensive"))
         run_dip(state, ticker, today, dashboard_so_far, allow_buy=not defensive)
         if defensive:
-            print("โหมดป้องกันเปิดอยู่ — ข้ามการซื้อใหม่ (ยังขายตามกติกา)")
+            print("EFDS ทำงานอยู่ — ข้ามการซื้อใหม่ (ยังขายตามกติกา)")
         else:
             run_buys(state, cycle, today, dashboard_so_far)
         update_equity(state, ticker)
@@ -1135,6 +1142,7 @@ def main():
         "enabled": trading_enabled,
         "paused": paused,
         "defensive": defensive,
+        "efds": control.get("efds") or {},
         "active_coins": active_coins,
         "cash_pool_thb": state.get("cash_pool_thb", 0.0),
         "profit_reserved_thb": state.get("profit_reserved_thb", 0.0),

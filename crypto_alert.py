@@ -31,8 +31,8 @@ STABLECOIN_EXCLUDE = {"USDT", "USDC", "DAI", "BUSD", "TUSD", "USDD", "FDUSD", "P
 
 # คำสั่งควบคุมผ่าน Telegram (ตอบกลับแชทบอท)
 STOP_WORDS = {"หยุด", "หยุดทุกอย่าง", "หยุดบอท", "stop", "/stop", "halt", "/halt"}
-DEFENSIVE_ON_WORDS = {"ป้องกัน", "โหมดป้องกัน", "เปิดป้องกัน", "defensive", "/defensive"}
-DEFENSIVE_OFF_WORDS = {"ปิดป้องกัน", "เลิกป้องกัน", "ซื้อปกติ", "normal", "/normal"}
+DEFENSIVE_ON_WORDS = {"efds", "/efds", "เปิด efds", "efds on", "ป้องกัน", "โหมดป้องกัน", "เปิดป้องกัน", "defensive", "/defensive"}
+DEFENSIVE_OFF_WORDS = {"ปิด efds", "efds off", "/efds_off", "ปิดป้องกัน", "เลิกป้องกัน", "ซื้อปกติ", "normal", "/normal"}
 START_WORDS = {"เริ่ม", "เริ่มใหม่", "ทำงานต่อ", "start", "/start", "resume", "/resume"}
 CONFIRM_WORDS = {"yes", "y", "ใช่", "ยืนยัน", "/confirm", "confirm"}
 CANCEL_WORDS = {"no", "n", "ไม่", "ยกเลิก", "/cancel", "cancel"}
@@ -272,14 +272,16 @@ def process_telegram_commands():
                     "(ราคาและ dashboard ยังอัปเดตตามปกติ แค่ไม่มีคำสั่งซื้อขายใหม่)"
                 )
         elif text in DEFENSIVE_ON_WORDS or text in DEFENSIVE_OFF_WORDS:
+            import efds
             on = text in DEFENSIVE_ON_WORDS
-            if bool(control.get("defensive")) != on:
-                control = {**control, "defensive": on, "defensive_updated_at": datetime.now(timezone.utc).isoformat()}
+            control = efds.set_manual(dict(control), on)
             send_telegram(
-                "🛡️ เปิดโหมดป้องกันแล้ว — หยุดซื้อใหม่ทั้งกองปกติและกองช้อน\n"
-                "ยังขายตามกติกาเหมือนเดิม (TP / ตัดตาม Death Cross / SL / ขายไม้ช้อน) เงินที่ขายได้จะพักเป็นเงินบาท\n"
-                "พิมพ์ \"ปิดป้องกัน\" เมื่ออยากให้กลับมาซื้อตามปกติ"
-                if on else "🟢 ปิดโหมดป้องกันแล้ว — กลับมาซื้อตามลำดับปกติ (เงินบาทที่พักไว้จะถูกใช้ซื้อตามกติกา)")
+                "🛡️ เปิด EFDS (External Factor Defense System) แล้ว — หยุดซื้อใหม่ทั้งกองปกติและกองช้อน\n"
+                "ยังขายตามกติกาเหมือนเดิม เงินที่ขายได้จะพักเป็นเงินบาท\n"
+                "เปิดเองแบบนี้จะค้างไว้จนกว่าจะพิมพ์ \"ปิด EFDS\""
+                if on else
+                "🟢 ปิด EFDS แล้ว — กลับมาซื้อตามลำดับปกติ\n"
+                f"(ถ้าตลาดยังผิดปกติอยู่ ระบบจะไม่เปิดเองซ้ำ {efds.OVERRIDE_HOURS} ชม. ตามที่สั่ง)")
         elif text in START_WORDS:
             if control.get("paused"):
                 control = {**control,
