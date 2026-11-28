@@ -1,0 +1,41 @@
+name: Liquidate all to THB and pause bot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crypto-bot
+  cancel-in-progress: false
+
+jobs:
+  liquidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATA_PASSWORD: ${{ secrets.DATA_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests cryptography openpyxl
+      - name: Unlock data
+        run: python tools/vault.py unlock
+      - name: Sell everything and pause
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BITKUB_API_KEY: ${{ secrets.BITKUB_API_KEY }}
+          BITKUB_API_SECRET: ${{ secrets.BITKUB_API_SECRET }}
+        run: python tools/vault.py run --log liquidate -- python tools/liquidate.py
+      - name: Commit
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          python tools/vault.py lock
+          git diff --staged --quiet || git commit -m "Liquidate all to THB, bot paused [skip ci]"
+          for i in 1 2 3 4 5; do git pull --rebase && git push && break; sleep 7; done
